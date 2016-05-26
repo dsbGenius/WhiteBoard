@@ -1,0 +1,122 @@
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:pixlui="http://schemas.android.com/apk/com.neopixl.pixlui"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clipToPadding="false"
+    android:fitsSystemWindows="false">
+
+
+    <RelativeLayout
+        android:id="@+id/white_board"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#FFFFFF"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:id="@+id/controlLayout"
+            android:layout_width="60dp"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:layout_alignParentRight="true"
+            android:padding="4dp">
+
+            <ImageView
+                android:id="@+id/sketch_stroke"
+                style="@style/control_btn"
+                android:src="@drawable/ic_brush_grey600_24dp" />
+
+            <ImageView
+                android:id="@+id/sketch_eraser"
+                style="@style/control_btn"
+                android:src="@drawable/ic_eraser" />
+
+            <ImageView
+                android:id="@+id/sketch_undo"
+                style="@style/control_btn"
+                android:alpha="0.4"
+                android:src="@drawable/ic_undo_grey600_24dp" />
+
+            <ImageView
+                android:id="@+id/sketch_redo"
+                style="@style/control_btn"
+                android:alpha="0.4"
+                android:src="@drawable/ic_redo_grey600_24dp" />
+
+
+            <ImageView
+                android:id="@+id/sketch_photo"
+                style="@style/control_btn"
+                android:src="@drawable/ic_photo_dark" />
+
+            <ImageView
+                android:id="@+id/sketch_save"
+                style="@style/control_btn"
+                android:src="@drawable/ic_file" />
+
+            <ImageView
+                android:id="@+id/sketch_erase"
+                style="@style/control_btn"
+                android:src="@drawable/ic_delete_grey600_48dp" />
+        </LinearLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_toLeftOf="@+id/controlLayout"
+            android:background="#efeded">
+
+
+            <ImageView
+
+                android:id="@+id/iv_bg"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center" />
+
+            <ImageView
+                android:id="@+id/iv_bg_color"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center" />
+
+            <com.yinghe.whiteboardlib.view.SketchView
+            android:id="@+id/drawing"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:background="#fff" />
+
+            <com.yinghe.whiteboardlib.view.ScaleView
+                android:id="@+id/scale_view"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_brush_grey600_24dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </FrameLayout>
+
+
+
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_gravity="bottom"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:visibility="gone"
+        android:orientation="horizontal">
+        <Button
+            android:id="@+id/bt_show_bg"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="原图"/>
+        <Button
+            android:id="@+id/bt_show_bg_gray"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="手绘图"/>
+    </LinearLayout>
+
+</FrameLayout>
