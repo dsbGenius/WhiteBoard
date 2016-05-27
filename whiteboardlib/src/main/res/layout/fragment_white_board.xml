@@ -92,8 +92,7 @@
 
             <com.yinghe.whiteboardlib.view.ScaleView
                 android:id="@+id/scale_view"
-                android:layout_gravity="center"
-                android:src="@drawable/ic_brush_grey600_24dp"
+                android:src="@drawable/test"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" />
         </FrameLayout>

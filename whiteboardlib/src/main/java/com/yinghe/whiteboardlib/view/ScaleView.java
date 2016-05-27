@@ -1,13 +1,19 @@
 package com.yinghe.whiteboardlib.view;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Matrix;
+import android.graphics.Paint;
+import android.graphics.PointF;
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.GestureDetector;
-import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.ScaleGestureDetector.OnScaleGestureListener;
@@ -15,6 +21,9 @@ import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
+
+import com.yinghe.whiteboardlib.R;
+import com.yinghe.whiteboardlib.Utils.Utils;
 
 /**
  *
@@ -28,37 +37,45 @@ public class ScaleView extends ImageView implements
     private static final String TAG = ScaleView.class.getSimpleName();
     public static final float SCALE_MAX = 8.0f;
     private static final float SCALE_MID = 0.2f;
+    private static final int MODE_DRAG = 1;
+    private static final int MODE_SCALE = 2;
+    private static final int MODE_ROTATE = 3;
 
+    Context context;
+    int actionMode;
     /**
      * 初始化时的缩放比例，如果图片宽或高大于屏幕，此值将小于0
      */
     private float initScale = 1.0f;
     private boolean once = true;
-
+    private boolean first = true;
     /**
      * 用于存放矩阵的9个值
      */
-    private final float[] matrixValues = new float[9];
+    private static float[] matrixValues = new float[9];
 
+
+    Bitmap markBM = BitmapFactory.decodeResource(getResources(), R.drawable.text_top_pnt_a);
+    Matrix markerScaleMatrix = new Matrix();
+    Rect markerRect = null;
+    Rect photoRect = null;
+    Paint p = new Paint();
+
+    PointF startP = new PointF();
+    PointF preP = new PointF();
+    PointF curP = new PointF();
+    int scaleReference;
     /**
-     * 缩放的手势检测
+     * 缩放手势
      */
     private ScaleGestureDetector mScaleGestureDetector = null;
-    private final Matrix mScaleMatrix = new Matrix();
-
     /**
-     * 用于双击检测
+     * 拖动手势
      */
     private GestureDetector mGestureDetector;
+
+    private final Matrix mScaleMatrix = new Matrix();
     private boolean isAutoScale;
-
-    private int mTouchSlop;
-
-    private float mLastX;
-    private float mLastY;
-
-    private boolean isCanDrag;
-    private int lastPointerCount;
 
     private boolean isCheckTopAndBottom = true;
     private boolean isCheckLeftAndRight = true;
@@ -71,46 +88,14 @@ public class ScaleView extends ImageView implements
     public ScaleView(Context context, AttributeSet attrs)
     {
         super(context, attrs);
+        this.context = context;
         super.setScaleType(ScaleType.MATRIX);
-        mGestureDetector = new GestureDetector(context,
-                new SimpleOnGestureListener()
-                {
-                    @Override
-                    public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-                        mScaleMatrix.postTranslate(-distanceX, -distanceY);
-                        setImageMatrix(mScaleMatrix);
-                        return true;
-                    }
-                });
         mScaleGestureDetector = new ScaleGestureDetector(context, new OnScaleGestureListener() {
             @Override
             public boolean onScale(ScaleGestureDetector detector) {
-                float x = detector.getFocusX();
-                float y = detector.getFocusY();
-                float scale = getScale();
-                float scaleFactor = detector.getScaleFactor();
                 if (getDrawable() == null)
                     return true;
-                /**
-                 * 缩放的范围控制
-                 */
-                if ((scale < SCALE_MAX && scaleFactor > 1.0f)
-                        || (scale > initScale && scaleFactor < 1.0f)) {
-                    /**
-                     * 最大值最小值判断
-                     */
-                    if (scaleFactor * scale < initScale) {
-                        scaleFactor = initScale / scale;
-                    }
-                    if (scaleFactor * scale > SCALE_MAX) {
-                        scaleFactor = SCALE_MAX / scale;
-                    }
-                    /**
-                     * 设置缩放比例
-                     */
-                    mScaleMatrix.postScale(scaleFactor, scaleFactor, x, y);
-                    setImageMatrix(mScaleMatrix);
-                }
+                onScaleAction(detector);
                 return true;
             }
 
@@ -126,6 +111,112 @@ public class ScaleView extends ImageView implements
             }
         });
         this.setOnTouchListener(this);
+        p.setColor(Color.BLUE);
+        p.setStrokeWidth(Utils.dip2px(context, 0.8f));
+        p.setStyle(Paint.Style.STROKE);
+    }
+
+    private void onDragAction(float distanceX, float distanceY) {
+        int x = (int) distanceX;
+        int y = (int) distanceY;
+        mScaleMatrix.postTranslate(x, y);
+        markerScaleMatrix.postTranslate(x, y);
+        markerRect.offset(x, y);
+        photoRect.offset(x, y);
+        setImageMatrix(mScaleMatrix);
+    }
+
+    private void onScaleAction(ScaleGestureDetector detector) {
+        float x = detector.getFocusX();
+        float y = detector.getFocusY();
+        float scale = getScale();
+        float scaleFactor = detector.getScaleFactor();
+        /**
+         * 缩放的范围控制
+         */
+        if ((scale < SCALE_MAX && scaleFactor > 1.0f)
+                || (scale > initScale && scaleFactor < 1.0f)) {
+            /**
+             * 最大值最小值判断
+             */
+            if (scaleFactor * scale < initScale) {
+                scaleFactor = initScale / scale;
+            }
+            if (scaleFactor * scale > SCALE_MAX) {
+                scaleFactor = SCALE_MAX / scale;
+            }
+            /**
+             * 设置缩放比例
+             */
+            mScaleMatrix.postScale(scaleFactor, scaleFactor, x, y);
+            setScaleRect(photoRect, scaleFactor);
+            setImageMatrix(mScaleMatrix);
+        }
+    }
+
+    private void setScaleRect(Rect photoRect, float scaleFactor) {
+
+        int newLeft = (int) (photoRect.left - (photoRect.width() * (scaleFactor - 1) / 2));
+        int newTop = (int) (photoRect.top - (photoRect.height() * (scaleFactor - 1) / 2));
+        int newRight = (int) (photoRect.right + (photoRect.width() * (scaleFactor - 1) / 2));
+        int newBottom = (int) (photoRect.bottom + (photoRect.height() * (scaleFactor - 1) / 2));
+        photoRect.set(newLeft, newTop, newRight, newBottom);
+    }
+
+    private void onRotateAction(Rect photoRect, PointF curP) {
+        int a = (int) (curP.x - photoRect.centerX());
+        int b = photoRect.width() / 2;
+        float scale = a/ scaleReference;
+        Log.i("", "scale=" + scale);
+        mScaleMatrix.postScale(scale, scale, photoRect.centerX(), photoRect.centerY());
+        setScaleRect(photoRect,scale);
+        setImageMatrix(mScaleMatrix);
+        scaleReference =a;
+
+//        float x = detector.getFocusX();
+//        float y = detector.getFocusY();
+//        float x2 = detector.getCurrentSpanX();
+//        float x1 = detector.getPreviousSpanX();
+//        float y2 = detector.getCurrentSpanY();
+//        float y1 = detector.getPreviousSpanY();
+//        float xy1 = detector.getCurrentSpan();
+//        float xy2 = detector.getPreviousSpan();
+//        float a1= (float) (Math.asin(y1 / xy1) * 180 /Math.PI);
+//        float a2= (float) (Math.asin(y2 / xy2) * 180 /Math.PI);
+//
+//        float a3;
+////        if (x1 - x2 < 0) {
+////            a3=a1-a2;
+////        }else {
+//            a3=a2-a1;
+////        }
+////        float a3=Math.abs(a1-a2);
+//        if (a3>0) {
+//            Log.e("1111", "a3=" + a3);
+//        }else {
+//            Log.i("1111", "a3=" + a3);
+//        }
+////        mScaleMatrix.postRotate(,x,y);
+//        mScaleMatrix.postRotate(a3,x,y);
+//        float xy3 = detector.getPreviousSpan();
+
+
+    }
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+        if (first) {//首次绘制调整边界
+            photoRect = new Rect(getDrawable().getBounds());//图片的边界
+            markerRect = new Rect(0, 0, markBM.getWidth(), markBM.getHeight());//放大按钮的边界
+            photoRect.offset((getWidth() - photoRect.width()) / 2, (getHeight() - photoRect.height()) / 2);//将照片边界偏移到中心
+            markerRect.offset((getWidth() + photoRect.width() - markerRect.width()) / 2, (getHeight() + photoRect.height() - markerRect.width()) / 2);//将标记边界偏移到中心
+            markerScaleMatrix.postTranslate((getWidth() + photoRect.width() - markerRect.width()) / 2, (getHeight() + photoRect.height() - markerRect.height()) / 2);//将标记Matrix与图片同步
+            first = false;
+        }
+        canvas.drawRect(markerRect, p);
+        canvas.drawRect(photoRect, p);
+        canvas.drawBitmap(markBM, markerScaleMatrix, null);
     }
 
 
@@ -200,24 +291,43 @@ public class ScaleView extends ImageView implements
 
 
     @Override
-    public boolean onTouch(View v, MotionEvent event)
-    {
-        mScaleGestureDetector.onTouchEvent(event);//双指缩放
-        mGestureDetector.onTouchEvent(event);//图片拖动
-//        checkMatrixBounds();
+    public boolean onTouch(View v, MotionEvent event) {
+        curP.set(event.getX(), event.getY());
+        switch (event.getAction() & MotionEvent.ACTION_MASK) {
+            case MotionEvent.ACTION_DOWN:
+                startP.set(event.getX(), event.getY());
+                if (markerRect.contains((int) startP.x, (int) startP.y)) {
+                    actionMode = MODE_ROTATE;
+                } else {
+                    actionMode = MODE_DRAG;
+                }
+                break;
+            case MotionEvent.ACTION_POINTER_DOWN:
+                actionMode = MODE_SCALE;
+                break;
+
+            case MotionEvent.ACTION_MOVE:
+                if (actionMode == MODE_SCALE) {
+                    mScaleGestureDetector.onTouchEvent(event);//双指缩放
+                } else if (actionMode == MODE_DRAG) {
+                    onDragAction(curP.x - preP.x, curP.y - preP.y);
+                } else if (actionMode == MODE_ROTATE) {
+//                    scaleReference = (int) (startP.x - photoRect.centerX());
+//                    onRotateAction(photoRect, curP);
+                }
+                preP.set(event.getX(), event.getY());
+                break;
+            case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_POINTER_UP:
+                break;
+            default:
+                break;
+        }
+        preP.set(event.getX(), event.getY());
         return true;
     }
 
-    /**
-     * 获得当前的缩放比例
-     *
-     * @return scale
-     */
-    public float getScale()
-    {
-        mScaleMatrix.getValues(matrixValues);
-        return matrixValues[Matrix.MSCALE_X];
-    }
+
 
     @Override
     protected void onAttachedToWindow()
@@ -306,16 +416,25 @@ public class ScaleView extends ImageView implements
         mScaleMatrix.postTranslate(deltaX, deltaY);
     }
 
-    /**
-     * 是否是推动行为
-     *
-     * @param dx
-     * @param dy
-     * @return
-     */
-    private boolean isCanDrag(float dx, float dy)
+    public float getScale() {
+        mScaleMatrix.getValues(matrixValues);
+        return matrixValues[Matrix.MSCALE_X];
+    }
+
+    public float getTranslateX() {
+        mScaleMatrix.getValues(matrixValues);
+        return matrixValues[Matrix.MTRANS_X];
+    }
+
+    public float getTranslateY() {
+        mScaleMatrix.getValues(matrixValues);
+        return matrixValues[Matrix.MTRANS_Y];
+    }
+
+    public float getRotate()
     {
-        return Math.sqrt((dx * dx) + (dy * dy)) >= mTouchSlop;
+        mScaleMatrix.getValues(matrixValues);
+        return matrixValues[Matrix.MTRANS_Y];
     }
 
 }

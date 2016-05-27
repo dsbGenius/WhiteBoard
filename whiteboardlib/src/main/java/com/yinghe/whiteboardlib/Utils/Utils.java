@@ -1,6 +1,7 @@
 package com.yinghe.whiteboardlib.Utils;
 
 import android.content.Context;
+import android.graphics.Matrix;
 
 /**
  * Created by TangentLu on 2015/8/19.
@@ -15,5 +16,6 @@ public class Utils {
         final float scale = context.getResources().getDisplayMetrics().density;
         return (int) (dpValue * scale + 0.5f);
     }
+
 
 }
