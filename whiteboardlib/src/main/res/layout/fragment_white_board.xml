@@ -30,6 +30,7 @@
 
             <ImageView
                 android:id="@+id/sketch_eraser"
+                android:alpha="0.4"
                 style="@style/control_btn"
                 android:src="@drawable/ic_eraser" />
 

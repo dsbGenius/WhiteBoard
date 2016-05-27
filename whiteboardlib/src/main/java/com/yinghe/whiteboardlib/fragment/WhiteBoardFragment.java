@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
@@ -373,7 +374,14 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         final Bitmap newBM = Bitmap.createBitmap(bgWidth, bgHeight, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(newBM);
         canvas.drawBitmap(bitmap1, 0, 0, null);
-        canvas.drawBitmap(bitmap2, (bgWidth - fgWidth) / 2, (bgHeight - fgHeight) / 2, null);
+
+        float s=scaleView.getScale();
+        Matrix matrix = new Matrix();
+        matrix.postScale(s, s);
+        matrix.postTranslate((bgWidth - fgWidth) / 3, (bgHeight - fgHeight) / 3);
+
+//        canvas.drawBitmap(bitmap2, (bgWidth - fgWidth) / 2, (bgHeight - fgHeight) / 2, null);
+        canvas.drawBitmap(bitmap2, matrix, null);
         canvas.save(Canvas.ALL_SAVE_FLAG);
         canvas.restore();
 
@@ -394,6 +402,8 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                         File f = new File(filePath, imgName);
                         if (!f.exists()) {
                             f.createNewFile();
+                        }else {
+                            f.delete();
                         }
                         FileOutputStream out = new FileOutputStream(f);
                         newBM.compress(Bitmap.CompressFormat.PNG, 90, out);
