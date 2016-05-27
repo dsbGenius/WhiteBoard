@@ -8,6 +8,8 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
+import android.graphics.Paint;
+import android.graphics.PaintFlagsDrawFilter;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
@@ -212,7 +214,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     private void findView(View view) {
 
         scaleView = (ScaleView) view.findViewById(R.id.scale_view);
-        scaleView.setEnabled(false);
+//        scaleView.setEnabled(false);
         //画板整体布局
         whiteBoardLayout = (RelativeLayout) view.findViewById(R.id.white_board);
         mSketchView = (SketchView) view.findViewById(R.id.drawing);
@@ -343,9 +345,11 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                     .show();
         } else if (i == R.id.sketch_photo) {
             if (scaleView.isFocusable()) {
+                sketchPhoto.setAlpha(0.1f);
                 scaleView.setEnabled(false);
                 scaleView.setFocusable(false);
             } else {
+                sketchPhoto.setAlpha(1.0f);
                 scaleView.setEnabled(true);
                 scaleView.setFocusable(true);
             }
@@ -369,18 +373,12 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         int bgWidth = bitmap1.getWidth();
         int bgHeight = bitmap1.getHeight();
         Bitmap bitmap2 = ((BitmapDrawable) scaleView.getDrawable()).getBitmap();
-        int fgWidth = bitmap2.getWidth();
-        int fgHeight = bitmap2.getHeight();
         final Bitmap newBM = Bitmap.createBitmap(bgWidth, bgHeight, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(newBM);
+        canvas.setDrawFilter(new PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG| Paint.FILTER_BITMAP_FLAG));//抗锯齿
         canvas.drawBitmap(bitmap1, 0, 0, null);
 
-        float s=scaleView.getScale();
-        Matrix matrix = new Matrix();
-        matrix.postScale(s, s);
-        matrix.postTranslate((bgWidth - fgWidth) / 3, (bgHeight - fgHeight) / 3);
-
-//        canvas.drawBitmap(bitmap2, (bgWidth - fgWidth) / 2, (bgHeight - fgHeight) / 2, null);
+        Matrix matrix = scaleView.getImageMatrix();
         canvas.drawBitmap(bitmap2, matrix, null);
         canvas.save(Canvas.ALL_SAVE_FLAG);
         canvas.restore();
