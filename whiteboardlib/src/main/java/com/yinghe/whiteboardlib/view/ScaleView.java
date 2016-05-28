@@ -8,7 +8,6 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PointF;
-import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
@@ -68,7 +67,9 @@ public class ScaleView extends ImageView implements
     PointF startP = new PointF();
     PointF preP = new PointF();
     PointF curP = new PointF();
-    int scaleReference;
+
+    PointF preVector = new PointF();
+    PointF curVector = new PointF();
     /**
      * 缩放手势
      */
@@ -136,7 +137,7 @@ public class ScaleView extends ImageView implements
         /**
          * 缩放的范围控制
          */
-        if ((scale < SCALE_MAX && scaleFactor > 1.0f)
+        if ((scale < SCALE_MAX && scaleFactor > SCALE_MID)
                 || (scale > initScale && scaleFactor < 1.0f)) {
             /**
              * 最大值最小值判断
@@ -159,54 +160,83 @@ public class ScaleView extends ImageView implements
     }
 
 
-    private void onRotateAction(Rect photoRect, PointF curP) {
-        int a = (int) (curP.x - photoRect.centerX());
-        int b = photoRect.width() / 2;
-        float scale = a/ scaleReference;
-        Log.i("", "scale=" + scale);
+    /**
+     * 获取p1到p2的线段的长度
+     *
+     * @return
+     */
+    double getLineLength(PointF vector) {
+        return Math.sqrt(vector.x * vector.x + vector.y * vector.y);
+    }
+
+    private void onRotateAction() {
+
+        float a = (float) Math.sqrt((curP.x - photoRect.centerX()) * (curP.x - photoRect.centerX())
+                + (curP.y - photoRect.centerY()) * (curP.y - photoRect.centerY()));
+        float b = (float) Math.sqrt(photoRect.width() / 2*photoRect.width() / 2+photoRect.height() / 2*photoRect.height() / 2);
+        float scale = a / b;
+        if (scale != 0)
         mScaleMatrix.postScale(scale, scale, photoRect.centerX(), photoRect.centerY());
-//        setScaleRect(photoRect,scale);
-        setImageMatrix(mScaleMatrix);
-        scaleReference =a;
 
-//        float x = detector.getFocusX();
-//        float y = detector.getFocusY();
-//        float x2 = detector.getCurrentSpanX();
-//        float x1 = detector.getPreviousSpanX();
-//        float y2 = detector.getCurrentSpanY();
-//        float y1 = detector.getPreviousSpanY();
-//        float xy1 = detector.getCurrentSpan();
-//        float xy2 = detector.getPreviousSpan();
-//        float a1= (float) (Math.asin(y1 / xy1) * 180 /Math.PI);
-//        float a2= (float) (Math.asin(y2 / xy2) * 180 /Math.PI);
+        //根据触点 构建两个向量，计算两个向量角度.
+        preVector.set(preP.x - photoRect.centerX(), preP.y - photoRect.centerY());//旧向量
+        curVector.set(curP.x - photoRect.centerX(), curP.y - photoRect.centerY());//新向量
+
+        double preVectorLen = getLineLength(preVector);
+        double curVectorLen = getLineLength(curVector);
+        //计算两个向量的夹角.
+        double cosAlpha = (preVector.x * curVector.x + preVector.y * curVector.y)
+                / (preVectorLen * curVectorLen);
+
+        //由于计算误差，可能会带来略大于1的cos，例如
+        if (cosAlpha > 1.0f) {
+            cosAlpha = 1.0f;
+        }
+        //本次的角度已经计算出来。
+        double dAngle = Math.acos(cosAlpha) * 180.0 / 3.14;
+
+        System.out.println("" + dAngle);
+        // 判断顺时针和逆时针.
+        //判断方法其实很简单，这里的v1v2其实相差角度很小的。
+        //v1v2先Normalize，
+        preVector.x /= preVectorLen;
+        preVector.y /= preVectorLen;
+        curVector.x /= curVectorLen;
+        curVector.y /= curVectorLen;
+        //作v2的逆时针垂直向量。
+        PointF v2Vec = new PointF(curVector.y, -curVector.x);
+
+        //判断这个垂直向量和v1的点积，点积>0表示俩向量夹角锐角。=0表示垂直，<0表示钝角
+        float vDot = preVector.x * v2Vec.x + preVector.y * v2Vec.y;
+        if (vDot > 0) {
+            //v2的逆时针垂直向量和v1是锐角关系，说明v1在v2的逆时针方向。
+        } else {
+            dAngle = -dAngle;
+        }
 //
-//        float a3;
-////        if (x1 - x2 < 0) {
-////            a3=a1-a2;
-////        }else {
-//            a3=a2-a1;
-////        }
-////        float a3=Math.abs(a1-a2);
-//        if (a3>0) {
-//            Log.e("1111", "a3=" + a3);
-//        }else {
-//            Log.i("1111", "a3=" + a3);
+//        angle += dAngle;
+//
+//        //角度你懂的。
+//        if (angle >= 360) {
+//
+//            angle -= 360;
 //        }
-////        mScaleMatrix.postRotate(,x,y);
-//        mScaleMatrix.postRotate(a3,x,y);
-//        float xy3 = detector.getPreviousSpan();
-
-
+//        if (angle < 0) {
+//            angle +=360;
+//        }
+        mScaleMatrix.postRotate((float) dAngle, photoRect.centerX(), photoRect.centerY());
+        setImageMatrix(mScaleMatrix);
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        drawPhoto(canvas);
+//        canvas.rotate(2);
+        drawPhotoRect(canvas);
         drawMarkers(canvas);
     }
 
-    private void drawPhoto(Canvas canvas) {
+    private void drawPhotoRect(Canvas canvas) {
         if (first) {//首次绘制调整边界
             photoRectSrc = new RectF(getDrawable().getBounds());//图片的边界
             markerScaleMatrix.postTranslate((getWidth() + photoRect.width() - markerRotateRect.width()) / 2, (getHeight() + photoRect.height() - markerRotateRect.height()) / 2);//将标记Matrix与图片同步
@@ -333,8 +363,7 @@ public class ScaleView extends ImageView implements
                 } else if (actionMode == MODE_DRAG) {
                     onDragAction(curP.x - preP.x, curP.y - preP.y);
                 } else if (actionMode == MODE_ROTATE) {
-//                    scaleReference = (int) (startP.x - photoRect.centerX());
-//                    onRotateAction(photoRect, curP);
+                    onRotateAction();
                 }
                 preP.set(event.getX(), event.getY());
                 break;
