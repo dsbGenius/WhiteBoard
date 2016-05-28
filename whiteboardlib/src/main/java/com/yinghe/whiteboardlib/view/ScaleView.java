@@ -55,10 +55,14 @@ public class ScaleView extends ImageView implements
     private static float[] matrixValues = new float[9];
 
 
-    Bitmap markBM = BitmapFactory.decodeResource(getResources(), R.drawable.text_top_pnt_a);
-    Matrix markerScaleMatrix = new Matrix();
-    Rect markerRect = null;
-    Rect photoRect = null;
+    Bitmap mirrorMarkBM = BitmapFactory.decodeResource(getResources(), R.drawable.mark_mirror);
+    Bitmap deleteMarkBM = BitmapFactory.decodeResource(getResources(), R.drawable.mark_delete);
+    Bitmap rotateMarkBM = BitmapFactory.decodeResource(getResources(), R.drawable.mark_rotate);
+    RectF photoRectSrc = null;
+    RectF markerMirrorRect = new RectF(0, 0, mirrorMarkBM.getWidth(), mirrorMarkBM.getHeight());//旋转标记边界
+    RectF markerDeleteRect = new RectF(0, 0, deleteMarkBM.getWidth(), deleteMarkBM.getHeight());//旋转标记边界
+    RectF markerRotateRect = new RectF(0, 0, rotateMarkBM.getWidth(), rotateMarkBM.getHeight());//旋转标记边界
+    RectF photoRect = new RectF();
     Paint p = new Paint();
 
     PointF startP = new PointF();
@@ -75,6 +79,7 @@ public class ScaleView extends ImageView implements
     private GestureDetector mGestureDetector;
 
     private final Matrix mScaleMatrix = new Matrix();
+    private final Matrix markerScaleMatrix = new Matrix();
     private boolean isAutoScale;
 
     private boolean isCheckTopAndBottom = true;
@@ -120,9 +125,6 @@ public class ScaleView extends ImageView implements
         int x = (int) distanceX;
         int y = (int) distanceY;
         mScaleMatrix.postTranslate(x, y);
-        markerScaleMatrix.postTranslate(x, y);
-        markerRect.offset(x, y);
-        photoRect.offset(x, y);
         setImageMatrix(mScaleMatrix);
     }
 
@@ -139,8 +141,11 @@ public class ScaleView extends ImageView implements
             /**
              * 最大值最小值判断
              */
-            if (scaleFactor * scale < initScale) {
-                scaleFactor = initScale / scale;
+//            if (scaleFactor * scale < initScale) {
+//                scaleFactor = initScale / scale;
+//            }
+            if (scaleFactor * scale < SCALE_MID) {
+                scaleFactor = SCALE_MID / scale;
             }
             if (scaleFactor * scale > SCALE_MAX) {
                 scaleFactor = SCALE_MAX / scale;
@@ -148,20 +153,11 @@ public class ScaleView extends ImageView implements
             /**
              * 设置缩放比例
              */
-            mScaleMatrix.postScale(scaleFactor, scaleFactor, x, y);
-            setScaleRect(photoRect, scaleFactor);
+            mScaleMatrix.postScale(scaleFactor, scaleFactor, (int)x, (int)y);
             setImageMatrix(mScaleMatrix);
         }
     }
 
-    private void setScaleRect(Rect photoRect, float scaleFactor) {
-
-        int newLeft = (int) (photoRect.left - (photoRect.width() * (scaleFactor - 1) / 2));
-        int newTop = (int) (photoRect.top - (photoRect.height() * (scaleFactor - 1) / 2));
-        int newRight = (int) (photoRect.right + (photoRect.width() * (scaleFactor - 1) / 2));
-        int newBottom = (int) (photoRect.bottom + (photoRect.height() * (scaleFactor - 1) / 2));
-        photoRect.set(newLeft, newTop, newRight, newBottom);
-    }
 
     private void onRotateAction(Rect photoRect, PointF curP) {
         int a = (int) (curP.x - photoRect.centerX());
@@ -169,7 +165,7 @@ public class ScaleView extends ImageView implements
         float scale = a/ scaleReference;
         Log.i("", "scale=" + scale);
         mScaleMatrix.postScale(scale, scale, photoRect.centerX(), photoRect.centerY());
-        setScaleRect(photoRect,scale);
+//        setScaleRect(photoRect,scale);
         setImageMatrix(mScaleMatrix);
         scaleReference =a;
 
@@ -206,17 +202,42 @@ public class ScaleView extends ImageView implements
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+        drawPhoto(canvas);
+        drawMarkers(canvas);
+    }
+
+    private void drawPhoto(Canvas canvas) {
         if (first) {//首次绘制调整边界
-            photoRect = new Rect(getDrawable().getBounds());//图片的边界
-            markerRect = new Rect(0, 0, markBM.getWidth(), markBM.getHeight());//放大按钮的边界
-            photoRect.offset((getWidth() - photoRect.width()) / 2, (getHeight() - photoRect.height()) / 2);//将照片边界偏移到中心
-            markerRect.offset((getWidth() + photoRect.width() - markerRect.width()) / 2, (getHeight() + photoRect.height() - markerRect.width()) / 2);//将标记边界偏移到中心
-            markerScaleMatrix.postTranslate((getWidth() + photoRect.width() - markerRect.width()) / 2, (getHeight() + photoRect.height() - markerRect.height()) / 2);//将标记Matrix与图片同步
+            photoRectSrc = new RectF(getDrawable().getBounds());//图片的边界
+            markerScaleMatrix.postTranslate((getWidth() + photoRect.width() - markerRotateRect.width()) / 2, (getHeight() + photoRect.height() - markerRotateRect.height()) / 2);//将标记Matrix与图片同步
             first = false;
         }
-        canvas.drawRect(markerRect, p);
+        mScaleMatrix.mapRect(photoRect,photoRectSrc);
         canvas.drawRect(photoRect, p);
-        canvas.drawBitmap(markBM, markerScaleMatrix, null);
+    }
+
+    private void drawMarkers(Canvas canvas) {
+        float x;
+        float y;
+
+        x=photoRect.left- markerMirrorRect.width()/2;
+        y=photoRect.top- markerMirrorRect.height()/2;
+        markerMirrorRect.offsetTo(x,y);
+//        canvas.drawRect(markerMirrorRect, p);
+        canvas.drawBitmap(mirrorMarkBM,x,y,null);
+
+        x=photoRect.right- markerDeleteRect.width()/2;
+        y=photoRect.top- markerDeleteRect.height()/2;
+        markerDeleteRect.offsetTo(x,y);
+//        canvas.drawRect(markerDeleteRect, p);
+        canvas.drawBitmap(deleteMarkBM,x,y,null);
+
+        x=photoRect.right- markerRotateRect.width()/2;
+        y=photoRect.bottom- markerRotateRect.height()/2;
+        markerRotateRect.offsetTo(x,y);
+//        canvas.drawRect(markerRotateRect, p);
+        canvas.drawBitmap(rotateMarkBM,x,y,null);
+
     }
 
 
@@ -296,7 +317,7 @@ public class ScaleView extends ImageView implements
         switch (event.getAction() & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN:
                 startP.set(event.getX(), event.getY());
-                if (markerRect.contains((int) startP.x, (int) startP.y)) {
+                if (markerRotateRect.contains((int) startP.x, (int) startP.y)) {
                     actionMode = MODE_ROTATE;
                 } else {
                     actionMode = MODE_DRAG;
