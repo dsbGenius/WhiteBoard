@@ -92,7 +92,7 @@
 
             <com.yinghe.whiteboardlib.view.ScaleView
                 android:id="@+id/scale_view"
-                android:src="@drawable/ic_action_draw"
+                android:src="@drawable/test"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" />
         </FrameLayout>

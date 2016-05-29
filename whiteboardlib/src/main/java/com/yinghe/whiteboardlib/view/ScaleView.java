@@ -19,11 +19,12 @@ import android.view.ScaleGestureDetector;
 import android.view.ScaleGestureDetector.OnScaleGestureListener;
 import android.view.View;
 import android.view.View.OnTouchListener;
-import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 
 import com.yinghe.whiteboardlib.R;
 import com.yinghe.whiteboardlib.Utils.Utils;
+
+import java.io.File;
 
 /**
  *
@@ -31,12 +32,12 @@ import com.yinghe.whiteboardlib.Utils.Utils;
  * 博客地址：http://www.jianshu.com/users/9efe1db2c646/latest_articles
  */
 public class ScaleView extends ImageView implements
-        OnTouchListener, ViewTreeObserver.OnGlobalLayoutListener
+        OnTouchListener
 
 {
     private static final String TAG = ScaleView.class.getSimpleName();
-    public static final float SCALE_MAX = 8.0f;
-    private static final float SCALE_MID = 0.1f;
+    public static  float SCALE_MAX = 4.0f;
+    private static  float SCALE_MIN = 0.1f;
     private static final int MODE_DRAG = 1;
     private static final int MODE_SCALE = 2;
     private static final int MODE_ROTATE = 3;
@@ -47,7 +48,6 @@ public class ScaleView extends ImageView implements
      * 初始化时的缩放比例，如果图片宽或高大于屏幕，此值将小于0
      */
     private float initScale = 1.0f;
-    private boolean once = true;
     private boolean first = true;
     /**
      * 用于存放矩阵的9个值
@@ -59,6 +59,7 @@ public class ScaleView extends ImageView implements
     Bitmap mirrorMarkBM = BitmapFactory.decodeResource(getResources(), R.drawable.mark_mirror);
     Bitmap deleteMarkBM = BitmapFactory.decodeResource(getResources(), R.drawable.mark_delete);
     Bitmap rotateMarkBM = BitmapFactory.decodeResource(getResources(), R.drawable.mark_rotate);
+//    Bitmap rotateMarkBM = BitmapFactory.decodeResource(getResources(), R.drawable.test);
     RectF markerMirrorRect = new RectF(0, 0, mirrorMarkBM.getWidth(), mirrorMarkBM.getHeight());//旋转标记边界
     RectF markerDeleteRect = new RectF(0, 0, deleteMarkBM.getWidth(), deleteMarkBM.getHeight());//旋转标记边界
     RectF markerRotateRect = new RectF(0, 0, rotateMarkBM.getWidth(), rotateMarkBM.getHeight());//旋转标记边界
@@ -106,6 +107,8 @@ public class ScaleView extends ImageView implements
         super(context, attrs);
         this.context = context;
         super.setScaleType(ScaleType.MATRIX);
+//        setImageBitmap(Utils.decodeSampledBitmapFromResource(getResources(), R.drawable.text_right_top_control, 400, 400));
+//        setImageBitmap(Utils.decodeSampledBitmapFromResource(getResources(), R.drawable.test, getWidth()/2, getHeight()/2));
         mScaleGestureDetector = new ScaleGestureDetector(context, new OnScaleGestureListener() {
             @Override
             public boolean onScale(ScaleGestureDetector detector) {
@@ -147,13 +150,13 @@ public class ScaleView extends ImageView implements
         /**
          * 缩放的范围控制
          */
-        if ((scale < SCALE_MAX && scaleFactor > SCALE_MID)
-                || (scale > SCALE_MID && scaleFactor < initScale)) {
+        if ((scale < SCALE_MAX && scaleFactor > SCALE_MIN)
+                || (scale > SCALE_MIN && scaleFactor < initScale)) {
             /**
              * 最大值最小值判断
              */
-            if (scaleFactor * scale < SCALE_MID) {
-                scaleFactor = SCALE_MID / scale;
+            if (scaleFactor * scale < SCALE_MIN) {
+                scaleFactor = SCALE_MIN / scale;
             }
             if (scaleFactor * scale > SCALE_MAX) {
                 scaleFactor = SCALE_MAX / scale;
@@ -184,7 +187,7 @@ public class ScaleView extends ImageView implements
         float b = (float) Math.sqrt(Math.pow(photoCorners[4] - photoCorners[0], 2) + Math.pow(photoCorners[5] - photoCorners[1], 2)) / 2;
 
         //设置Matrix缩放参数
-        if (a>=photoLen/2*SCALE_MID){
+        if (a>=photoLen/2* SCALE_MIN &&a<=photoLen/2*SCALE_MAX){
             //这种计算方法可以保持旋转图标坐标与触摸点同步缩放
             float scale = a / b;
             mScaleMatrix.postScale(scale, scale, photoCorners[8], photoCorners[9]);
@@ -234,9 +237,26 @@ public class ScaleView extends ImageView implements
         drawMarkers(canvas);
     }
 
+    private void setLimitScale() {
+        SCALE_MAX = Math.max(getWidth(), getHeight()) / Math.max(photoRectSrc.width(), photoRectSrc.height());
+        SCALE_MIN = SCALE_MAX / 5;
+    }
+
+    public void setPhotoUri(String path) {
+        File file = new File(path);
+        if (file.exists()) {
+            Bitmap bm=Utils.decodeSampledBitmapFromFile(getResources(), path, 900, 900);
+            if (bm != null) {
+                setImageBitmap(bm);
+            }
+        }
+        first = true;
+        invalidate();
+    }
     private void drawPhotoBorder(Canvas canvas) {
         if (first) {//首次绘制调整边界
             photoRectSrc = new RectF(getDrawable().getBounds());//图片的边界
+            setLimitScale();
             photoCornersSrc[0] = photoRectSrc.left;
             photoCornersSrc[1] = photoRectSrc.top;
             photoCornersSrc[2] = photoRectSrc.right;
@@ -399,7 +419,7 @@ public class ScaleView extends ImageView implements
     protected void onAttachedToWindow()
     {
         super.onAttachedToWindow();
-        getViewTreeObserver().addOnGlobalLayoutListener(this);
+//        getViewTreeObserver().addOnGlobalLayoutListener(this);
     }
 
     @SuppressWarnings("deprecation")
@@ -407,50 +427,50 @@ public class ScaleView extends ImageView implements
     protected void onDetachedFromWindow()
     {
         super.onDetachedFromWindow();
-        getViewTreeObserver().removeGlobalOnLayoutListener(this);
+//        getViewTreeObserver().removeGlobalOnLayoutListener(this);
     }
 
-    @Override
-    public void onGlobalLayout()
-    {
-        if (once)
-        {
-            Drawable d = getDrawable();
-            if (d == null)
-                return;
-            Log.e(TAG, d.getIntrinsicWidth() + " , " + d.getIntrinsicHeight());
-            int width = getWidth();
-            int height = getHeight();
-            // 拿到图片的宽和高
-            int dw = d.getIntrinsicWidth();
-            int dh = d.getIntrinsicHeight();
-            float scale = 1.0f;
-            // 如果图片的宽或者高大于屏幕，则缩放至屏幕的宽或者高
-            if (dw > width && dh <= height)
-            {
-                scale = width * 1.0f / dw;
-            }
-            if (dh > height && dw <= width)
-            {
-                scale = height * 1.0f / dh;
-            }
-            // 如果宽和高都大于屏幕，则让其按按比例适应屏幕大小
-            if (dw > width && dh > height)
-            {
-                scale = Math.min(width * 1.0f / dw, height * 1.0f / dh);
-            }
-            initScale = scale;
-
-            Log.e(TAG, "initScale = " + initScale);
-            mScaleMatrix.postTranslate((width - dw) / 2, (height - dh) / 2);
-            mScaleMatrix.postScale(scale, scale, getWidth() / 2,
-                    getHeight() / 2);
-            // 图片移动至屏幕中心
-            setImageMatrix(mScaleMatrix);
-            once = false;
-        }
-
-    }
+//    @Override
+//    public void onGlobalLayout()
+//    {
+//        if (once)
+//        {
+//            Drawable d = getDrawable();
+//            if (d == null)
+//                return;
+//            Log.e(TAG, d.getIntrinsicWidth() + " , " + d.getIntrinsicHeight());
+//            int width = getWidth();
+//            int height = getHeight();
+//            // 拿到图片的宽和高
+//            int dw = d.getIntrinsicWidth();
+//            int dh = d.getIntrinsicHeight();
+//            float scale = 1.0f;
+//            // 如果图片的宽或者高大于屏幕，则缩放至屏幕的宽或者高
+//            if (dw > width && dh <= height)
+//            {
+//                scale = width * 1.0f / dw;
+//            }
+//            if (dh > height && dw <= width)
+//            {
+//                scale = height * 1.0f / dh;
+//            }
+//            // 如果宽和高都大于屏幕，则让其按按比例适应屏幕大小
+//            if (dw > width && dh > height)
+//            {
+//                scale = Math.min(width * 1.0f / dw, height * 1.0f / dh);
+//            }
+//            initScale = scale;
+//
+//            Log.e(TAG, "initScale = " + initScale);
+//            mScaleMatrix.postTranslate((width - dw) / 2, (height - dh) / 2);
+//            mScaleMatrix.postScale(scale, scale, getWidth() / 2,
+//                    getHeight() / 2);
+//            // 图片移动至屏幕中心
+//            setImageMatrix(mScaleMatrix);
+//            once = false;
+//        }
+//
+//    }
 
     /**
      * 移动时，进行边界判断，主要判断宽或高大于屏幕的

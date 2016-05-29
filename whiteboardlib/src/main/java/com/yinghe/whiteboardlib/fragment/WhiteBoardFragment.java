@@ -14,6 +14,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -330,6 +331,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
             mSketchView.redo();
         } else if (i == R.id.sketch_erase) {
             askForErase();
+            scaleView.setPhotoUri(Environment.getExternalStorageDirectory().toString() + "/test.jpg");
         } else if (i == R.id.sketch_save) {
             if (mSketchView.getPaths().size() == 0) {
                 Toast.makeText(getActivity(), "你还没有手绘", Toast.LENGTH_SHORT).show();
