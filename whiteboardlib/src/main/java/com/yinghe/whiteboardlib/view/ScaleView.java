@@ -7,6 +7,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.PointF;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
@@ -26,8 +27,8 @@ import com.yinghe.whiteboardlib.Utils.Utils;
 
 /**
  *
- * @author zhy
- * 博客地址：http://blog.csdn.net/lmj623565791
+ * @author tangentLu
+ * 博客地址：http://www.jianshu.com/users/9efe1db2c646/latest_articles
  */
 public class ScaleView extends ImageView implements
         OnTouchListener, ViewTreeObserver.OnGlobalLayoutListener
@@ -35,7 +36,7 @@ public class ScaleView extends ImageView implements
 {
     private static final String TAG = ScaleView.class.getSimpleName();
     public static final float SCALE_MAX = 8.0f;
-    private static final float SCALE_MID = 0.2f;
+    private static final float SCALE_MID = 0.1f;
     private static final int MODE_DRAG = 1;
     private static final int MODE_SCALE = 2;
     private static final int MODE_ROTATE = 3;
@@ -54,14 +55,16 @@ public class ScaleView extends ImageView implements
     private static float[] matrixValues = new float[9];
 
 
+    RectF photoRectSrc = null;
     Bitmap mirrorMarkBM = BitmapFactory.decodeResource(getResources(), R.drawable.mark_mirror);
     Bitmap deleteMarkBM = BitmapFactory.decodeResource(getResources(), R.drawable.mark_delete);
     Bitmap rotateMarkBM = BitmapFactory.decodeResource(getResources(), R.drawable.mark_rotate);
-    RectF photoRectSrc = null;
     RectF markerMirrorRect = new RectF(0, 0, mirrorMarkBM.getWidth(), mirrorMarkBM.getHeight());//旋转标记边界
     RectF markerDeleteRect = new RectF(0, 0, deleteMarkBM.getWidth(), deleteMarkBM.getHeight());//旋转标记边界
     RectF markerRotateRect = new RectF(0, 0, rotateMarkBM.getWidth(), rotateMarkBM.getHeight());//旋转标记边界
-    RectF photoRect = new RectF();
+
+
+    double photoLen;//图片对角线长度
     Paint p = new Paint();
 
     PointF startP = new PointF();
@@ -70,6 +73,13 @@ public class ScaleView extends ImageView implements
 
     PointF preVector = new PointF();
     PointF curVector = new PointF();
+
+    float[] photoCornersSrc = new float[10];//0,1代表左上角点XY，2,3代表右上角点XY，4,5代表右下角点XY，6,7代表左下角点XY，8,9代表中心点XY
+    float[] photoCorners = new float[10];//0,1代表左上角点XY，2,3代表右上角点XY，4,5代表右下角点XY，6,7代表左下角点XY，8,9代表中心点XY
+
+    Path photoBorderPath = new Path();
+
+
     /**
      * 缩放手势
      */
@@ -117,7 +127,7 @@ public class ScaleView extends ImageView implements
             }
         });
         this.setOnTouchListener(this);
-        p.setColor(Color.BLUE);
+        p.setColor(Color.GRAY);
         p.setStrokeWidth(Utils.dip2px(context, 0.8f));
         p.setStyle(Paint.Style.STROKE);
     }
@@ -138,13 +148,10 @@ public class ScaleView extends ImageView implements
          * 缩放的范围控制
          */
         if ((scale < SCALE_MAX && scaleFactor > SCALE_MID)
-                || (scale > initScale && scaleFactor < 1.0f)) {
+                || (scale > SCALE_MID && scaleFactor < initScale)) {
             /**
              * 最大值最小值判断
              */
-//            if (scaleFactor * scale < initScale) {
-//                scaleFactor = initScale / scale;
-//            }
             if (scaleFactor * scale < SCALE_MID) {
                 scaleFactor = SCALE_MID / scale;
             }
@@ -165,109 +172,118 @@ public class ScaleView extends ImageView implements
      *
      * @return
      */
-    double getLineLength(PointF vector) {
+    double getVectorLength(PointF vector) {
         return Math.sqrt(vector.x * vector.x + vector.y * vector.y);
     }
 
     private void onRotateAction() {
+        //放大
+        //目前触摸点与图片显示中心距离
+        float a = (float) Math.sqrt(Math.pow(curP.x - photoCorners[8], 2) + Math.pow(curP.y - photoCorners[9], 2));
+        //目前上次旋转图标与图片显示中心距离
+        float b = (float) Math.sqrt(Math.pow(photoCorners[4] - photoCorners[0], 2) + Math.pow(photoCorners[5] - photoCorners[1], 2)) / 2;
 
-        float a = (float) Math.sqrt((curP.x - photoRect.centerX()) * (curP.x - photoRect.centerX())
-                + (curP.y - photoRect.centerY()) * (curP.y - photoRect.centerY()));
-        float b = (float) Math.sqrt(photoRect.width() / 2*photoRect.width() / 2+photoRect.height() / 2*photoRect.height() / 2);
-        float scale = a / b;
-        if (scale != 0)
-        mScaleMatrix.postScale(scale, scale, photoRect.centerX(), photoRect.centerY());
+        //设置Matrix缩放参数
+        if (a>=photoLen/2*SCALE_MID){
+            //这种计算方法可以保持旋转图标坐标与触摸点同步缩放
+            float scale = a / b;
+            mScaleMatrix.postScale(scale, scale, photoCorners[8], photoCorners[9]);
+        }
 
-        //根据触点 构建两个向量，计算两个向量角度.
-        preVector.set(preP.x - photoRect.centerX(), preP.y - photoRect.centerY());//旧向量
-        curVector.set(curP.x - photoRect.centerX(), curP.y - photoRect.centerY());//新向量
-
-        double preVectorLen = getLineLength(preVector);
-        double curVectorLen = getLineLength(curVector);
+        //旋转
+        //根据移动坐标的变化构建两个向量，以便计算两个向量角度.
+        preVector.set(preP.x - photoCorners[8], preP.y - photoCorners[9]);//旋转后向量
+        curVector.set(curP.x - photoCorners[8], curP.y - photoCorners[9]);//旋转前向量
+        //计算向量长度
+        double preVectorLen = getVectorLength(preVector);
+        double curVectorLen = getVectorLength(curVector);
         //计算两个向量的夹角.
         double cosAlpha = (preVector.x * curVector.x + preVector.y * curVector.y)
                 / (preVectorLen * curVectorLen);
-
         //由于计算误差，可能会带来略大于1的cos，例如
         if (cosAlpha > 1.0f) {
             cosAlpha = 1.0f;
         }
         //本次的角度已经计算出来。
-        double dAngle = Math.acos(cosAlpha) * 180.0 / 3.14;
-
-        System.out.println("" + dAngle);
+        double dAngle = Math.acos(cosAlpha) * 180.0 /Math.PI;
         // 判断顺时针和逆时针.
         //判断方法其实很简单，这里的v1v2其实相差角度很小的。
-        //v1v2先Normalize，
+        //先转换成单位向量
         preVector.x /= preVectorLen;
         preVector.y /= preVectorLen;
         curVector.x /= curVectorLen;
         curVector.y /= curVectorLen;
-        //作v2的逆时针垂直向量。
-        PointF v2Vec = new PointF(curVector.y, -curVector.x);
+        //作curVector的逆时针垂直向量。
+        PointF verticalVec = new PointF(curVector.y, -curVector.x);
 
         //判断这个垂直向量和v1的点积，点积>0表示俩向量夹角锐角。=0表示垂直，<0表示钝角
-        float vDot = preVector.x * v2Vec.x + preVector.y * v2Vec.y;
+        float vDot = preVector.x * verticalVec.x + preVector.y * verticalVec.y;
         if (vDot > 0) {
             //v2的逆时针垂直向量和v1是锐角关系，说明v1在v2的逆时针方向。
         } else {
             dAngle = -dAngle;
         }
-//
-//        angle += dAngle;
-//
-//        //角度你懂的。
-//        if (angle >= 360) {
-//
-//            angle -= 360;
-//        }
-//        if (angle < 0) {
-//            angle +=360;
-//        }
-        mScaleMatrix.postRotate((float) dAngle, photoRect.centerX(), photoRect.centerY());
+        mScaleMatrix.postRotate((float) dAngle, photoCorners[8], photoCorners[9]);
         setImageMatrix(mScaleMatrix);
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-//        canvas.rotate(2);
-        drawPhotoRect(canvas);
+        drawPhotoBorder(canvas);
         drawMarkers(canvas);
     }
 
-    private void drawPhotoRect(Canvas canvas) {
+    private void drawPhotoBorder(Canvas canvas) {
         if (first) {//首次绘制调整边界
             photoRectSrc = new RectF(getDrawable().getBounds());//图片的边界
-            markerScaleMatrix.postTranslate((getWidth() + photoRect.width() - markerRotateRect.width()) / 2, (getHeight() + photoRect.height() - markerRotateRect.height()) / 2);//将标记Matrix与图片同步
+            photoCornersSrc[0] = photoRectSrc.left;
+            photoCornersSrc[1] = photoRectSrc.top;
+            photoCornersSrc[2] = photoRectSrc.right;
+            photoCornersSrc[3] = photoRectSrc.top;
+            photoCornersSrc[4] = photoRectSrc.right;
+            photoCornersSrc[5] = photoRectSrc.bottom;
+            photoCornersSrc[6] = photoRectSrc.left;
+            photoCornersSrc[7] = photoRectSrc.bottom;
+            photoCornersSrc[8] = photoRectSrc.centerX();
+            photoCornersSrc[9] = photoRectSrc.centerY();
+            photoLen = Math.sqrt(Math.pow(photoRectSrc.width(), 2) + Math.pow(photoRectSrc.height(), 2));
+            markerScaleMatrix.postTranslate((getWidth() + photoRectSrc.width() - markerRotateRect.width()) / 2,
+                    (getHeight() + photoRectSrc.height() - markerRotateRect.height()) / 2);//将标记Matrix与图片同步
             first = false;
         }
-        mScaleMatrix.mapRect(photoRect,photoRectSrc);
-        canvas.drawRect(photoRect, p);
+        mScaleMatrix.mapPoints(photoCorners, photoCornersSrc);
+        photoBorderPath.reset();
+        photoBorderPath.moveTo(photoCorners[0], photoCorners[1]);
+        photoBorderPath.lineTo(photoCorners[2], photoCorners[3]);
+        photoBorderPath.lineTo(photoCorners[4], photoCorners[5]);
+        photoBorderPath.lineTo(photoCorners[6], photoCorners[7]);
+        photoBorderPath.lineTo(photoCorners[0], photoCorners[1]);
+        canvas.drawPath(photoBorderPath, p);
     }
 
     private void drawMarkers(Canvas canvas) {
         float x;
         float y;
 
-        x=photoRect.left- markerMirrorRect.width()/2;
-        y=photoRect.top- markerMirrorRect.height()/2;
+
+        x = photoCorners[0] - markerMirrorRect.width() / 2;
+        y = photoCorners[1] - markerMirrorRect.height() / 2;
         markerMirrorRect.offsetTo(x,y);
 //        canvas.drawRect(markerMirrorRect, p);
-        canvas.drawBitmap(mirrorMarkBM,x,y,null);
+//        canvas.drawBitmap(mirrorMarkBM,x,y,null);
 
-        x=photoRect.right- markerDeleteRect.width()/2;
-        y=photoRect.top- markerDeleteRect.height()/2;
+        x = photoCorners[2] - markerDeleteRect.width() / 2;
+        y = photoCorners[3] - markerDeleteRect.height() / 2;
         markerDeleteRect.offsetTo(x,y);
 //        canvas.drawRect(markerDeleteRect, p);
-        canvas.drawBitmap(deleteMarkBM,x,y,null);
+//        canvas.drawBitmap(deleteMarkBM,x,y,null);
 
-        x=photoRect.right- markerRotateRect.width()/2;
-        y=photoRect.bottom- markerRotateRect.height()/2;
+        x = photoCorners[4] - markerRotateRect.width() / 2;
+        y = photoCorners[5] - markerRotateRect.height() / 2;
         markerRotateRect.offsetTo(x,y);
 //        canvas.drawRect(markerRotateRect, p);
         canvas.drawBitmap(rotateMarkBM,x,y,null);
-
     }
 
 
