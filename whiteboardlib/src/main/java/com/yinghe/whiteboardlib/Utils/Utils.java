@@ -1,6 +1,7 @@
 package com.yinghe.whiteboardlib.Utils;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Matrix;
 
 /**
@@ -17,5 +18,8 @@ public class Utils {
         return (int) (dpValue * scale + 0.5f);
     }
 
-
+    public static boolean isLandScreen(Context context) {
+        int ori =context.getResources().getConfiguration().orientation;//获取屏幕方向
+        return ori == Configuration.ORIENTATION_LANDSCAPE;
+    }
 }

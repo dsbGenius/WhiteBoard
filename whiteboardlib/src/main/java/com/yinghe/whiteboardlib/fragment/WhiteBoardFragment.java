@@ -72,6 +72,8 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     int drawMode;//模式
 
     int pupWindowsDPWidth = 250;//弹窗宽度，单位DP
+    int strokePupWindowsDPHeight = 210;//画笔弹窗高度，单位DP
+    int eraserPupWindowsDPHeight = 90;//橡皮擦弹窗高度，单位DP
 
     PopupWindow strokePopupWindow, eraserPopupWindow;//画笔、橡皮擦参数设置弹窗实例
     private View popupStrokeLayout, popupEraserLayout;//画笔、橡皮擦弹窗布局
@@ -115,8 +117,9 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         //画笔弹窗
         strokePopupWindow = new PopupWindow(activity);
         strokePopupWindow.setContentView(popupStrokeLayout);//设置主体布局
-        strokePopupWindow.setWidth(Utils.dip2px(getActivity(), pupWindowsDPWidth));//宽度200dp
-        strokePopupWindow.setHeight(WindowManager.LayoutParams.WRAP_CONTENT);//高度自适应
+        strokePopupWindow.setWidth(Utils.dip2px(getActivity(), pupWindowsDPWidth));//宽度
+//        strokePopupWindow.setHeight(WindowManager.LayoutParams.WRAP_CONTENT);//高度自适应
+        strokePopupWindow.setHeight(Utils.dip2px(getActivity(), strokePupWindowsDPHeight));//高度
         strokePopupWindow.setFocusable(true);
         strokePopupWindow.setBackgroundDrawable(new BitmapDrawable());//设置空白背景
         strokePopupWindow.setAnimationStyle(R.style.mypopwindow_anim_style);//动画
@@ -185,7 +188,8 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         eraserPopupWindow = new PopupWindow(activity);
         eraserPopupWindow.setContentView(popupEraserLayout);//设置主体布局
         eraserPopupWindow.setWidth(Utils.dip2px(getActivity(), pupWindowsDPWidth));//宽度200dp
-        eraserPopupWindow.setHeight(WindowManager.LayoutParams.WRAP_CONTENT);//高度自适应
+//        eraserPopupWindow.setHeight(WindowManager.LayoutParams.WRAP_CONTENT);//高度自适应
+        eraserPopupWindow.setHeight(Utils.dip2px(getActivity(), eraserPupWindowsDPHeight));//高度自适应
         eraserPopupWindow.setFocusable(true);
         eraserPopupWindow.setBackgroundDrawable(new BitmapDrawable());//设置空白背景
         eraserPopupWindow.setAnimationStyle(R.style.mypopwindow_anim_style);//动画
@@ -357,10 +361,20 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     }
 
     private void showPopup(View anchor, int drawMode) {
-        if (drawMode == SketchView.STROKE) {
-            strokePopupWindow.showAsDropDown(anchor, Utils.dip2px(activity, -pupWindowsDPWidth), -anchor.getHeight());
+        if (Utils.isLandScreen(activity)) {
+//        if (true) {
+            if (drawMode == SketchView.STROKE) {
+                strokePopupWindow.showAsDropDown(anchor, Utils.dip2px(activity, -pupWindowsDPWidth), -anchor.getHeight());
+            } else {
+                eraserPopupWindow.showAsDropDown(anchor, Utils.dip2px(activity, -pupWindowsDPWidth), -anchor.getHeight());
+            }
         } else {
-            eraserPopupWindow.showAsDropDown(anchor, Utils.dip2px(activity, -pupWindowsDPWidth), -anchor.getHeight());
+            if (drawMode == SketchView.STROKE) {
+                strokePopupWindow.showAsDropDown(anchor,0,Utils.dip2px(activity, -strokePupWindowsDPHeight)-anchor.getHeight());
+//                strokePopupWindow.showAsDropDown(anchor,0,);
+            } else {
+                eraserPopupWindow.showAsDropDown(anchor, 0, Utils.dip2px(activity, -eraserPupWindowsDPHeight)-anchor.getHeight());
+            }
         }
     }
 
