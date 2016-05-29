@@ -19,7 +19,6 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -303,14 +302,21 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     public void onClick(View v) {
         int i = v.getId();
         if (i == R.id.sketch_stroke) {
+            sketchPhoto.setAlpha(0.4f);
+            scaleView.setEnabled(false);
+            scaleView.setFocusable(false);
             if (mSketchView.getMode() == SketchView.STROKE) {
                 showPopup(v, SketchView.STROKE);
+
             } else {
                 mSketchView.setMode(SketchView.STROKE);
                 setAlpha(eraser, 0.4f);
                 setAlpha(stroke, 1f);
             }
         } else if (i == R.id.sketch_eraser) {
+            sketchPhoto.setAlpha(0.4f);
+            scaleView.setEnabled(false);
+            scaleView.setFocusable(false);
             if (mSketchView.getMode() == SketchView.ERASER) {
                 showPopup(v, SketchView.ERASER);
             } else {
@@ -348,15 +354,15 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                     })
                     .show();
         } else if (i == R.id.sketch_photo) {
-            if (scaleView.isFocusable()) {
-                sketchPhoto.setAlpha(0.1f);
-                scaleView.setEnabled(false);
-                scaleView.setFocusable(false);
-            } else {
+//            if (scaleView.isFocusable()) {
+//                sketchPhoto.setAlpha(0.1f);
+//                scaleView.setEnabled(false);
+//                scaleView.setFocusable(false);
+//            } else {
                 sketchPhoto.setAlpha(1.0f);
                 scaleView.setEnabled(true);
                 scaleView.setFocusable(true);
-            }
+//            }
         }
     }
 
