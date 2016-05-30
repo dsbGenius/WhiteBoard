@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -14,11 +15,13 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -29,6 +32,7 @@ import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
+import com.yinghe.whiteboardlib.MultiImageSelector;
 import com.yinghe.whiteboardlib.R;
 import com.yinghe.whiteboardlib.Utils.Utils;
 import com.yinghe.whiteboardlib.view.ScaleView;
@@ -36,6 +40,7 @@ import com.yinghe.whiteboardlib.view.SketchView;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.util.ArrayList;
 
 public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawChangedListener, View.OnClickListener {
 
@@ -44,6 +49,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     public static final int COLOR_GREEN = Color.parseColor("#ff99cc00");
     public static final int COLOR_ORANGE = Color.parseColor("#ffffbb33");
     public static final int COLOR_BLUE = Color.parseColor("#ff33b5e5");
+    private static final int REQUEST_IMAGE = 2;
 
     public static int bitmapSize = 300;
 
@@ -359,9 +365,14 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                     })
                     .show();
         } else if (i == R.id.sketch_photo) {
-//            scaleView.setPhotoPath(Environment.getExternalStorageDirectory().toString() + "/test.jpg");
-            Bitmap bm = Utils.decodeSampledBitmapFromResource(getResources(), R.drawable.test4, bitmapSize, bitmapSize);
-            scaleView.setImageBitmap(bm);
+//            scaleView.setPhotoUri(Environment.getExternalStorageDirectory().toString() + "/test.jpg");
+//            scaleView.setImageBitmap(Utils.decodeSampledBitmapFromResource(getResources(),R.drawable.test,500,500));
+            MultiImageSelector selector = MultiImageSelector.create(getActivity());
+            selector.showCamera(false);
+            selector.count(9);
+            selector.single();
+            selector.origin(mSelectPath);
+            selector.start(this, REQUEST_IMAGE);
 //            if (scaleView.isFocusable()) {
 //                sketchPhoto.setAlpha(0.1f);
 //                scaleView.setEnabled(false);
