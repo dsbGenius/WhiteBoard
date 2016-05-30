@@ -5,6 +5,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 
 /**
  * Created by TangentLu on 2015/8/19.
@@ -58,17 +59,18 @@ public class Utils {
         int targetDensity = res.getDisplayMetrics().densityDpi;
         // Calculate inSampleSize
         options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
-        double xSScale = ((double) options.outWidth) / ((double) reqWidth);
-        double ySScale = ((double) options.outHeight) / ((double) reqHeight);
-
-        double startScale = xSScale > ySScale ? xSScale : ySScale;
+//        double xSScale = ((double) options.outWidth) / ((double) reqWidth);
+//        double ySScale = ((double) options.outHeight) / ((double) reqHeight);
+//
+//        double startScale =Math.max(xSScale , ySScale);
 
         options.inScaled = true;
-        options.inDensity = (int) (targetDensity * startScale);
+        options.inDensity = (int) ((float)targetDensity*2);
         options.inTargetDensity = targetDensity;
-//        if (options.inScaled)
         // Decode bitmap with inSampleSize set
         options.inJustDecodeBounds = false;
+        Bitmap b= BitmapFactory.decodeResource(res, resId, options);
+        Log.e("xxx", b.getByteCount() + "");
         return BitmapFactory.decodeResource(res, resId, options);
     }
 

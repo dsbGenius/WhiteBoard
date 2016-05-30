@@ -9,6 +9,7 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PointF;
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
@@ -79,6 +80,7 @@ public class ScaleView extends ImageView implements
     float[] photoCorners = new float[10];//0,1代表左上角点XY，2,3代表右上角点XY，4,5代表右下角点XY，6,7代表左下角点XY，8,9代表中心点XY
 
     Path photoBorderPath = new Path();
+    Rect viewRect = new Rect();
 
 
     /**
@@ -107,8 +109,6 @@ public class ScaleView extends ImageView implements
         super(context, attrs);
         this.context = context;
         super.setScaleType(ScaleType.MATRIX);
-//        setImageBitmap(Utils.decodeSampledBitmapFromResource(getResources(), R.drawable.text_right_top_control, 400, 400));
-//        setImageBitmap(Utils.decodeSampledBitmapFromResource(getResources(), R.drawable.test, getWidth()/2, getHeight()/2));
         mScaleGestureDetector = new ScaleGestureDetector(context, new OnScaleGestureListener() {
             @Override
             public boolean onScale(ScaleGestureDetector detector) {
@@ -136,35 +136,18 @@ public class ScaleView extends ImageView implements
     }
 
     private void onDragAction(float distanceX, float distanceY) {
-        int x = (int) distanceX;
-        int y = (int) distanceY;
-        mScaleMatrix.postTranslate(x, y);
+        mScaleMatrix.postTranslate((int) distanceX, (int) distanceY);
         setImageMatrix(mScaleMatrix);
+
     }
 
     private void onScaleAction(ScaleGestureDetector detector) {
-        float x = detector.getFocusX();
-        float y = detector.getFocusY();
-        float scale = getScale();
+        //目前图片对角线长度
+        float len = (float) Math.sqrt(Math.pow(photoCorners[0] - photoCorners[4], 2) + Math.pow(photoCorners[1] - photoCorners[5], 2));
         float scaleFactor = detector.getScaleFactor();
-        /**
-         * 缩放的范围控制
-         */
-        if ((scale < SCALE_MAX && scaleFactor > SCALE_MIN)
-                || (scale > SCALE_MIN && scaleFactor < initScale)) {
-            /**
-             * 最大值最小值判断
-             */
-            if (scaleFactor * scale < SCALE_MIN) {
-                scaleFactor = SCALE_MIN / scale;
-            }
-            if (scaleFactor * scale > SCALE_MAX) {
-                scaleFactor = SCALE_MAX / scale;
-            }
-            /**
-             * 设置缩放比例
-             */
-            mScaleMatrix.postScale(scaleFactor, scaleFactor, (int)x, (int)y);
+        //设置Matrix缩放参数
+        if ((scaleFactor < 1 && len >= photoLen * SCALE_MIN) || (scaleFactor > 1 && len <= photoLen * SCALE_MAX)) {
+            mScaleMatrix.postScale(scaleFactor, scaleFactor, photoCorners[8], photoCorners[9]);
             setImageMatrix(mScaleMatrix);
         }
     }
@@ -246,7 +229,7 @@ public class ScaleView extends ImageView implements
         SCALE_MIN = SCALE_MAX / 5;
     }
 
-    public void setPhotoUri(String path) {
+    public void setPhotoPath(String path) {
         File file = new File(path);
         if (file.exists()) {
             Bitmap bm=Utils.decodeSampledBitmapFromFile(getResources(), path, 900, 900);
@@ -259,8 +242,9 @@ public class ScaleView extends ImageView implements
     }
     private void drawPhotoBorder(Canvas canvas) {
         if (first) {//首次绘制调整边界
+            getGlobalVisibleRect(viewRect);
             photoRectSrc = new RectF(getDrawable().getBounds());//图片的边界
-            setLimitScale();
+            setLimitScale();//放大倍数
             photoCornersSrc[0] = photoRectSrc.left;
             photoCornersSrc[1] = photoRectSrc.top;
             photoCornersSrc[2] = photoRectSrc.right;
@@ -275,7 +259,7 @@ public class ScaleView extends ImageView implements
             markerScaleMatrix.postTranslate((getWidth() + photoRectSrc.width() - markerRotateRect.width()) / 2,
                     (getHeight() + photoRectSrc.height() - markerRotateRect.height()) / 2);//将标记Matrix与图片同步
             first = false;
-            mScaleMatrix.postTranslate(getWidth() / 2, getHeight() / 2);
+            mScaleMatrix.postTranslate(getWidth() / 2-photoRectSrc.width()/2, getHeight() / 2-photoRectSrc.height()/2);
             setImageMatrix(mScaleMatrix);
         }
         mScaleMatrix.mapPoints(photoCorners, photoCornersSrc);
@@ -479,33 +463,33 @@ public class ScaleView extends ImageView implements
 //    }
 
     /**
-     * 移动时，进行边界判断，主要判断宽或高大于屏幕的
+     * 判断是否超出边界
      */
-    private void checkMatrixBounds()
-    {
-        RectF rect = getMatrixRectF();
-
-        float deltaX = 0, deltaY = 0;
-        final float viewWidth = getWidth();
-        final float viewHeight = getHeight();
-        // 判断移动或缩放后，图片显示是否超出屏幕边界
-        if (rect.top > 0 && isCheckTopAndBottom)
-        {
-            deltaY = -rect.top;
-        }
-        if (rect.bottom < viewHeight && isCheckTopAndBottom)
-        {
-            deltaY = viewHeight - rect.bottom;
-        }
-        if (rect.left > 0 && isCheckLeftAndRight)
-        {
-            deltaX = -rect.left;
-        }
-        if (rect.right < viewWidth && isCheckLeftAndRight)
-        {
-            deltaX = viewWidth - rect.right;
-        }
-        mScaleMatrix.postTranslate(deltaX, deltaY);
+    private boolean isOutOfBounds(int x, int y) {
+        return !viewRect.contains(x, y);
+//        RectF rect = getMatrixRectF();
+//
+//        float deltaX = 0, deltaY = 0;
+//        final float viewWidth = getWidth();
+//        final float viewHeight = getHeight();
+//        // 判断移动或缩放后，图片显示是否超出屏幕边界
+//        if (rect.top > 0 && isCheckTopAndBottom)
+//        {
+//            deltaY = -rect.top;
+//        }
+//        if (rect.bottom < viewHeight && isCheckTopAndBottom)
+//        {
+//            deltaY = viewHeight - rect.bottom;
+//        }
+//        if (rect.left > 0 && isCheckLeftAndRight)
+//        {
+//            deltaX = -rect.left;
+//        }
+//        if (rect.right < viewWidth && isCheckLeftAndRight)
+//        {
+//            deltaX = viewWidth - rect.right;
+//        }
+//        mScaleMatrix.postTranslate(deltaX, deltaY);
     }
 
     public float getScale() {

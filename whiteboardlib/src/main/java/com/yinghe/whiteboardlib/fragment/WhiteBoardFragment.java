@@ -20,6 +20,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -45,6 +46,8 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     public static final int COLOR_GREEN = Color.parseColor("#ff99cc00");
     public static final int COLOR_ORANGE = Color.parseColor("#ffffbb33");
     public static final int COLOR_BLUE = Color.parseColor("#ff33b5e5");
+
+    public static int bitmapSize = 300;
 
     ScaleView scaleView;
 
@@ -91,6 +94,8 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         activity = getActivity();//初始化上下文
+        bitmapSize=Math.min(activity.getWindowManager().getDefaultDisplay().getWidth(),activity.getWindowManager().getDefaultDisplay().getHeight())/2;
+
     }
 
     @Override
@@ -356,8 +361,8 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                     })
                     .show();
         } else if (i == R.id.sketch_photo) {
-//            scaleView.setPhotoUri(Environment.getExternalStorageDirectory().toString() + "/test.jpg");
-            scaleView.setImageBitmap(Utils.decodeSampledBitmapFromResource(getResources(),R.drawable.test,500,500));
+//            scaleView.setPhotoPath(Environment.getExternalStorageDirectory().toString() + "/test.jpg");
+            scaleView.setImageBitmap(Utils.decodeSampledBitmapFromResource(getResources(),R.drawable.test2,bitmapSize,bitmapSize));
 //            if (scaleView.isFocusable()) {
 //                sketchPhoto.setAlpha(0.1f);
 //                scaleView.setEnabled(false);
