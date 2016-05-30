@@ -20,6 +20,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -48,6 +49,8 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     public static final int COLOR_ORANGE = Color.parseColor("#ffffbb33");
     public static final int COLOR_BLUE = Color.parseColor("#ff33b5e5");
     private static final int REQUEST_IMAGE = 2;
+
+    public static int bitmapSize = 300;
 
     ScaleView scaleView;
 
@@ -95,6 +98,8 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         activity = getActivity();//初始化上下文
+        bitmapSize=Math.min(activity.getWindowManager().getDefaultDisplay().getWidth(),activity.getWindowManager().getDefaultDisplay().getHeight())/2;
+
     }
 
     @Override
@@ -373,9 +378,9 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
 //                scaleView.setEnabled(false);
 //                scaleView.setFocusable(false);
 //            } else {
-//                sketchPhoto.setAlpha(1.0f);
-//                scaleView.setEnabled(true);
-//                scaleView.setFocusable(true);
+                sketchPhoto.setAlpha(1.0f);
+                scaleView.setEnabled(true);
+                scaleView.setFocusable(true);
 //            }
         }
     }

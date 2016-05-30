@@ -110,7 +110,7 @@ bintray {
 //    key = properties.getProperty("bintray.apikey")
 user="tangentLu"
     key="815e785b4744519cf8f70ac4218393f5168fa231"
-    configurations = ['published','archives']
+    configurations = ['archives']
     pkg {
         repo = "WhiteBoard"
         // it is the name that appears in bintray when logged
