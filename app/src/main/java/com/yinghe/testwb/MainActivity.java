@@ -8,7 +8,12 @@ import android.view.MenuItem;
 
 import com.yinghe.whiteboardlib.fragment.WhiteBoardFragment;
 
+import java.util.ArrayList;
+
 public class MainActivity extends AppCompatActivity {
+
+    private static final int REQUEST_IMAGE = 2;
+    private ArrayList<String> mSelectPath;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

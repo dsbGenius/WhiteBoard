@@ -25,4 +25,5 @@
         <item name="android:windowExitAnimation">@anim/pophide_anim</item>
         <!-- 指定消失的动画xml -->
     </style>
+    <style name="NO_ACTIONBAR" parent="Theme.AppCompat.Light.NoActionBar"></style>
 </resources>

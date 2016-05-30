@@ -23,6 +23,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:configChanges="orientation|screenSize"
+            android:screenOrientation="landscape"
+            android:theme="@style/Base.Theme.AppCompat.Dialog"
+            android:name="com.yinghe.whiteboardlib.MultiImageSelectorActivity" />
     </application>
 
 </manifest>

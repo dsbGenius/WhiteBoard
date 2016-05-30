@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -14,7 +15,6 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -30,6 +30,7 @@ import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
+import com.yinghe.whiteboardlib.MultiImageSelector;
 import com.yinghe.whiteboardlib.R;
 import com.yinghe.whiteboardlib.Utils.Utils;
 import com.yinghe.whiteboardlib.view.ScaleView;
@@ -37,6 +38,7 @@ import com.yinghe.whiteboardlib.view.SketchView;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.util.ArrayList;
 
 public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawChangedListener, View.OnClickListener {
 
@@ -45,6 +47,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     public static final int COLOR_GREEN = Color.parseColor("#ff99cc00");
     public static final int COLOR_ORANGE = Color.parseColor("#ffffbb33");
     public static final int COLOR_BLUE = Color.parseColor("#ff33b5e5");
+    private static final int REQUEST_IMAGE = 2;
 
     ScaleView scaleView;
 
@@ -82,6 +85,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     private int size;
     private AlertDialog dialog;
     private Bitmap bitmap1;
+    private ArrayList<String> mSelectPath;
 
     public static WhiteBoardFragment newInstance() {
         return new WhiteBoardFragment();
@@ -357,16 +361,37 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                     .show();
         } else if (i == R.id.sketch_photo) {
 //            scaleView.setPhotoUri(Environment.getExternalStorageDirectory().toString() + "/test.jpg");
-            scaleView.setImageBitmap(Utils.decodeSampledBitmapFromResource(getResources(),R.drawable.test,500,500));
+//            scaleView.setImageBitmap(Utils.decodeSampledBitmapFromResource(getResources(),R.drawable.test,500,500));
+            MultiImageSelector selector = MultiImageSelector.create(getActivity());
+            selector.showCamera(false);
+            selector.count(9);
+                selector.single();
+            selector.origin(mSelectPath);
+            selector.start(this, REQUEST_IMAGE);
 //            if (scaleView.isFocusable()) {
 //                sketchPhoto.setAlpha(0.1f);
 //                scaleView.setEnabled(false);
 //                scaleView.setFocusable(false);
 //            } else {
-                sketchPhoto.setAlpha(1.0f);
-                scaleView.setEnabled(true);
-                scaleView.setFocusable(true);
+//                sketchPhoto.setAlpha(1.0f);
+//                scaleView.setEnabled(true);
+//                scaleView.setFocusable(true);
 //            }
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(requestCode == REQUEST_IMAGE) {
+            if (resultCode == getActivity().RESULT_OK) {
+                mSelectPath = data.getStringArrayListExtra(MultiImageSelector.EXTRA_RESULT);
+                StringBuilder sb = new StringBuilder();
+                for (String p : mSelectPath) {
+                    sb.append(p);
+                    sb.append("\n");
+                }
+                Toast.makeText(getActivity(), sb.toString(), Toast.LENGTH_LONG).show();
+            }
         }
     }
 
