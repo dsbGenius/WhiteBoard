@@ -232,9 +232,13 @@ public class ScaleView extends ImageView implements
 
     @Override
     protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
-        drawPhotoBorder(canvas);
-        drawMarkers(canvas);
+        if (getDrawable() != null) {
+            drawPhotoBorder(canvas);
+            super.onDraw(canvas);
+            drawMarkers(canvas);
+        }else {
+            super.onDraw(canvas);
+        }
     }
 
     private void setLimitScale() {
@@ -271,6 +275,8 @@ public class ScaleView extends ImageView implements
             markerScaleMatrix.postTranslate((getWidth() + photoRectSrc.width() - markerRotateRect.width()) / 2,
                     (getHeight() + photoRectSrc.height() - markerRotateRect.height()) / 2);//将标记Matrix与图片同步
             first = false;
+            mScaleMatrix.postTranslate(getWidth() / 2, getHeight() / 2);
+            setImageMatrix(mScaleMatrix);
         }
         mScaleMatrix.mapPoints(photoCorners, photoCornersSrc);
         photoBorderPath.reset();

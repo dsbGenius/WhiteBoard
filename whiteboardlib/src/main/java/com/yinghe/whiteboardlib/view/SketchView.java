@@ -132,7 +132,6 @@ public class SketchView extends ImageView implements OnTouchListener {
     /**
      * Change canvass background and force redraw
      *
-     * @param bitmap
      */
     public void setBackgroundBitmap(Activity mActivity, Bitmap bitmap) {
         if (!bitmap.isMutable()) {
@@ -260,7 +259,6 @@ public class SketchView extends ImageView implements OnTouchListener {
     /**
      * Returns a new bitmap associated with drawed canvas
      *
-     * @return
      */
     public Bitmap getBitmap() {
         if (paths.size() == 0)

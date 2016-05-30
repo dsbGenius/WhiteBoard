@@ -38,10 +38,10 @@
                 android:layout_gravity="center"
                 android:background="#fff" />
 
+
             <com.yinghe.whiteboardlib.view.ScaleView
                 android:id="@+id/scale_view"
                 android:layout_width="match_parent"
-            android:src="@drawable/test"
                 android:layout_height="match_parent" />
             <!--android:src="@drawable/ic_action_draw"-->
         </FrameLayout>

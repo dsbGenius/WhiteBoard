@@ -218,7 +218,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     private void findView(View view) {
 
         scaleView = (ScaleView) view.findViewById(R.id.scale_view);
-//        scaleView.setEnabled(false);
+        scaleView.setEnabled(false);
         //画板整体布局
         whiteBoardLayout = (RelativeLayout) view.findViewById(R.id.white_board);
         mSketchView = (SketchView) view.findViewById(R.id.drawing);
@@ -231,6 +231,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         erase = (ImageView) view.findViewById(R.id.sketch_erase);
         sketchSave = (ImageView) view.findViewById(R.id.sketch_save);
         sketchPhoto = (ImageView) view.findViewById(R.id.sketch_photo);
+        sketchPhoto.setAlpha(0.4f);
         controlLayout = (LinearLayout) view.findViewById(R.id.controlLayout);
         btShowBg = (Button) view.findViewById(R.id.bt_show_bg);
         btShowBgGray = (Button) view.findViewById(R.id.bt_show_bg_gray);
@@ -331,7 +332,6 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
             mSketchView.redo();
         } else if (i == R.id.sketch_erase) {
             askForErase();
-            scaleView.setPhotoUri(Environment.getExternalStorageDirectory().toString() + "/test.jpg");
         } else if (i == R.id.sketch_save) {
             if (mSketchView.getPaths().size() == 0) {
                 Toast.makeText(getActivity(), "你还没有手绘", Toast.LENGTH_SHORT).show();
@@ -356,6 +356,8 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                     })
                     .show();
         } else if (i == R.id.sketch_photo) {
+//            scaleView.setPhotoUri(Environment.getExternalStorageDirectory().toString() + "/test.jpg");
+            scaleView.setImageBitmap(Utils.decodeSampledBitmapFromResource(getResources(),R.drawable.test,500,500));
 //            if (scaleView.isFocusable()) {
 //                sketchPhoto.setAlpha(0.1f);
 //                scaleView.setEnabled(false);
