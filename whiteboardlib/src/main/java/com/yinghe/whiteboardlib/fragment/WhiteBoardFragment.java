@@ -364,21 +364,12 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                     })
                     .show();
         } else if (i == R.id.sketch_photo) {
-//            scaleView.setPhotoUri(Environment.getExternalStorageDirectory().toString() + "/test.jpg");
-//            scaleView.setImageBitmap(Utils.decodeSampledBitmapFromResource(getResources(),R.drawable.test,500,500));
             MultiImageSelector selector = MultiImageSelector.create(getActivity());
             selector.showCamera(false);
             selector.count(9);
             selector.single();
             selector.origin(mSelectPath);
             selector.start(this, REQUEST_IMAGE);
-//            if (scaleView.isFocusable()) {
-//                sketchPhoto.setAlpha(0.1f);
-//                scaleView.setEnabled(false);
-//                scaleView.setFocusable(false);
-//            } else {
-
-//            }
         }
     }
 
@@ -394,9 +385,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                 }else if(mSelectPath==null||mSelectPath.size()==0){
                     Toast.makeText(getActivity(), "图片加载失败,请重试!", Toast.LENGTH_LONG).show();
                 }
-
-                Toast.makeText(getActivity(), path, Toast.LENGTH_LONG).show();
-                //j加载图片
+                //加载图片
                 scaleView.setPhotoPath(path);
                 sketchPhoto.setAlpha(1.0f);
                 scaleView.setEnabled(true);
