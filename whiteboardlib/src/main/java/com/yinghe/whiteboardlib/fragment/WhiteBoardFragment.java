@@ -20,7 +20,6 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -98,7 +97,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         activity = getActivity();//初始化上下文
-        bitmapSize=Math.min(activity.getWindowManager().getDefaultDisplay().getWidth(),activity.getWindowManager().getDefaultDisplay().getHeight())/2;
+        bitmapSize = Math.min(activity.getWindowManager().getDefaultDisplay().getWidth(), activity.getWindowManager().getDefaultDisplay().getHeight()) / 2;
 
     }
 
@@ -370,7 +369,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
             MultiImageSelector selector = MultiImageSelector.create(getActivity());
             selector.showCamera(false);
             selector.count(9);
-                selector.single();
+            selector.single();
             selector.origin(mSelectPath);
             selector.start(this, REQUEST_IMAGE);
 //            if (scaleView.isFocusable()) {
@@ -378,24 +377,30 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
 //                scaleView.setEnabled(false);
 //                scaleView.setFocusable(false);
 //            } else {
-                sketchPhoto.setAlpha(1.0f);
-                scaleView.setEnabled(true);
-                scaleView.setFocusable(true);
+
 //            }
         }
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(requestCode == REQUEST_IMAGE) {
+        if (requestCode == REQUEST_IMAGE) {
             if (resultCode == getActivity().RESULT_OK) {
                 mSelectPath = data.getStringArrayListExtra(MultiImageSelector.EXTRA_RESULT);
                 StringBuilder sb = new StringBuilder();
-                for (String p : mSelectPath) {
-                    sb.append(p);
-                    sb.append("\n");
+                String path = "";
+                if (mSelectPath.size() == 1) {
+                    path = mSelectPath.get(0);
+                }else if(mSelectPath==null||mSelectPath.size()==0){
+                    Toast.makeText(getActivity(), "图片加载失败,请重试!", Toast.LENGTH_LONG).show();
                 }
-                Toast.makeText(getActivity(), sb.toString(), Toast.LENGTH_LONG).show();
+
+                Toast.makeText(getActivity(), path, Toast.LENGTH_LONG).show();
+                //j加载图片
+                scaleView.setPhotoPath(path);
+                sketchPhoto.setAlpha(1.0f);
+                scaleView.setEnabled(true);
+                scaleView.setFocusable(true);
             }
         }
     }
@@ -410,10 +415,10 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
             }
         } else {
             if (drawMode == SketchView.STROKE) {
-                strokePopupWindow.showAsDropDown(anchor,0,Utils.dip2px(activity, -strokePupWindowsDPHeight)-anchor.getHeight());
+                strokePopupWindow.showAsDropDown(anchor, 0, Utils.dip2px(activity, -strokePupWindowsDPHeight) - anchor.getHeight());
 //                strokePopupWindow.showAsDropDown(anchor,0,);
             } else {
-                eraserPopupWindow.showAsDropDown(anchor, 0, Utils.dip2px(activity, -eraserPupWindowsDPHeight)-anchor.getHeight());
+                eraserPopupWindow.showAsDropDown(anchor, 0, Utils.dip2px(activity, -eraserPupWindowsDPHeight) - anchor.getHeight());
             }
         }
     }
@@ -429,7 +434,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         Bitmap bitmap2 = ((BitmapDrawable) scaleView.getDrawable()).getBitmap();
         final Bitmap newBM = Bitmap.createBitmap(bgWidth, bgHeight, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(newBM);
-        canvas.setDrawFilter(new PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG| Paint.FILTER_BITMAP_FLAG));//抗锯齿
+        canvas.setDrawFilter(new PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG));//抗锯齿
         canvas.drawBitmap(bitmap1, 0, 0, null);
 
         Matrix matrix = scaleView.getImageMatrix();
@@ -454,7 +459,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                         File f = new File(filePath, imgName);
                         if (!f.exists()) {
                             f.createNewFile();
-                        }else {
+                        } else {
                             f.delete();
                         }
                         FileOutputStream out = new FileOutputStream(f);
