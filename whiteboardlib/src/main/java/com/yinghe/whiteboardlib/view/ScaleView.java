@@ -24,6 +24,7 @@ import android.widget.ImageView;
 
 import com.yinghe.whiteboardlib.R;
 import com.yinghe.whiteboardlib.Utils.Utils;
+import com.yinghe.whiteboardlib.fragment.WhiteBoardFragment;
 
 import java.io.File;
 
@@ -232,7 +233,7 @@ public class ScaleView extends ImageView implements
     public void setPhotoPath(String path) {
         File file = new File(path);
         if (file.exists()) {
-            Bitmap bm=Utils.decodeSampledBitmapFromFile(getResources(), path, 900, 900);
+            Bitmap bm=Utils.decodeSampledBitmapFromFile(getResources(), path, WhiteBoardFragment.bitmapSize, WhiteBoardFragment.bitmapSize);
             if (bm != null) {
                 setImageBitmap(bm);
             }
