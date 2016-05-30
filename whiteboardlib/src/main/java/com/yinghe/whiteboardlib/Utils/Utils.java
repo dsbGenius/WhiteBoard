@@ -45,7 +45,9 @@ public class Utils {
 //        if (options.inScaled)
         // Decode bitmap with inSampleSize set
         options.inJustDecodeBounds = false;
-        return BitmapFactory.decodeFile(filePath, options);
+        Bitmap bm = BitmapFactory.decodeFile(filePath, options);
+        Log.e("xxx", bm.getByteCount() + "");
+        return bm;
     }
 
 
@@ -59,13 +61,13 @@ public class Utils {
         int targetDensity = res.getDisplayMetrics().densityDpi;
         // Calculate inSampleSize
         options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
-//        double xSScale = ((double) options.outWidth) / ((double) reqWidth);
-//        double ySScale = ((double) options.outHeight) / ((double) reqHeight);
-//
-//        double startScale =Math.max(xSScale , ySScale);
+        double xSScale = ((double) options.outWidth) / ((double) reqWidth);
+        double ySScale = ((double) options.outHeight) / ((double) reqHeight);
+
+        double startScale =Math.max(xSScale , ySScale);
 
         options.inScaled = true;
-        options.inDensity = (int) ((float)targetDensity*2);
+        options.inDensity = (int) (targetDensity*startScale);
         options.inTargetDensity = targetDensity;
         // Decode bitmap with inSampleSize set
         options.inJustDecodeBounds = false;
@@ -92,13 +94,6 @@ public class Utils {
                     && (halfWidth / inSampleSize) > reqWidth) {
                 inSampleSize *= 2;
             }
-//            if (height > width) {
-//                options.outHeight = reqHeight;
-//                options.outWidth = reqHeight * height / width;
-//            } else {
-//                options.outWidth = reqWidth;
-//                options.outHeight = reqWidth * width / height;
-//            }
         }
 
         return inSampleSize;

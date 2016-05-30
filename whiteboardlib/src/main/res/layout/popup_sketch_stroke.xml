@@ -1,11 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/bg_popup"
     android:orientation="vertical"
     android:padding="16dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="画笔类型"
+        android:textSize="11sp" />
+
+    <RadioGroup
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <RadioButton
+            style="@style/stroke_color_btn"
+            android:button="@drawable/stroke_type_rbtn_draw" />
+
+        <RadioButton
+            style="@style/stroke_color_btn"
+            android:button="@drawable/stroke_type_rbtn_draw_bold" />
+
+        <RadioButton
+            style="@style/stroke_color_btn"
+            android:button="@drawable/stroke_type_rbtn_line" />
+
+        <RadioButton
+            style="@style/stroke_color_btn"
+            android:button="@drawable/stroke_type_rbtn_circle" />
+
+        <RadioButton
+            style="@style/stroke_color_btn"
+            android:button="@drawable/stroke_type_rbtn_rectangle" />
+
+        <RadioButton
+            style="@style/stroke_color_btn"
+            android:button="@drawable/stroke_type_rbtn_text" />
+    </RadioGroup>
 
     <TextView
         android:layout_width="match_parent"
@@ -18,6 +54,7 @@
         android:layout_marginTop="5dp"
         android:layout_marginBottom="5dp"
         android:layout_height="wrap_content"
+        android:gravity="center_vertical"
         android:orientation="horizontal" >
 
         <ImageView
@@ -34,7 +71,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="不透明度"
+        android:text="画笔颜色"
         android:textSize="11sp"/>
     <RadioGroup
         android:id="@+id/stroke_color_radio_group"
@@ -66,7 +103,7 @@
 
     </RadioGroup>
 
-    <TextView 
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="不透明度"

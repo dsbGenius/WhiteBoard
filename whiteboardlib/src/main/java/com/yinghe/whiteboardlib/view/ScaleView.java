@@ -231,6 +231,7 @@ public class ScaleView extends ImageView implements
     }
 
     public void setPhotoPath(String path) {
+
         File file = new File(path);
         if (file.exists()) {
             Bitmap bm=Utils.decodeSampledBitmapFromFile(getResources(), path, WhiteBoardFragment.bitmapSize, WhiteBoardFragment.bitmapSize);
@@ -243,6 +244,7 @@ public class ScaleView extends ImageView implements
     }
     private void drawPhotoBorder(Canvas canvas) {
         if (first) {//首次绘制调整边界
+            mScaleMatrix.reset();
             getGlobalVisibleRect(viewRect);
             photoRectSrc = new RectF(getDrawable().getBounds());//图片的边界
             setLimitScale();//放大倍数

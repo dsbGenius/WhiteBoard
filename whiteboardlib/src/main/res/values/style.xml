@@ -17,6 +17,12 @@
         <item name="android:layout_gravity">center</item>
         <item name="android:layout_weight">1</item>
     </style>
+    <style name="stroke_type_btn">
+        <item name="android:layout_width">10dp</item>
+        <item name="android:layout_height">10dp</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:layout_weight">0</item>
+    </style>
 
 
     <style name="mypopwindow_anim_style">

@@ -15,11 +15,13 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -76,8 +78,8 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
 
     int drawMode;//模式
 
-    int pupWindowsDPWidth = 250;//弹窗宽度，单位DP
-    int strokePupWindowsDPHeight = 210;//画笔弹窗高度，单位DP
+    int pupWindowsDPWidth = 300;//弹窗宽度，单位DP
+    int strokePupWindowsDPHeight = 275;//画笔弹窗高度，单位DP
     int eraserPupWindowsDPHeight = 90;//橡皮擦弹窗高度，单位DP
 
     PopupWindow strokePopupWindow, eraserPopupWindow;//画笔、橡皮擦参数设置弹窗实例
@@ -97,7 +99,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         activity = getActivity();//初始化上下文
-        bitmapSize = Math.min(activity.getWindowManager().getDefaultDisplay().getWidth(), activity.getWindowManager().getDefaultDisplay().getHeight()) / 2;
+        bitmapSize = Math.min(activity.getWindowManager().getDefaultDisplay().getWidth(), activity.getWindowManager().getDefaultDisplay().getHeight()) ;
 
     }
 
@@ -364,12 +366,21 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                     })
                     .show();
         } else if (i == R.id.sketch_photo) {
+//            scaleView.setPhotoUri(Environment.getExternalStorageDirectory().toString() + "/test.jpg");
+//            scaleView.setImageBitmap(Utils.decodeSampledBitmapFromResource(getResources(),R.drawable.test,500,500));
             MultiImageSelector selector = MultiImageSelector.create(getActivity());
             selector.showCamera(false);
             selector.count(9);
             selector.single();
             selector.origin(mSelectPath);
             selector.start(this, REQUEST_IMAGE);
+//            if (scaleView.isFocusable()) {
+//                sketchPhoto.setAlpha(0.1f);
+//                scaleView.setEnabled(false);
+//                scaleView.setFocusable(false);
+//            } else {
+
+//            }
         }
     }
 
@@ -385,7 +396,9 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                 }else if(mSelectPath==null||mSelectPath.size()==0){
                     Toast.makeText(getActivity(), "图片加载失败,请重试!", Toast.LENGTH_LONG).show();
                 }
-                //加载图片
+
+                Toast.makeText(getActivity(), path, Toast.LENGTH_LONG).show();
+                //j加载图片
                 scaleView.setPhotoPath(path);
                 sketchPhoto.setAlpha(1.0f);
                 scaleView.setEnabled(true);
