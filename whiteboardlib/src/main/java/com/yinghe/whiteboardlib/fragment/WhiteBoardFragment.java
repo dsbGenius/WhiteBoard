@@ -78,8 +78,8 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
 
     int drawMode;//模式
 
-    int pupWindowsDPWidth = 250;//弹窗宽度，单位DP
-    int strokePupWindowsDPHeight = 210;//画笔弹窗高度，单位DP
+    int pupWindowsDPWidth = 300;//弹窗宽度，单位DP
+    int strokePupWindowsDPHeight = 275;//画笔弹窗高度，单位DP
     int eraserPupWindowsDPHeight = 90;//橡皮擦弹窗高度，单位DP
 
     PopupWindow strokePopupWindow, eraserPopupWindow;//画笔、橡皮擦参数设置弹窗实例
