@@ -86,7 +86,7 @@ public class MultiImageSelectorFragment extends Fragment {
     // folder result data set
     private ArrayList<Folder> mResultFolder = new ArrayList<>();
 
-    private GridView mGridView;
+    private GridView mImageGridView;
     private Callback mCallback;
 
     private ImageGridAdapter mImageAdapter;
@@ -153,9 +153,9 @@ public class MultiImageSelectorFragment extends Fragment {
             }
         });
 
-        mGridView = (GridView) view.findViewById(R.id.grid);
-        mGridView.setAdapter(mImageAdapter);
-        mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        mImageGridView = (GridView) view.findViewById(R.id.grid);
+        mImageGridView.setAdapter(mImageAdapter);
+        mImageGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 if (mImageAdapter.isShowCamera()) {
@@ -171,7 +171,7 @@ public class MultiImageSelectorFragment extends Fragment {
                 }
             }
         });
-        mGridView.setOnScrollListener(new AbsListView.OnScrollListener() {
+        mImageGridView.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(AbsListView view, int scrollState) {
                 if (scrollState == SCROLL_STATE_FLING) {
@@ -195,7 +195,8 @@ public class MultiImageSelectorFragment extends Fragment {
      */
     private void createPopupFolderList() {
         Point point = ScreenUtils.getScreenSize(getActivity());
-        int width = point.x;
+//        int width = point.x;
+        int width =getActivity().getWindow().getDecorView().getWidth()-200;
         int height = (int) (point.y * (4.5f/8.0f));
         mFolderPopupWindow = new ListPopupWindow(getActivity());
         mFolderPopupWindow.setBackgroundDrawable(new ColorDrawable(Color.WHITE));
@@ -212,7 +213,7 @@ public class MultiImageSelectorFragment extends Fragment {
                 mFolderAdapter.setSelectIndex(i);
 
                 final int index = i;
-                final AdapterView v = adapterView;
+                final AdapterView TempAdapterView = adapterView;
 
                 new Handler().postDelayed(new Runnable() {
                     @Override
@@ -228,7 +229,7 @@ public class MultiImageSelectorFragment extends Fragment {
                                 mImageAdapter.setShowCamera(false);
                             }
                         } else {
-                            Folder folder = (Folder) v.getAdapter().getItem(index);
+                            Folder folder = (Folder) TempAdapterView.getAdapter().getItem(index);
                             if (null != folder) {
                                 mImageAdapter.setData(folder.images);
                                 mCategoryText.setText(folder.name);
@@ -239,7 +240,7 @@ public class MultiImageSelectorFragment extends Fragment {
                             mImageAdapter.setShowCamera(false);
                         }
 
-                        mGridView.smoothScrollToPosition(0);
+                        mImageGridView.smoothScrollToPosition(0);
                     }
                 }, 100);
 
@@ -389,8 +390,12 @@ public class MultiImageSelectorFragment extends Fragment {
         }
     }
 
+    /**
+     * 查询图片数据库的某个文件夹所有图片数据
+     * 以及所有包含图片的文件夹数据
+     */
     private LoaderManager.LoaderCallbacks<Cursor> mLoaderCallback = new LoaderManager.LoaderCallbacks<Cursor>() {
-
+        //要查询的数据
         private final String[] IMAGE_PROJECTION = {
                 MediaStore.Images.Media.DATA,
                 MediaStore.Images.Media.DISPLAY_NAME,

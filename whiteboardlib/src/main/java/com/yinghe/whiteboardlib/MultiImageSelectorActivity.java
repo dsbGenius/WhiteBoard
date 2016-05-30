@@ -9,8 +9,11 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 
 import java.io.File;
@@ -23,22 +26,32 @@ import java.util.ArrayList;
  * Updated by nereo on 2016/5/18.
  */
 public class MultiImageSelectorActivity extends AppCompatActivity
-        implements MultiImageSelectorFragment.Callback{
+        implements MultiImageSelectorFragment.Callback {
 
     // Single choice
     public static final int MODE_SINGLE = 0;
     // Multi choice
     public static final int MODE_MULTI = 1;
 
-    /** Max image size，int，{@link #DEFAULT_IMAGE_SIZE} by default */
+    /**
+     * Max image size，int，{@link #DEFAULT_IMAGE_SIZE} by default
+     */
     public static final String EXTRA_SELECT_COUNT = "max_select_count";
-    /** Select mode，{@link #MODE_MULTI} by default */
+    /**
+     * Select mode，{@link #MODE_MULTI} by default
+     */
     public static final String EXTRA_SELECT_MODE = "select_count_mode";
-    /** Whether show camera，true by default */
+    /**
+     * Whether show camera，true by default
+     */
     public static final String EXTRA_SHOW_CAMERA = "show_camera";
-    /** Result data set，ArrayList&lt;String&gt;*/
+    /**
+     * Result data set，ArrayList&lt;String&gt;
+     */
     public static final String EXTRA_RESULT = "select_result";
-    /** Original data set */
+    /**
+     * Original data set
+     */
     public static final String EXTRA_DEFAULT_SELECTED_LIST = "default_list";
     // Default image size
     private static final int DEFAULT_IMAGE_SIZE = 9;
@@ -50,7 +63,13 @@ public class MultiImageSelectorActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setTheme(R.style.NO_ACTIONBAR);
+        setTheme(R.style.dialogActivity);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        WindowManager.LayoutParams attr = getWindow().getAttributes();
+        if (attr != null) {
+            attr.gravity = Gravity.RIGHT;
+            getWindow().getDecorView().setPadding(0,0,200,0);
+        }
         setContentView(R.layout.activity_default);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -58,7 +77,7 @@ public class MultiImageSelectorActivity extends AppCompatActivity
         }
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        if(toolbar != null){
+        if (toolbar != null) {
             setSupportActionBar(toolbar);
         }
 
@@ -71,33 +90,33 @@ public class MultiImageSelectorActivity extends AppCompatActivity
         mDefaultCount = intent.getIntExtra(EXTRA_SELECT_COUNT, DEFAULT_IMAGE_SIZE);
         final int mode = intent.getIntExtra(EXTRA_SELECT_MODE, MODE_MULTI);
         final boolean isShow = intent.getBooleanExtra(EXTRA_SHOW_CAMERA, true);
-        if(mode == MODE_MULTI && intent.hasExtra(EXTRA_DEFAULT_SELECTED_LIST)) {
+        if (mode == MODE_MULTI && intent.hasExtra(EXTRA_DEFAULT_SELECTED_LIST)) {
             resultList = intent.getStringArrayListExtra(EXTRA_DEFAULT_SELECTED_LIST);
         }
 
         mSubmitButton = (Button) findViewById(R.id.commit);
-        if(mode == MODE_MULTI){
+        if (mode == MODE_MULTI) {
             updateDoneText(resultList);
             mSubmitButton.setVisibility(View.VISIBLE);
             mSubmitButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    if(resultList != null && resultList.size() >0){
+                    if (resultList != null && resultList.size() > 0) {
                         // Notify success
                         Intent data = new Intent();
                         data.putStringArrayListExtra(EXTRA_RESULT, resultList);
                         setResult(RESULT_OK, data);
-                    }else{
+                    } else {
                         setResult(RESULT_CANCELED);
                     }
                     finish();
                 }
             });
-        }else{
+        } else {
             mSubmitButton.setVisibility(View.GONE);
         }
 
-        if(savedInstanceState == null){
+        if (savedInstanceState == null) {
             Bundle bundle = new Bundle();
             bundle.putInt(MultiImageSelectorFragment.EXTRA_SELECT_COUNT, mDefaultCount);
             bundle.putInt(MultiImageSelectorFragment.EXTRA_SELECT_MODE, mode);
@@ -124,14 +143,15 @@ public class MultiImageSelectorActivity extends AppCompatActivity
 
     /**
      * Update done button by select image data
+     *
      * @param resultList selected image data
      */
-    private void updateDoneText(ArrayList<String> resultList){
+    private void updateDoneText(ArrayList<String> resultList) {
         int size = 0;
-        if(resultList == null || resultList.size()<=0){
+        if (resultList == null || resultList.size() <= 0) {
             mSubmitButton.setText(R.string.action_done);
             mSubmitButton.setEnabled(false);
-        }else{
+        } else {
             size = resultList.size();
             mSubmitButton.setEnabled(true);
         }
@@ -150,7 +170,7 @@ public class MultiImageSelectorActivity extends AppCompatActivity
 
     @Override
     public void onImageSelected(String path) {
-        if(!resultList.contains(path)) {
+        if (!resultList.contains(path)) {
             resultList.add(path);
         }
         updateDoneText(resultList);
@@ -158,7 +178,7 @@ public class MultiImageSelectorActivity extends AppCompatActivity
 
     @Override
     public void onImageUnselected(String path) {
-        if(resultList.contains(path)){
+        if (resultList.contains(path)) {
             resultList.remove(path);
         }
         updateDoneText(resultList);
@@ -166,7 +186,7 @@ public class MultiImageSelectorActivity extends AppCompatActivity
 
     @Override
     public void onCameraShot(File imageFile) {
-        if(imageFile != null) {
+        if (imageFile != null) {
             // notify system the image has change
             sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.fromFile(imageFile)));
 
