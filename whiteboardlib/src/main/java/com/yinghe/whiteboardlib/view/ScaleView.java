@@ -231,6 +231,7 @@ public class ScaleView extends ImageView implements
     }
 
     public void setPhotoPath(String path) {
+
         File file = new File(path);
         if (file.exists()) {
             Bitmap bm=Utils.decodeSampledBitmapFromFile(getResources(), path, WhiteBoardFragment.bitmapSize, WhiteBoardFragment.bitmapSize);

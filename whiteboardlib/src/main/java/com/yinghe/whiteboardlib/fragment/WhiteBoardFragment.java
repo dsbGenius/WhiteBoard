@@ -14,13 +14,11 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -362,7 +360,8 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                     .show();
         } else if (i == R.id.sketch_photo) {
 //            scaleView.setPhotoPath(Environment.getExternalStorageDirectory().toString() + "/test.jpg");
-            scaleView.setImageBitmap(Utils.decodeSampledBitmapFromResource(getResources(),R.drawable.test2,bitmapSize,bitmapSize));
+            Bitmap bm = Utils.decodeSampledBitmapFromResource(getResources(), R.drawable.test4, bitmapSize, bitmapSize);
+            scaleView.setImageBitmap(bm);
 //            if (scaleView.isFocusable()) {
 //                sketchPhoto.setAlpha(0.1f);
 //                scaleView.setEnabled(false);
