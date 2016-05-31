@@ -136,8 +136,6 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
             public void onCheckedChanged(RadioGroup group, int checkedId) {
                 if (checkedId == R.id.stroke_type_rbtn_draw) {
                     strokeType = SketchView.STROKE_TYPE_DRAW;
-                } else if (checkedId == R.id.stroke_type_rbtn_draw_bold) {
-                    strokeType = SketchView.STROKE_TYPE_DRAW_BOLD;
                 } else if (checkedId == R.id.stroke_type_rbtn_line) {
                     strokeType = SketchView.STROKE_TYPE_LINE;
                 } else if (checkedId == R.id.stroke_type_rbtn_circle) {

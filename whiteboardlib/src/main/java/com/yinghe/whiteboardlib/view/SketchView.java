@@ -24,6 +24,9 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.PointF;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Pair;
@@ -33,6 +36,7 @@ import android.view.View.OnTouchListener;
 import android.widget.ImageView;
 
 import java.util.ArrayList;
+import java.util.List;
 
 
 public class SketchView extends ImageView implements OnTouchListener {
@@ -47,11 +51,11 @@ public class SketchView extends ImageView implements OnTouchListener {
 
 
     public static final int STROKE_TYPE_DRAW= 0;
-    public static final int STROKE_TYPE_DRAW_BOLD= 1;
-    public static final int STROKE_TYPE_LINE= 2;
-    public static final int STROKE_TYPE_CIRCLE=3;
-    public static final int STROKE_TYPE_RECTANGLE= 4;
-    public static final int STROKE_TYPE_TEXT= 5;
+    public static final int STROKE_TYPE_LINE= 1;
+    public static final int STROKE_TYPE_CIRCLE=2;
+    public static final int STROKE_TYPE_RECTANGLE= 3;
+    public static final int STROKE_TYPE_TEXT= 4;
+    public static final int STROKE_TYPE_BITMAP= 5;
 
     private float strokeSize = DEFAULT_STROKE_SIZE;
     private int strokeRealColor = Color.BLACK;//画笔实际颜色
@@ -69,6 +73,8 @@ public class SketchView extends ImageView implements OnTouchListener {
 
     private ArrayList<Pair<Path, Paint>> paths = new ArrayList<>();
     private ArrayList<Pair<Path, Paint>> undonePaths = new ArrayList<>();
+    private List<StrokeRecord> strokeRecordList= new ArrayList<>();
+    private List<StrokeRecord> strokeRecordRedoList = new ArrayList<>();
     private Context mContext;
 
     private Bitmap bitmap;
@@ -76,10 +82,10 @@ public class SketchView extends ImageView implements OnTouchListener {
     private int strokeMode = STROKE;
 
     public void setStrokeType(int strokeType) {
-        StrokeType = strokeType;
+        this.strokeType = strokeType;
     }
 
-    private int StrokeType = STROKE_TYPE_DRAW;
+    private int strokeType = STROKE_TYPE_DRAW;
 
     private OnDrawChangedListener onDrawChangedListener;
 
@@ -222,27 +228,31 @@ public class SketchView extends ImageView implements OnTouchListener {
 
 
     private void touch_start(float x, float y) {
-        // Clearing undone list
-        undonePaths.clear();
-        if (strokeMode == ERASER) {
-            m_Paint.setColor(Color.WHITE);
-            m_Paint.setStrokeWidth(eraserSize);
-        } else {
-            m_Paint.setColor(strokeRealColor);
-            m_Paint.setStrokeWidth(strokeSize);
-        }
-
-        Paint newPaint = new Paint(m_Paint); // Clones the mPaint object
-
-        // Avoids that a sketch with just erasures is saved
-        if (!(paths.size() == 0 && strokeMode == ERASER && bitmap == null)) {
-            paths.add(new Pair<>(m_Path, newPaint));
-        }
-
-        m_Path.reset();
-        m_Path.moveTo(x, y);
         downX = x;
         downY = y;
+        // Clearing undone list
+        undonePaths.clear();
+        strokeRecordRedoList.clear();
+        if (strokeType == STROKE_TYPE_DRAW ) {
+            if (strokeMode == ERASER) {
+                m_Paint.setColor(Color.WHITE);
+                m_Paint.setStrokeWidth(eraserSize);
+            } else {
+                m_Paint.setColor(strokeRealColor);
+                m_Paint.setStrokeWidth(strokeSize);
+            }
+            Paint newPaint = new Paint(m_Paint); // Clones the mPaint object
+            // Avoids that a sketch with just erasures is saved
+            if (!(paths.size() == 0 && strokeMode == ERASER && bitmap == null)) {
+                paths.add(new Pair<>(m_Path, newPaint));
+            }
+            m_Path.reset();
+            m_Path.moveTo(x, y);
+        } else if (strokeType == STROKE_TYPE_LINE) {
+
+        }
+
+
     }
 
 
@@ -295,7 +305,7 @@ public class SketchView extends ImageView implements OnTouchListener {
         if (paths.size() >= 2) {
             undonePaths.add(paths.remove(paths.size() - 1));
             // If there is not only one path remained both touch and move paths are removed
-            undonePaths.add(paths.remove(paths.size() - 1));
+//            undonePaths.add(paths.remove(paths.size() - 1));
             invalidate();
         }
     }
@@ -307,7 +317,7 @@ public class SketchView extends ImageView implements OnTouchListener {
     public void redo() {
         if (undonePaths.size() > 0) {
             paths.add(undonePaths.remove(undonePaths.size() - 1));
-            paths.add(undonePaths.remove(undonePaths.size() - 1));
+//            paths.add(undonePaths.remove(undonePaths.size() - 1));
             invalidate();
         }
     }
@@ -379,4 +389,21 @@ public class SketchView extends ImageView implements OnTouchListener {
 
         public void onDrawChanged();
     }
+
+    public class StrokeRecord {
+        public int type;//记录类型
+        public Paint paint;//笔类
+        public Path path;//画笔路径数据
+        public PointF[] linePoints; //线数据
+        public RectF ovalRect; //圆数据
+        public Rect rectangleRect; //矩形数据
+        public String text;//文字
+        public PointF[] textLocation;//文字位置
+        public Bitmap bitmap;//图形
+
+        StrokeRecord(int type) {
+            this.type = type;
+        }
+    }
+
 }
