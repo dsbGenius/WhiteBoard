@@ -312,12 +312,12 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     @Override
     public void onDrawChanged() {
         // Undo
-        if (mSketchView.getPaths().size() > 0)
+        if (mSketchView.getRecordCount() > 0)
             setAlpha(undo, 1f);
         else
             setAlpha(undo, 0.4f);
         // Redo
-        if (mSketchView.getUndoneCount() > 0)
+        if (mSketchView.getRedoCount() > 0)
             setAlpha(redo, 1f);
         else
             setAlpha(redo, 0.4f);
@@ -360,7 +360,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         } else if (i == R.id.sketch_erase) {
             askForErase();
         } else if (i == R.id.sketch_save) {
-            if (mSketchView.getPaths().size() == 0) {
+            if (mSketchView.getRecordCount() == 0) {
                 Toast.makeText(getActivity(), "你还没有手绘", Toast.LENGTH_SHORT).show();
                 return;
             }
