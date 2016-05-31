@@ -45,17 +45,26 @@ public class SketchView extends ImageView implements OnTouchListener {
     public static final int DEFAULT_STROKE_ALPHA = 100;
     public static final int DEFAULT_ERASER_SIZE = 50;
 
+
+    public static final int STROKE_TYPE_DRAW= 1;
+    public static final int STROKE_TYPE_DRAW_BOLD= 2;
+    public static final int STROKE_TYPE_LINE= 3;
+    public static final int STROKE_TYPE_CIRCLE= 4;
+    public static final int STROKE_TYPE_RECTANGLE= 5;
+    public static final int STROKE_TYPE_TEXT= 6;
+
     private float strokeSize = DEFAULT_STROKE_SIZE;
     private int strokeRealColor = Color.BLACK;//画笔实际颜色
     private int strokeColor = Color.BLACK;//画笔颜色
     private int strokeAlpha = 255;//画笔透明度
     private float eraserSize = DEFAULT_ERASER_SIZE;
     private int background = Color.WHITE;
+//    private int background = Color.TRANSPARENT;
 
     //	private Canvas mCanvas;
     private Path m_Path;
     private Paint m_Paint;
-    private float mX, mY;
+    private float downX, downY;
     private int width, height;
 
     private ArrayList<Pair<Path, Paint>> paths = new ArrayList<>();
@@ -64,7 +73,8 @@ public class SketchView extends ImageView implements OnTouchListener {
 
     private Bitmap bitmap;
 
-    private int mode = STROKE;
+    private int drawMode = STROKE;
+    private int StrokeMode = STROKE_TYPE_DRAW;
 
     private OnDrawChangedListener onDrawChangedListener;
 
@@ -94,9 +104,9 @@ public class SketchView extends ImageView implements OnTouchListener {
     }
 
 
-    public void setMode(int mode) {
-        if (mode == STROKE || mode == ERASER)
-            this.mode = mode;
+    public void setDrawMode(int drawMode) {
+        if (drawMode == STROKE || drawMode == ERASER)
+            this.drawMode = drawMode;
     }
 
 
@@ -124,8 +134,8 @@ public class SketchView extends ImageView implements OnTouchListener {
     }
 
 
-    public int getMode() {
-        return this.mode;
+    public int getDrawMode() {
+        return this.drawMode;
     }
 
 
@@ -165,7 +175,6 @@ public class SketchView extends ImageView implements OnTouchListener {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         width = MeasureSpec.getSize(widthMeasureSpec);
         height = MeasureSpec.getSize(heightMeasureSpec);
-
         setMeasuredDimension(width, height);
     }
 
@@ -210,8 +219,7 @@ public class SketchView extends ImageView implements OnTouchListener {
     private void touch_start(float x, float y) {
         // Clearing undone list
         undonePaths.clear();
-
-        if (mode == ERASER) {
+        if (drawMode == ERASER) {
             m_Paint.setColor(Color.WHITE);
             m_Paint.setStrokeWidth(eraserSize);
         } else {
@@ -222,32 +230,31 @@ public class SketchView extends ImageView implements OnTouchListener {
         Paint newPaint = new Paint(m_Paint); // Clones the mPaint object
 
         // Avoids that a sketch with just erasures is saved
-        if (!(paths.size() == 0 && mode == ERASER && bitmap == null)) {
+        if (!(paths.size() == 0 && drawMode == ERASER && bitmap == null)) {
             paths.add(new Pair<>(m_Path, newPaint));
         }
 
         m_Path.reset();
         m_Path.moveTo(x, y);
-        mX = x;
-        mY = y;
+        downX = x;
+        downY = y;
     }
 
 
     private void touch_move(float x, float y) {
-        float dx = Math.abs(x - mX);
-        float dy = Math.abs(y - mY);
-        m_Path.quadTo(mX, mY, (x + mX) / 2, (y + mY) / 2);
-        mX = x;
-        mY = y;
+//        m_Path.rLineTo((x + downX) / 2, (y + downY) / 2);
+        m_Path.quadTo(downX, downY, (x + downX) / 2, (y + downY) / 2);
+        downX = x;
+        downY = y;
     }
 
 
     private void touch_up() {
-        m_Path.lineTo(mX, mY);
+        m_Path.lineTo(downX, downY);
         Paint newPaint = new Paint(m_Paint); // Clones the mPaint object
 
         // Avoids that a sketch with just erasures is saved
-        if (!(paths.size() == 0 && mode == ERASER && bitmap == null)) {
+        if (!(paths.size() == 0 && drawMode == ERASER && bitmap == null)) {
             paths.add(new Pair<>(m_Path, newPaint));
         }
 

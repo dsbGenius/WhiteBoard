@@ -12,6 +12,7 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
+import android.media.ThumbnailUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -58,6 +59,7 @@ public class ScaleView extends ImageView implements
 
 
     RectF photoRectSrc = null;
+    Bitmap photoSampleBM = null;
     Bitmap mirrorMarkBM = BitmapFactory.decodeResource(getResources(), R.drawable.mark_mirror);
     Bitmap deleteMarkBM = BitmapFactory.decodeResource(getResources(), R.drawable.mark_delete);
     Bitmap rotateMarkBM = BitmapFactory.decodeResource(getResources(), R.drawable.mark_rotate);
@@ -234,9 +236,9 @@ public class ScaleView extends ImageView implements
 
         File file = new File(path);
         if (file.exists()) {
-            Bitmap bm=Utils.decodeSampledBitmapFromFile(getResources(), path, WhiteBoardFragment.bitmapSize, WhiteBoardFragment.bitmapSize);
-            if (bm != null) {
-                setImageBitmap(bm);
+            photoSampleBM = Utils.decodeSampleBitMapFromFile(context, path, WhiteBoardFragment.bitmapSize, WhiteBoardFragment.bitmapSize);
+            if (photoSampleBM != null) {
+                setImageBitmap(photoSampleBM);
             }
         }
         first = true;
@@ -516,4 +518,7 @@ public class ScaleView extends ImageView implements
         return matrixValues[Matrix.MTRANS_Y];
     }
 
+    public Bitmap getPhotoSampleBM() {
+        return photoSampleBM;
+    }
 }

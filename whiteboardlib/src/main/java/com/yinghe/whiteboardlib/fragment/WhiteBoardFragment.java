@@ -15,13 +15,11 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -317,11 +315,11 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
             sketchPhoto.setAlpha(0.4f);
             scaleView.setEnabled(false);
             scaleView.setFocusable(false);
-            if (mSketchView.getMode() == SketchView.STROKE) {
+            if (mSketchView.getDrawMode() == SketchView.STROKE) {
                 showPopup(v, SketchView.STROKE);
 
             } else {
-                mSketchView.setMode(SketchView.STROKE);
+                mSketchView.setDrawMode(SketchView.STROKE);
                 setAlpha(eraser, 0.4f);
                 setAlpha(stroke, 1f);
             }
@@ -329,10 +327,10 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
             sketchPhoto.setAlpha(0.4f);
             scaleView.setEnabled(false);
             scaleView.setFocusable(false);
-            if (mSketchView.getMode() == SketchView.ERASER) {
+            if (mSketchView.getDrawMode() == SketchView.ERASER) {
                 showPopup(v, SketchView.ERASER);
             } else {
-                mSketchView.setMode(SketchView.ERASER);
+                mSketchView.setDrawMode(SketchView.ERASER);
                 setAlpha(stroke, 0.4f);
                 setAlpha(eraser, 1f);
             }
@@ -433,14 +431,17 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         bitmap1 = mSketchView.getBitmap();
         int bgWidth = bitmap1.getWidth();
         int bgHeight = bitmap1.getHeight();
-        Bitmap bitmap2 = ((BitmapDrawable) scaleView.getDrawable()).getBitmap();
         final Bitmap newBM = Bitmap.createBitmap(bgWidth, bgHeight, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(newBM);
         canvas.setDrawFilter(new PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG));//抗锯齿
         canvas.drawBitmap(bitmap1, 0, 0, null);
 
         Matrix matrix = scaleView.getImageMatrix();
-        canvas.drawBitmap(bitmap2, matrix, null);
+        Bitmap bitmap2 = scaleView.getPhotoSampleBM();
+        if (bitmap2 != null) {
+            canvas.drawBitmap(bitmap2, matrix, null);
+        }
+
         canvas.save(Canvas.ALL_SAVE_FLAG);
         canvas.restore();
 
