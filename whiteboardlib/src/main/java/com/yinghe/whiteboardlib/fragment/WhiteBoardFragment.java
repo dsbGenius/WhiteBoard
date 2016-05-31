@@ -15,13 +15,11 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -397,8 +395,8 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                     Toast.makeText(getActivity(), "图片加载失败,请重试!", Toast.LENGTH_LONG).show();
                 }
 
-                Toast.makeText(getActivity(), path, Toast.LENGTH_LONG).show();
-                //j加载图片
+//                Toast.makeText(getActivity(), path, Toast.LENGTH_LONG).show();
+                //加载图片
                 scaleView.setPhotoPath(path);
                 sketchPhoto.setAlpha(1.0f);
                 scaleView.setEnabled(true);

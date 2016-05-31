@@ -35,6 +35,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
+import com.yinghe.whiteboardlib.Utils.DensityUtil;
 import com.yinghe.whiteboardlib.Utils.FileUtils;
 import com.yinghe.whiteboardlib.Utils.ScreenUtils;
 import com.yinghe.whiteboardlib.adapter.FolderAdapter;
@@ -49,11 +50,7 @@ import java.util.List;
 
 
 
-/**
- * Multi image selector Fragment
- * Created by Nereo on 2015/4/7.
- * Updated by nereo on 2016/5/18.
- */
+
 public class MultiImageSelectorFragment extends Fragment {
 
     public static final String TAG = "MultiImageSelectorFragment";
@@ -196,7 +193,7 @@ public class MultiImageSelectorFragment extends Fragment {
     private void createPopupFolderList() {
         Point point = ScreenUtils.getScreenSize(getActivity());
 //        int width = point.x;
-        int width =getActivity().getWindow().getDecorView().getWidth()-200;
+        int width =getActivity().getWindow().getDecorView().getWidth()- DensityUtil.dip2px(getActivity(),60);
         int height = (int) (point.y * (4.5f/8.0f));
         mFolderPopupWindow = new ListPopupWindow(getActivity());
         mFolderPopupWindow.setBackgroundDrawable(new ColorDrawable(Color.WHITE));
