@@ -9,22 +9,23 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+
+import com.yinghe.whiteboardlib.Utils.DensityUtil;
 
 import java.io.File;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 
-/**
- * Multi image selector
- * Created by Nereo on 2015/4/7.
- * Updated by nereo on 2016/1/19.
- * Updated by nereo on 2016/5/18.
- */
+
 public class MultiImageSelectorActivity extends AppCompatActivity
         implements MultiImageSelectorFragment.Callback {
 
@@ -59,6 +60,31 @@ public class MultiImageSelectorActivity extends AppCompatActivity
     private ArrayList<String> resultList = new ArrayList<>();
     private Button mSubmitButton;
     private int mDefaultCount = DEFAULT_IMAGE_SIZE;
+    private int statusBarHeight;//状态高度
+    private LinearLayout layout;
+
+
+    /**
+     * 获取状态栏高度
+     */
+    public int getStatusBarHeight() {
+        Class<?> c = null;
+        Object obj = null;
+        Field field = null;
+        int x = 0, sbar = 0;
+        try {
+            c = Class.forName("com.android.internal.R$dimen");
+            obj = c.newInstance();
+            field = c.getField("status_bar_height");
+            x = Integer.parseInt(field.get(obj).toString());
+            sbar = getResources().getDimensionPixelSize(x);
+        } catch(Exception e1) {
+            Log.e("getStatusBarHight()","get status bar height fail");
+            e1.printStackTrace();
+        }
+        statusBarHeight = sbar;
+        return statusBarHeight;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,10 +94,16 @@ public class MultiImageSelectorActivity extends AppCompatActivity
         WindowManager.LayoutParams attr = getWindow().getAttributes();
         if (attr != null) {
             attr.gravity = Gravity.RIGHT;
-            getWindow().getDecorView().setPadding(0,0,200,0);
+            float paddingRightValue = DensityUtil.dip2px(this, 60);
+            getWindow().getDecorView().setPadding(0,0, (int) paddingRightValue,0);
         }
-        setContentView(R.layout.activity_default);
-
+        setContentView(R.layout.activity_image_selector);
+        //设置顶部marin值
+        getStatusBarHeight();
+        layout = (LinearLayout) findViewById(R.id.image_selector_layout);
+        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(layout.getLayoutParams());
+        lp.setMargins(0, statusBarHeight, 0, 0);
+        layout.setLayoutParams(lp);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             getWindow().setStatusBarColor(Color.BLACK);
         }

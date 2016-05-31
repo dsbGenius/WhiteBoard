@@ -13,7 +13,7 @@
         android:verticalSpacing="@dimen/space_size"
         android:paddingBottom="?android:attr/actionBarSize"
         android:clipToPadding="false"
-        android:numColumns="5"/>
+        android:numColumns="3"/>
 
     <RelativeLayout
         android:clickable="true"
