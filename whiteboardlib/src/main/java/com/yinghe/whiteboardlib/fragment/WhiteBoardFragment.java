@@ -67,14 +67,15 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     ImageView sketchSave;//保存
     ImageView sketchPhoto;//加载图片
 
-    RadioGroup radioGroup;
+    RadioGroup strokeTypeRG,strokeColorRG;
 
     Button btShowBg;
     Button btShowBgGray;
 
     Activity activity;//上下文
 
-    int drawMode;//模式
+    int strokeMode;//模式
+    int strokeType;//模式
 
     int pupWindowsDPWidth = 300;//弹窗宽度，单位DP
     int strokePupWindowsDPHeight = 275;//画笔弹窗高度，单位DP
@@ -98,7 +99,6 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         super.onCreate(savedInstanceState);
         activity = getActivity();//初始化上下文
         bitmapSize = Math.min(activity.getWindowManager().getDefaultDisplay().getWidth(), activity.getWindowManager().getDefaultDisplay().getHeight()) ;
-
     }
 
     @Override
@@ -113,7 +113,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
 
     private void initDrawParams() {
         //默认为画笔模式
-        drawMode = SketchView.STROKE;
+        strokeMode = SketchView.STROKE;
 
         //画笔宽度缩放基准参数
         Drawable circleDrawable = getResources().getDrawable(R.drawable.circle);
@@ -131,8 +131,26 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         strokePopupWindow.setFocusable(true);
         strokePopupWindow.setBackgroundDrawable(new BitmapDrawable());//设置空白背景
         strokePopupWindow.setAnimationStyle(R.style.mypopwindow_anim_style);//动画
-        //画笔宽度拖动条
-        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+        strokeTypeRG.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                if (checkedId == R.id.stroke_type_rbtn_draw) {
+                    strokeType = SketchView.STROKE_TYPE_DRAW;
+                } else if (checkedId == R.id.stroke_type_rbtn_draw_bold) {
+                    strokeType = SketchView.STROKE_TYPE_DRAW_BOLD;
+                } else if (checkedId == R.id.stroke_type_rbtn_line) {
+                    strokeType = SketchView.STROKE_TYPE_LINE;
+                } else if (checkedId == R.id.stroke_type_rbtn_circle) {
+                    strokeType = SketchView.STROKE_TYPE_CIRCLE;
+                } else if (checkedId == R.id.stroke_type_rbtn_rectangle) {
+                    strokeType = SketchView.STROKE_TYPE_RECTANGLE;
+                }else if (checkedId == R.id.stroke_type_rbtn_text) {
+                    strokeType = SketchView.STROKE_TYPE_TEXT;
+                }
+                mSketchView.setStrokeType(strokeType);
+            }
+        });
+        strokeColorRG.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
                 int color = COLOR_BLACK;
@@ -150,6 +168,8 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                 mSketchView.setStrokeColor(color);
             }
         });
+//        strokeTypeRG.check(R.id.stroke_type_rbtn_draw);
+        //画笔宽度拖动条
         strokeSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
@@ -168,7 +188,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
             }
         });
         strokeSeekBar.setProgress(SketchView.DEFAULT_STROKE_SIZE);
-        radioGroup.check(R.id.stroke_color_black);
+//        strokeColorRG.check(R.id.stroke_color_black);
 
         //画笔不透明度拖动条
         strokeAlphaSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -265,7 +285,8 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         strokeSeekBar = (SeekBar) (popupStrokeLayout.findViewById(R.id.stroke_seekbar));
         strokeAlphaSeekBar = (SeekBar) (popupStrokeLayout.findViewById(R.id.stroke_alpha_seekbar));
         //画笔颜色
-        radioGroup = (RadioGroup) popupStrokeLayout.findViewById(R.id.stroke_color_radio_group);
+        strokeTypeRG = (RadioGroup) popupStrokeLayout.findViewById(R.id.stroke_color_radio_group);
+        strokeColorRG = (RadioGroup) popupStrokeLayout.findViewById(R.id.stroke_color_radio_group);
         // popupWindow布局
         LayoutInflater inflater2 = (LayoutInflater) getActivity().getSystemService(Activity
                 .LAYOUT_INFLATER_SERVICE);
@@ -315,11 +336,11 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
             sketchPhoto.setAlpha(0.4f);
             scaleView.setEnabled(false);
             scaleView.setFocusable(false);
-            if (mSketchView.getDrawMode() == SketchView.STROKE) {
+            if (mSketchView.getStrokeMode() == SketchView.STROKE) {
                 showPopup(v, SketchView.STROKE);
 
             } else {
-                mSketchView.setDrawMode(SketchView.STROKE);
+                mSketchView.setStrokeMode(SketchView.STROKE);
                 setAlpha(eraser, 0.4f);
                 setAlpha(stroke, 1f);
             }
@@ -327,10 +348,10 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
             sketchPhoto.setAlpha(0.4f);
             scaleView.setEnabled(false);
             scaleView.setFocusable(false);
-            if (mSketchView.getDrawMode() == SketchView.ERASER) {
+            if (mSketchView.getStrokeMode() == SketchView.ERASER) {
                 showPopup(v, SketchView.ERASER);
             } else {
-                mSketchView.setDrawMode(SketchView.ERASER);
+                mSketchView.setStrokeMode(SketchView.ERASER);
                 setAlpha(stroke, 0.4f);
                 setAlpha(eraser, 1f);
             }
@@ -429,8 +450,8 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                 .setMessage("保存中...")
                 .show();
         bitmap1 = mSketchView.getBitmap();
-        int bgWidth = bitmap1.getWidth();
-        int bgHeight = bitmap1.getHeight();
+        int bgWidth = mSketchView.getWidth();
+        int bgHeight =mSketchView.getHeight();
         final Bitmap newBM = Bitmap.createBitmap(bgWidth, bgHeight, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(newBM);
         canvas.setDrawFilter(new PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG));//抗锯齿

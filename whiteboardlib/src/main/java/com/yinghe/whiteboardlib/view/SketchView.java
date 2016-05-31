@@ -46,12 +46,12 @@ public class SketchView extends ImageView implements OnTouchListener {
     public static final int DEFAULT_ERASER_SIZE = 50;
 
 
-    public static final int STROKE_TYPE_DRAW= 1;
-    public static final int STROKE_TYPE_DRAW_BOLD= 2;
-    public static final int STROKE_TYPE_LINE= 3;
-    public static final int STROKE_TYPE_CIRCLE= 4;
-    public static final int STROKE_TYPE_RECTANGLE= 5;
-    public static final int STROKE_TYPE_TEXT= 6;
+    public static final int STROKE_TYPE_DRAW= 0;
+    public static final int STROKE_TYPE_DRAW_BOLD= 1;
+    public static final int STROKE_TYPE_LINE= 2;
+    public static final int STROKE_TYPE_CIRCLE=3;
+    public static final int STROKE_TYPE_RECTANGLE= 4;
+    public static final int STROKE_TYPE_TEXT= 5;
 
     private float strokeSize = DEFAULT_STROKE_SIZE;
     private int strokeRealColor = Color.BLACK;//画笔实际颜色
@@ -73,8 +73,13 @@ public class SketchView extends ImageView implements OnTouchListener {
 
     private Bitmap bitmap;
 
-    private int drawMode = STROKE;
-    private int StrokeMode = STROKE_TYPE_DRAW;
+    private int strokeMode = STROKE;
+
+    public void setStrokeType(int strokeType) {
+        StrokeType = strokeType;
+    }
+
+    private int StrokeType = STROKE_TYPE_DRAW;
 
     private OnDrawChangedListener onDrawChangedListener;
 
@@ -104,9 +109,9 @@ public class SketchView extends ImageView implements OnTouchListener {
     }
 
 
-    public void setDrawMode(int drawMode) {
-        if (drawMode == STROKE || drawMode == ERASER)
-            this.drawMode = drawMode;
+    public void setStrokeMode(int strokeMode) {
+        if (strokeMode == STROKE || strokeMode == ERASER)
+            this.strokeMode = strokeMode;
     }
 
 
@@ -134,8 +139,8 @@ public class SketchView extends ImageView implements OnTouchListener {
     }
 
 
-    public int getDrawMode() {
-        return this.drawMode;
+    public int getStrokeMode() {
+        return this.strokeMode;
     }
 
 
@@ -154,6 +159,7 @@ public class SketchView extends ImageView implements OnTouchListener {
         }
         this.bitmap = bitmap;
 //		this.bitmap = getScaledBitmap(mActivity, bitmap);
+        invalidate();
 //		mCanvas = new Canvas(bitmap);
     }
 
@@ -183,7 +189,6 @@ public class SketchView extends ImageView implements OnTouchListener {
     public boolean onTouch(View arg0, MotionEvent event) {
         float x = event.getX();
         float y = event.getY();
-
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 touch_start(x, y);
@@ -219,7 +224,7 @@ public class SketchView extends ImageView implements OnTouchListener {
     private void touch_start(float x, float y) {
         // Clearing undone list
         undonePaths.clear();
-        if (drawMode == ERASER) {
+        if (strokeMode == ERASER) {
             m_Paint.setColor(Color.WHITE);
             m_Paint.setStrokeWidth(eraserSize);
         } else {
@@ -230,7 +235,7 @@ public class SketchView extends ImageView implements OnTouchListener {
         Paint newPaint = new Paint(m_Paint); // Clones the mPaint object
 
         // Avoids that a sketch with just erasures is saved
-        if (!(paths.size() == 0 && drawMode == ERASER && bitmap == null)) {
+        if (!(paths.size() == 0 && strokeMode == ERASER && bitmap == null)) {
             paths.add(new Pair<>(m_Path, newPaint));
         }
 
@@ -254,7 +259,7 @@ public class SketchView extends ImageView implements OnTouchListener {
         Paint newPaint = new Paint(m_Paint); // Clones the mPaint object
 
         // Avoids that a sketch with just erasures is saved
-        if (!(paths.size() == 0 && drawMode == ERASER && bitmap == null)) {
+        if (!(paths.size() == 0 && strokeMode == ERASER && bitmap == null)) {
             paths.add(new Pair<>(m_Path, newPaint));
         }
 

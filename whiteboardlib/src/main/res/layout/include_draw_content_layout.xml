@@ -22,7 +22,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="center"
-            android:background="#fff" />
+            android:background="@drawable/stroke_color_rbtn_green" />
 
 
         <com.yinghe.whiteboardlib.view.ScaleView
