@@ -16,6 +16,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -94,7 +95,6 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     private ImageView strokeImageView, strokeAlphaImage, eraserImageView;//画笔宽度，画笔不透明度，橡皮擦宽度IV
     private int size;
     private AlertDialog dialog;
-    private Bitmap bitmap1;
     private ArrayList<String> mSelectPath;
     public static int sketchViewHight;
     public static int sketchViewWidth;
@@ -495,22 +495,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                 .setTitle("保存手绘")
                 .setMessage("保存中...")
                 .show();
-        bitmap1 = mSketchView.getBitmap();
-        int bgWidth = mSketchView.getWidth();
-        int bgHeight =mSketchView.getHeight();
-        final Bitmap newBM = Bitmap.createBitmap(bgWidth, bgHeight, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(newBM);
-        canvas.setDrawFilter(new PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG));//抗锯齿
-        canvas.drawBitmap(bitmap1, 0, 0, null);
-
-//        Matrix matrix = scaleView.getImageMatrix();
-//        Bitmap bitmap2 = scaleView.getPhotoSampleBM();
-//        if (bitmap2 != null) {
-//            canvas.drawBitmap(bitmap2, matrix, null);
-//        }
-
-        canvas.save(Canvas.ALL_SAVE_FLAG);
-        canvas.restore();
+        final Bitmap newBM = getResultBitmap();
 
         new AsyncTask() {
 
@@ -558,6 +543,20 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
             }
         }.execute("");
 
+    }
+
+    @NonNull
+    public Bitmap getResultBitmap() {
+        Bitmap bitmap1 = mSketchView.getBitmap();
+        int bgWidth = mSketchView.getWidth();
+        int bgHeight =mSketchView.getHeight();
+        final Bitmap newBM = Bitmap.createBitmap(bgWidth, bgHeight, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(newBM);
+        canvas.setDrawFilter(new PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG));//抗锯齿
+        canvas.drawBitmap(bitmap1, 0, 0, null);
+        canvas.save(Canvas.ALL_SAVE_FLAG);
+        canvas.restore();
+        return newBM;
     }
 
     private void askForErase() {
