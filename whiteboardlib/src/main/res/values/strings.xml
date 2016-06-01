@@ -18,4 +18,5 @@
     <string name="permission_dialog_cancel">CANCEL</string>
     <string name="permission_rationale">Storage read permission is needed to pick files.</string>
     <string name="permission_rationale_write_storage">Storage write permission is needed to save the image.</string>
+    <string name="select_image">选择图片</string>
 </resources>
