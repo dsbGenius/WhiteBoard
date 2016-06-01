@@ -32,7 +32,7 @@ import android.widget.Toast;
 
 import com.yinghe.whiteboardlib.MultiImageSelector;
 import com.yinghe.whiteboardlib.R;
-import com.yinghe.whiteboardlib.Utils.Utils;
+import com.yinghe.whiteboardlib.Utils.BitmapUtils;
 import com.yinghe.whiteboardlib.view.ScaleView;
 import com.yinghe.whiteboardlib.view.SketchView;
 
@@ -125,9 +125,9 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         //画笔弹窗
         strokePopupWindow = new PopupWindow(activity);
         strokePopupWindow.setContentView(popupStrokeLayout);//设置主体布局
-        strokePopupWindow.setWidth(Utils.dip2px(getActivity(), pupWindowsDPWidth));//宽度
+        strokePopupWindow.setWidth(BitmapUtils.dip2px(getActivity(), pupWindowsDPWidth));//宽度
 //        strokePopupWindow.setHeight(WindowManager.LayoutParams.WRAP_CONTENT);//高度自适应
-        strokePopupWindow.setHeight(Utils.dip2px(getActivity(), strokePupWindowsDPHeight));//高度
+        strokePopupWindow.setHeight(BitmapUtils.dip2px(getActivity(), strokePupWindowsDPHeight));//高度
         strokePopupWindow.setFocusable(true);
         strokePopupWindow.setBackgroundDrawable(new BitmapDrawable());//设置空白背景
         strokePopupWindow.setAnimationStyle(R.style.mypopwindow_anim_style);//动画
@@ -213,9 +213,9 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         //橡皮擦弹窗
         eraserPopupWindow = new PopupWindow(activity);
         eraserPopupWindow.setContentView(popupEraserLayout);//设置主体布局
-        eraserPopupWindow.setWidth(Utils.dip2px(getActivity(), pupWindowsDPWidth));//宽度200dp
+        eraserPopupWindow.setWidth(BitmapUtils.dip2px(getActivity(), pupWindowsDPWidth));//宽度200dp
 //        eraserPopupWindow.setHeight(WindowManager.LayoutParams.WRAP_CONTENT);//高度自适应
-        eraserPopupWindow.setHeight(Utils.dip2px(getActivity(), eraserPupWindowsDPHeight));//高度自适应
+        eraserPopupWindow.setHeight(BitmapUtils.dip2px(getActivity(), eraserPupWindowsDPHeight));//高度自适应
         eraserPopupWindow.setFocusable(true);
         eraserPopupWindow.setBackgroundDrawable(new BitmapDrawable());//设置空白背景
         eraserPopupWindow.setAnimationStyle(R.style.mypopwindow_anim_style);//动画
@@ -384,7 +384,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                     .show();
         } else if (i == R.id.sketch_photo) {
 //            scaleView.setPhotoUri(Environment.getExternalStorageDirectory().toString() + "/test.jpg");
-//            scaleView.setImageBitmap(Utils.decodeSampledBitmapFromResource(getResources(),R.drawable.test,500,500));
+//            scaleView.setImageBitmap(BitmapUtils.decodeSampledBitmapFromResource(getResources(),R.drawable.test,500,500));
             MultiImageSelector selector = MultiImageSelector.create(getActivity());
             selector.showCamera(false);
             selector.count(9);
@@ -413,8 +413,6 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                 }else if(mSelectPath==null||mSelectPath.size()==0){
                     Toast.makeText(getActivity(), "图片加载失败,请重试!", Toast.LENGTH_LONG).show();
                 }
-
-//                Toast.makeText(getActivity(), path, Toast.LENGTH_LONG).show();
                 //加载图片
                 scaleView.setPhotoPath(path);
                 sketchPhoto.setAlpha(1.0f);
@@ -425,19 +423,19 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     }
 
     private void showPopup(View anchor, int drawMode) {
-        if (Utils.isLandScreen(activity)) {
+        if (BitmapUtils.isLandScreen(activity)) {
 //        if (true) {
             if (drawMode == SketchView.STROKE) {
-                strokePopupWindow.showAsDropDown(anchor, Utils.dip2px(activity, -pupWindowsDPWidth), -anchor.getHeight());
+                strokePopupWindow.showAsDropDown(anchor, BitmapUtils.dip2px(activity, -pupWindowsDPWidth), -anchor.getHeight());
             } else {
-                eraserPopupWindow.showAsDropDown(anchor, Utils.dip2px(activity, -pupWindowsDPWidth), -anchor.getHeight());
+                eraserPopupWindow.showAsDropDown(anchor, BitmapUtils.dip2px(activity, -pupWindowsDPWidth), -anchor.getHeight());
             }
         } else {
             if (drawMode == SketchView.STROKE) {
-                strokePopupWindow.showAsDropDown(anchor, 0, Utils.dip2px(activity, -strokePupWindowsDPHeight) - anchor.getHeight());
+                strokePopupWindow.showAsDropDown(anchor, 0, BitmapUtils.dip2px(activity, -strokePupWindowsDPHeight) - anchor.getHeight());
 //                strokePopupWindow.showAsDropDown(anchor,0,);
             } else {
-                eraserPopupWindow.showAsDropDown(anchor, 0, Utils.dip2px(activity, -eraserPupWindowsDPHeight) - anchor.getHeight());
+                eraserPopupWindow.showAsDropDown(anchor, 0, BitmapUtils.dip2px(activity, -eraserPupWindowsDPHeight) - anchor.getHeight());
             }
         }
     }
