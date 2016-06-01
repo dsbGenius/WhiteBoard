@@ -105,6 +105,7 @@ public class MultiImageSelectorActivity extends AppCompatActivity
         }
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setTitle("选择图片");
         if (toolbar != null) {
             setSupportActionBar(toolbar);
         }
