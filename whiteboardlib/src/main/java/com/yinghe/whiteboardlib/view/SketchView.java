@@ -34,6 +34,8 @@ import android.view.View;
 import android.view.View.OnTouchListener;
 import android.widget.ImageView;
 
+import com.yinghe.whiteboardlib.bean.StrokeRecord;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,12 +51,7 @@ public class SketchView extends ImageView implements OnTouchListener {
     public static final int DEFAULT_ERASER_SIZE = 50;
 
 
-    public static final int STROKE_TYPE_DRAW= 0;
-    public static final int STROKE_TYPE_LINE= 1;
-    public static final int STROKE_TYPE_CIRCLE=2;
-    public static final int STROKE_TYPE_RECTANGLE= 3;
-    public static final int STROKE_TYPE_TEXT= 4;
-    public static final int STROKE_TYPE_BITMAP= 5;
+
 
     private float strokeSize = DEFAULT_STROKE_SIZE;
     private int strokeRealColor = Color.BLACK;//画笔实际颜色
@@ -82,7 +79,7 @@ public class SketchView extends ImageView implements OnTouchListener {
         this.strokeType = strokeType;
     }
 
-    private int strokeType = STROKE_TYPE_DRAW;
+    private int strokeType = StrokeRecord.STROKE_TYPE_DRAW;
 
     private OnDrawChangedListener onDrawChangedListener;
 
@@ -190,7 +187,6 @@ public class SketchView extends ImageView implements OnTouchListener {
 
     @Override
     public boolean onTouch(View arg0, MotionEvent event) {
-        onDrawChangedListener.onDrawChanged();
         float x = event.getX();
         float y = event.getY();
         switch (event.getAction()) {
@@ -216,21 +212,32 @@ public class SketchView extends ImageView implements OnTouchListener {
         if (bitmap != null) {
             canvas.drawBitmap(bitmap, 0, 0, null);
         }
+        drawRecord(canvas);
+        onDrawChangedListener.onDrawChanged();
+    }
 
+    private void drawRecord(Canvas canvas) {
         for (StrokeRecord record : recordList) {
-            if (record.type == STROKE_TYPE_DRAW) {
+            int type = record.type;
+            if (type == StrokeRecord.STROKE_TYPE_DRAW) {
                 canvas.drawPath(record.path, record.paint);
+            } else if (type == StrokeRecord.STROKE_TYPE_BITMAP) {
+                canvas.drawBitmap(record.bitmap,record.matrix,null);
             }
         }
     }
 
+    public void addRecord(StrokeRecord record) {
+        recordList.add(record);
+        invalidate();
+    }
 
     private void touch_start(float x, float y) {
         downX = x;
         downY = y;
         // Clearing undone list
         redoList.clear();
-        if (strokeType == STROKE_TYPE_DRAW ) {
+        if (strokeType ==StrokeRecord.STROKE_TYPE_DRAW ) {
             if (strokeMode == ERASER) {
                 m_Paint.setColor(Color.WHITE);
                 m_Paint.setStrokeWidth(eraserSize);
@@ -241,14 +248,14 @@ public class SketchView extends ImageView implements OnTouchListener {
             Paint newPaint = new Paint(m_Paint); // Clones the mPaint object
             m_Path.reset();
             m_Path.moveTo(x, y);
-            StrokeRecord record = new StrokeRecord(STROKE_TYPE_DRAW);
-            if (strokeType == STROKE_TYPE_DRAW) {
+            StrokeRecord record = new StrokeRecord(StrokeRecord.STROKE_TYPE_DRAW);
+            if (strokeType == StrokeRecord.STROKE_TYPE_DRAW) {
                 m_Path.lineTo(downX, downY);
                 record.paint = new Paint(m_Paint); // Clones the mPaint object
                 record.path = m_Path;
             }
             recordList.add(record);
-        } else if (strokeType == STROKE_TYPE_LINE) {
+        } else if (strokeType == StrokeRecord.STROKE_TYPE_LINE) {
 
         }
 
@@ -295,6 +302,7 @@ public class SketchView extends ImageView implements OnTouchListener {
             bitmap.eraseColor(background);
         }
         Canvas canvas = new Canvas(bitmap);
+        drawRecord(canvas);
 //        for (Pair<Path, Paint> p : paths) {
 //            canvas.drawPath(p.first, p.second);
 //        }
@@ -379,20 +387,6 @@ public class SketchView extends ImageView implements OnTouchListener {
         public void onDrawChanged();
     }
 
-    public class StrokeRecord {
-        public int type;//记录类型
-        public Paint paint;//笔类
-        public Path path;//画笔路径数据
-        public PointF[] linePoints; //线数据
-        public RectF ovalRect; //圆数据
-        public Rect rectangleRect; //矩形数据
-        public String text;//文字
-        public PointF[] textLocation;//文字位置
-        public Bitmap bitmap;//图形
 
-        StrokeRecord(int type) {
-            this.type = type;
-        }
-    }
 
 }

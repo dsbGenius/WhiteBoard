@@ -35,6 +35,7 @@ import android.widget.Toast;
 import com.yinghe.whiteboardlib.MultiImageSelector;
 import com.yinghe.whiteboardlib.R;
 import com.yinghe.whiteboardlib.Utils.BitmapUtils;
+import com.yinghe.whiteboardlib.bean.StrokeRecord;
 import com.yinghe.whiteboardlib.view.ScaleView;
 import com.yinghe.whiteboardlib.view.SketchView;
 
@@ -143,15 +144,15 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
                 if (checkedId == R.id.stroke_type_rbtn_draw) {
-                    strokeType = SketchView.STROKE_TYPE_DRAW;
+                    strokeType = StrokeRecord.STROKE_TYPE_DRAW;
                 } else if (checkedId == R.id.stroke_type_rbtn_line) {
-                    strokeType = SketchView.STROKE_TYPE_LINE;
+                    strokeType = StrokeRecord.STROKE_TYPE_LINE;
                 } else if (checkedId == R.id.stroke_type_rbtn_circle) {
-                    strokeType = SketchView.STROKE_TYPE_CIRCLE;
+                    strokeType = StrokeRecord.STROKE_TYPE_CIRCLE;
                 } else if (checkedId == R.id.stroke_type_rbtn_rectangle) {
-                    strokeType = SketchView.STROKE_TYPE_RECTANGLE;
+                    strokeType = StrokeRecord.STROKE_TYPE_RECTANGLE;
                 }else if (checkedId == R.id.stroke_type_rbtn_text) {
-                    strokeType = SketchView.STROKE_TYPE_TEXT;
+                    strokeType = StrokeRecord.STROKE_TYPE_TEXT;
                 }
                 mSketchView.setStrokeType(strokeType);
             }
@@ -310,7 +311,6 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     @Override
     public void onResume() {
         super.onResume();
-
     }
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
@@ -431,23 +431,20 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                     })
                     .show();
         } else if (id == R.id.sketch_photo) {
-//            scaleView.setPhotoUri(Environment.getExternalStorageDirectory().toString() + "/test.jpg");
-//            scaleView.setImageBitmap(BitmapUtils.decodeSampledBitmapFromResource(getResources(),R.drawable.test,500,500));
             MultiImageSelector selector = MultiImageSelector.create(getActivity());
             selector.showCamera(false);
             selector.count(9);
             selector.single();
             selector.origin(mSelectPath);
             selector.start(this, REQUEST_IMAGE);
-//            if (scaleView.isFocusable()) {
-//                sketchPhoto.setAlpha(0.1f);
-//                scaleView.setEnabled(false);
-//                scaleView.setFocusable(false);
-//            } else {
-
-//            }
         } else if (id == R.id.sure_action) {
-
+            StrokeRecord record = new StrokeRecord(StrokeRecord.STROKE_TYPE_BITMAP);
+            record.bitmap = scaleView.getPhotoSampleBM();
+            record.matrix = new Matrix(scaleView.getPhotoMatrix());
+            mSketchView.addRecord(record);
+            scaleView.setImageBitmap(null);
+            scaleView.setVisibility(View.GONE);
+            sureActionLayout.setVisibility(View.GONE);
         } else if (id == R.id.cancel_action) {
             scaleView.setImageBitmap(null);
             scaleView.setVisibility(View.GONE);
@@ -506,11 +503,11 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         canvas.setDrawFilter(new PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG));//抗锯齿
         canvas.drawBitmap(bitmap1, 0, 0, null);
 
-        Matrix matrix = scaleView.getImageMatrix();
-        Bitmap bitmap2 = scaleView.getPhotoSampleBM();
-        if (bitmap2 != null) {
-            canvas.drawBitmap(bitmap2, matrix, null);
-        }
+//        Matrix matrix = scaleView.getImageMatrix();
+//        Bitmap bitmap2 = scaleView.getPhotoSampleBM();
+//        if (bitmap2 != null) {
+//            canvas.drawBitmap(bitmap2, matrix, null);
+//        }
 
         canvas.save(Canvas.ALL_SAVE_FLAG);
         canvas.restore();
