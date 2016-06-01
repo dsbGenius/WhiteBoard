@@ -81,12 +81,12 @@
                 android:layout_height="match_parent">
                 <ImageView
                     android:id="@+id/cancel_action"
-                    style="@style/control_btn"
+                    style="@style/control_btn.action"
                     android:src="@drawable/ic_cancel" />
 
                 <ImageView
                     android:id="@+id/sure_action"
-                    style="@style/control_btn"
+                    style="@style/control_btn.action"
                     android:src="@drawable/ic_sure" />
             </LinearLayout>
         </FrameLayout>

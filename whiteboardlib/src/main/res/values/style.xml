@@ -11,6 +11,10 @@
         <item name="android:background">@drawable/control_btn_bg</item>
     </style>
 
+    <style name="control_btn.action" >
+        <item name="android:padding">10dp</item>
+    </style>
+
     <style name="stroke_color_btn">
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_height">match_parent</item>

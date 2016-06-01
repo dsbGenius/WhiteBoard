@@ -520,4 +520,7 @@ public class ScaleView extends ImageView implements
     public Bitmap getPhotoSampleBM() {
         return photoSampleBM;
     }
+    public Matrix getPhotoMatrix() {
+        return mScaleMatrix;
+    }
 }
