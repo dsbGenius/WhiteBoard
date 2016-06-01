@@ -13,9 +13,9 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/actionbar_color"
-        app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-        android:minHeight="?android:attr/actionBarSize">
+        android:background="@color/com_bg_gray"
+
+        >
 
         <Button
             android:id="@+id/commit"

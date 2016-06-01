@@ -15,6 +15,7 @@ import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -99,6 +100,13 @@ public class MultiImageSelectorActivity extends AppCompatActivity
         screenWidth = WhiteBoardFragment.sketchViewWidth;
         int orientation = this.getResources().getConfiguration().orientation;
         setActivitySize(orientation);
+        getWindow().getDecorView().setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                finish();
+                return true;
+            }
+        });
         setContentView(R.layout.activity_image_selector);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             getWindow().setStatusBarColor(Color.BLACK);
@@ -192,7 +200,7 @@ public class MultiImageSelectorActivity extends AppCompatActivity
             Point point = new Point();
             d.getSize(point);
             p.height = (int) (screenHight * 2 / 3);   //高度设置为屏幕的1.0
-            p.width = (int) (screenWidth);
+            p.width = (int) (getWindowManager().getDefaultDisplay().getWidth());
             Log.i("orientaion", "竖屏 hight:" + p.height + "  width:" + p.width);
             getWindow().setAttributes(p);
         }

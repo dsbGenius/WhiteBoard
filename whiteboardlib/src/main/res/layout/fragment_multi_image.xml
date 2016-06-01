@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:background="@android:color/black"
+    android:background="#181819"
     android:id="@+id/fragment_layout"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content">
@@ -19,18 +19,19 @@
     <RelativeLayout
         android:clickable="true"
         android:id="@+id/footer"
-        android:background="#cc000000"
+        android:background="@color/com_bg_gray"
         android:layout_alignParentBottom="true"
         android:layout_width="match_parent"
-        android:layout_height="?android:attr/actionBarSize">
+        android:layout_height="50dp">
 
         <Button
             android:id="@+id/category_btn"
             android:paddingLeft="16dp"
             android:paddingRight="16dp"
             android:layout_centerVertical="true"
-            android:textColor="#DCDCDC"
+            android:textColor="@android:color/white"
             tools:text="所有图片"
+            android:textStyle="bold"
             android:textSize="16sp"
             android:gravity="center_vertical"
             android:drawableRight="@drawable/text_indicator"
