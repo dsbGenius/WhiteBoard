@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -20,6 +21,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -88,6 +90,8 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     private AlertDialog dialog;
     private Bitmap bitmap1;
     private ArrayList<String> mSelectPath;
+    public static int sketchViewHight;
+    public static int sketchViewWidth;
 
     public static WhiteBoardFragment newInstance() {
         return new WhiteBoardFragment();
@@ -97,7 +101,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         activity = getActivity();//初始化上下文
-        bitmapSize = Math.min(activity.getWindowManager().getDefaultDisplay().getWidth(), activity.getWindowManager().getDefaultDisplay().getHeight()) ;
+        bitmapSize = Math.min(activity.getWindowManager().getDefaultDisplay().getWidth(), activity.getWindowManager().getDefaultDisplay().getHeight());
 
     }
 
@@ -273,6 +277,42 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         popupEraserLayout = inflater2.inflate(R.layout.popup_sketch_eraser, null);
         eraserImageView = (ImageView) popupEraserLayout.findViewById(R.id.stroke_circle);
         eraserSeekBar = (SeekBar) (popupEraserLayout.findViewById(R.id.stroke_seekbar));
+        getSketchSize();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+    }
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+
+        super.onConfigurationChanged(newConfig);
+       getSketchSize();
+    }
+    private void getSketchSize() {
+//        int w = View.MeasureSpec.makeMeasureSpec(0,View.MeasureSpec.UNSPECIFIED);
+//        int h = View.MeasureSpec.makeMeasureSpec(0,View.MeasureSpec.UNSPECIFIED);
+//        mSketchView.measure(w, h);
+//        sketchViewHight = mSketchView.getMeasuredHeight();
+//        sketchViewWidth = mSketchView.getMeasuredWidth();
+        ViewTreeObserver vto = mSketchView.getViewTreeObserver();
+        vto.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            public boolean onPreDraw() {
+                if(sketchViewHight==0&&sketchViewWidth==0) {
+                    int height = mSketchView.getMeasuredHeight();
+                    int width = mSketchView.getMeasuredWidth();
+                    sketchViewHight = height;
+                    sketchViewWidth = width;
+                    Log.i("onPreDraw", sketchViewHight + "  " + sketchViewWidth);
+                }
+//                Log.i("onPreDraw h w", height + "  " + width);
+
+                return true;
+            }
+        });
+        Log.i("getSketchSize", sketchViewHight + "  " + sketchViewWidth);
     }
 
     protected void setSeekBarProgress(int progress, int drawMode) {
@@ -391,7 +431,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                 String path = "";
                 if (mSelectPath.size() == 1) {
                     path = mSelectPath.get(0);
-                }else if(mSelectPath==null||mSelectPath.size()==0){
+                } else if (mSelectPath == null || mSelectPath.size() == 0) {
                     Toast.makeText(getActivity(), "图片加载失败,请重试!", Toast.LENGTH_LONG).show();
                 }
 

@@ -1,7 +1,9 @@
 package com.yinghe.whiteboardlib;
 
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Color;
+import android.graphics.Point;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -10,16 +12,17 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Display;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
 import com.yinghe.whiteboardlib.Utils.DensityUtil;
+import com.yinghe.whiteboardlib.fragment.WhiteBoardFragment;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -62,7 +65,8 @@ public class MultiImageSelectorActivity extends AppCompatActivity
     private int mDefaultCount = DEFAULT_IMAGE_SIZE;
     private int statusBarHeight;//状态高度
     private LinearLayout layout;
-
+    private int screenHight;
+    private int screenWidth;
 
     /**
      * 获取状态栏高度
@@ -78,8 +82,8 @@ public class MultiImageSelectorActivity extends AppCompatActivity
             field = c.getField("status_bar_height");
             x = Integer.parseInt(field.get(obj).toString());
             sbar = getResources().getDimensionPixelSize(x);
-        } catch(Exception e1) {
-            Log.e("getStatusBarHight()","get status bar height fail");
+        } catch (Exception e1) {
+            Log.e("getStatusBarHight()", "get status bar height fail");
             e1.printStackTrace();
         }
         statusBarHeight = sbar;
@@ -91,19 +95,11 @@ public class MultiImageSelectorActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setTheme(R.style.dialogActivity);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-        WindowManager.LayoutParams attr = getWindow().getAttributes();
-        if (attr != null) {
-            attr.gravity = Gravity.RIGHT;
-            float paddingRightValue = DensityUtil.dip2px(this, 60);
-            getWindow().getDecorView().setPadding(0,0, (int) paddingRightValue,0);
-        }
+        screenHight = WhiteBoardFragment.sketchViewHight;
+        screenWidth = WhiteBoardFragment.sketchViewWidth;
+        int orientation = this.getResources().getConfiguration().orientation;
+        setActivitySize(orientation);
         setContentView(R.layout.activity_image_selector);
-        //设置顶部marin值
-        getStatusBarHeight();
-        layout = (LinearLayout) findViewById(R.id.image_selector_layout);
-        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(layout.getLayoutParams());
-        lp.setMargins(0, statusBarHeight, 0, 0);
-        layout.setLayoutParams(lp);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             getWindow().setStatusBarColor(Color.BLACK);
         }
@@ -161,6 +157,54 @@ public class MultiImageSelectorActivity extends AppCompatActivity
         }
 
     }
+
+    private void setActivitySize(int orientation) {
+        WindowManager.LayoutParams attr = getWindow().getAttributes();
+        attr.verticalMargin = 0;
+//        statusBarHeight = getStatusBarHeight();
+        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {//横屏
+            screenWidth = Math.max(WhiteBoardFragment.sketchViewHight, WhiteBoardFragment.sketchViewWidth);
+            screenHight = Math.min(WhiteBoardFragment.sketchViewHight, WhiteBoardFragment.sketchViewWidth);
+            attr.gravity = Gravity.RIGHT;
+            float paddingRightValue = DensityUtil.dip2px(this, 60);
+            getStatusBarHeight();
+            getWindow().getDecorView().setPadding(0, 0, (int) paddingRightValue, 0);
+            WindowManager m = getWindowManager();
+            Display d = m.getDefaultDisplay();  //为获取屏幕宽、高
+            WindowManager.LayoutParams p = getWindow().getAttributes();  //获取对话框当前的参数值
+            Point point = new Point();
+            d.getSize(point);
+            p.height = (int) (screenHight);   //高度设置为屏幕的1.0
+            p.width = (int) (screenWidth/2);
+            Log.i("orientaion", "横屏 hight:" + p.height + "  width:" + p.width);
+            getWindow().setAttributes(p);
+            getWindow().setGravity(Gravity.RIGHT | Gravity.BOTTOM);
+        } else if (orientation == Configuration.ORIENTATION_PORTRAIT) {//竖屏
+            screenWidth = Math.min(WhiteBoardFragment.sketchViewHight, WhiteBoardFragment.sketchViewWidth);
+            screenHight = Math.max(WhiteBoardFragment.sketchViewHight, WhiteBoardFragment.sketchViewWidth);
+            attr.gravity = Gravity.BOTTOM;
+            float paddingButtomValue = DensityUtil.dip2px(this, 50);
+            getWindow().getDecorView().setPadding(0, 0, 0, (int) paddingButtomValue);
+            WindowManager m = getWindowManager();
+            Display d = m.getDefaultDisplay();  //为获取屏幕宽、高
+            WindowManager.LayoutParams p = getWindow().getAttributes();  //获取对话框当前的参数值
+            Point point = new Point();
+            d.getSize(point);
+            p.height = (int) (screenHight * 2 / 3);   //高度设置为屏幕的1.0
+            p.width = (int) (screenWidth);
+            Log.i("orientaion", "竖屏 hight:" + p.height + "  width:" + p.width);
+            getWindow().setAttributes(p);
+        }
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+
+        super.onConfigurationChanged(newConfig);
+        int orientation = newConfig.orientation;
+        setActivitySize(orientation);
+    }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
