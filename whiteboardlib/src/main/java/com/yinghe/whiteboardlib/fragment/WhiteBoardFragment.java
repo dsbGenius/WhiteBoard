@@ -59,7 +59,6 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     ImageView ivBgColor;//画板背景颜色
 
     View controlLayout;//控制布局
-    View sureActionLayout;//确认布局
     ImageView stroke;//画笔
     ImageView eraser;//橡皮擦
     ImageView undo;//撤销
@@ -67,6 +66,10 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     ImageView erase;//清空
     ImageView sketchSave;//保存
     ImageView sketchPhoto;//加载图片
+
+    View sureActionLayout;//确认布局
+    ImageView sureAction;
+    ImageView cancelAction;
 
     RadioGroup strokeTypeRG,strokeColorRG;
 
@@ -245,7 +248,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     private void findView(View view) {
 
         scaleView = (ScaleView) view.findViewById(R.id.scale_view);
-        scaleView.setEnabled(false);
+//        scaleView.setEnabled(false);
         //画板整体布局
         whiteBoardLayout = (RelativeLayout) view.findViewById(R.id.white_board);
         mSketchView = (SketchView) view.findViewById(R.id.drawing);
@@ -261,6 +264,8 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         sketchPhoto.setAlpha(0.4f);
         controlLayout = view.findViewById(R.id.controlLayout);
         sureActionLayout = view.findViewById(R.id.sure_action_layout);
+        sureAction = (ImageView) view.findViewById(R.id.sure_action);
+        cancelAction = (ImageView) view.findViewById(R.id.cancel_action);
         btShowBg = (Button) view.findViewById(R.id.bt_show_bg);
         btShowBgGray = (Button) view.findViewById(R.id.bt_show_bg_gray);
 
@@ -273,7 +278,8 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         erase.setOnClickListener(this);
         sketchSave.setOnClickListener(this);
         sketchPhoto.setOnClickListener(this);
-
+        sureAction.setOnClickListener(this);
+        cancelAction.setOnClickListener(this);
 
         // popupWindow布局
         LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Activity
@@ -331,11 +337,11 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
 
     @Override
     public void onClick(View v) {
-        int i = v.getId();
-        if (i == R.id.sketch_stroke) {
+        int id = v.getId();
+        if (id == R.id.sketch_stroke) {
             sketchPhoto.setAlpha(0.4f);
-            scaleView.setEnabled(false);
-            scaleView.setFocusable(false);
+//            scaleView.setEnabled(false);
+//            scaleView.setFocusable(false);
             if (mSketchView.getStrokeMode() == SketchView.STROKE) {
                 showPopup(v, SketchView.STROKE);
 
@@ -344,10 +350,10 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                 setAlpha(eraser, 0.4f);
                 setAlpha(stroke, 1f);
             }
-        } else if (i == R.id.sketch_eraser) {
+        } else if (id == R.id.sketch_eraser) {
             sketchPhoto.setAlpha(0.4f);
-            scaleView.setEnabled(false);
-            scaleView.setFocusable(false);
+//            scaleView.setEnabled(false);
+//            scaleView.setFocusable(false);
             if (mSketchView.getStrokeMode() == SketchView.ERASER) {
                 showPopup(v, SketchView.ERASER);
             } else {
@@ -355,13 +361,13 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                 setAlpha(stroke, 0.4f);
                 setAlpha(eraser, 1f);
             }
-        } else if (i == R.id.sketch_undo) {
+        } else if (id == R.id.sketch_undo) {
             mSketchView.undo();
-        } else if (i == R.id.sketch_redo) {
+        } else if (id == R.id.sketch_redo) {
             mSketchView.redo();
-        } else if (i == R.id.sketch_erase) {
+        } else if (id == R.id.sketch_erase) {
             askForErase();
-        } else if (i == R.id.sketch_save) {
+        } else if (id == R.id.sketch_save) {
             if (mSketchView.getRecordCount() == 0) {
                 Toast.makeText(getActivity(), "你还没有手绘", Toast.LENGTH_SHORT).show();
                 return;
@@ -384,7 +390,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                         }
                     })
                     .show();
-        } else if (i == R.id.sketch_photo) {
+        } else if (id == R.id.sketch_photo) {
 //            scaleView.setPhotoUri(Environment.getExternalStorageDirectory().toString() + "/test.jpg");
 //            scaleView.setImageBitmap(BitmapUtils.decodeSampledBitmapFromResource(getResources(),R.drawable.test,500,500));
             MultiImageSelector selector = MultiImageSelector.create(getActivity());
@@ -400,6 +406,12 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
 //            } else {
 
 //            }
+        } else if (id == R.id.sure_action) {
+
+        } else if (id == R.id.cancel_action) {
+            scaleView.setImageBitmap(null);
+            scaleView.setVisibility(View.GONE);
+            sureActionLayout.setVisibility(View.GONE);
         }
     }
 
@@ -417,8 +429,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                 //加载图片
                 scaleView.setPhotoPath(path);
                 sketchPhoto.setAlpha(1.0f);
-                scaleView.setEnabled(true);
-                scaleView.setFocusable(true);
+                scaleView.setVisibility(View.VISIBLE);
                 sureActionLayout.setVisibility(View.VISIBLE);
             }
         }

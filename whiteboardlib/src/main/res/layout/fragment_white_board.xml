@@ -70,12 +70,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
                 <ImageView
-                    android:id="@+id/cancel"
+                    android:id="@+id/cancel_action"
                     style="@style/control_btn"
                     android:src="@drawable/ic_cancel" />
 
                 <ImageView
-                    android:id="@+id/sure"
+                    android:id="@+id/sure_action"
                     style="@style/control_btn"
                     android:src="@drawable/ic_sure" />
             </LinearLayout>
@@ -93,22 +93,22 @@
 
     </RelativeLayout>
 
-    <!--<LinearLayout-->
-        <!--android:layout_gravity="bottom"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="40dp"-->
-        <!--android:visibility="gone"-->
-        <!--android:orientation="horizontal">-->
-        <!--<Button-->
-            <!--android:id="@+id/bt_show_bg"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:text="原图"/>-->
-        <!--<Button-->
-            <!--android:id="@+id/bt_show_bg_gray"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:text="手绘图"/>-->
-    <!--</LinearLayout>-->
+    <LinearLayout
+        android:layout_gravity="bottom"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:visibility="gone"
+        android:orientation="horizontal">
+        <Button
+            android:id="@+id/bt_show_bg"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="原图"/>
+        <Button
+            android:id="@+id/bt_show_bg_gray"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="手绘图"/>
+    </LinearLayout>
 
 </FrameLayout>
