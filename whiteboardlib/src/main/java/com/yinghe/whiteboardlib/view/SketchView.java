@@ -190,6 +190,7 @@ public class SketchView extends ImageView implements OnTouchListener {
 
     @Override
     public boolean onTouch(View arg0, MotionEvent event) {
+        onDrawChangedListener.onDrawChanged();
         float x = event.getX();
         float y = event.getY();
         switch (event.getAction()) {
@@ -216,15 +217,11 @@ public class SketchView extends ImageView implements OnTouchListener {
             canvas.drawBitmap(bitmap, 0, 0, null);
         }
 
-//        for (Pair<Path, Paint> p : paths) {
-//            canvas.drawPath(p.first, p.second);
-//        }
         for (StrokeRecord record : recordList) {
             if (record.type == STROKE_TYPE_DRAW) {
                 canvas.drawPath(record.path, record.paint);
             }
         }
-        onDrawChangedListener.onDrawChanged();
     }
 
 

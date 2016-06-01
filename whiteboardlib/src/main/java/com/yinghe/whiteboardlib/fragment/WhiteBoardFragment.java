@@ -58,7 +58,8 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     ImageView ivBg;//画板背景图片
     ImageView ivBgColor;//画板背景颜色
 
-    LinearLayout controlLayout;//控制布局
+    View controlLayout;//控制布局
+    View sureActionLayout;//确认布局
     ImageView stroke;//画笔
     ImageView eraser;//橡皮擦
     ImageView undo;//撤销
@@ -258,7 +259,8 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         sketchSave = (ImageView) view.findViewById(R.id.sketch_save);
         sketchPhoto = (ImageView) view.findViewById(R.id.sketch_photo);
         sketchPhoto.setAlpha(0.4f);
-        controlLayout = (LinearLayout) view.findViewById(R.id.controlLayout);
+        controlLayout = view.findViewById(R.id.controlLayout);
+        sureActionLayout = view.findViewById(R.id.sure_action_layout);
         btShowBg = (Button) view.findViewById(R.id.bt_show_bg);
         btShowBgGray = (Button) view.findViewById(R.id.bt_show_bg_gray);
 
@@ -406,7 +408,6 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         if (requestCode == REQUEST_IMAGE) {
             if (resultCode == getActivity().RESULT_OK) {
                 mSelectPath = data.getStringArrayListExtra(MultiImageSelector.EXTRA_RESULT);
-                StringBuilder sb = new StringBuilder();
                 String path = "";
                 if (mSelectPath.size() == 1) {
                     path = mSelectPath.get(0);
@@ -418,6 +419,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                 sketchPhoto.setAlpha(1.0f);
                 scaleView.setEnabled(true);
                 scaleView.setFocusable(true);
+                sureActionLayout.setVisibility(View.VISIBLE);
             }
         }
     }

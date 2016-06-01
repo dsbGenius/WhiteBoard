@@ -12,14 +12,17 @@
         android:background="#FFFFFF"
         android:orientation="horizontal">
 
-        <LinearLayout
+        <FrameLayout
             android:id="@+id/controlLayout"
             android:layout_width="60dp"
+            android:background="@color/gray"
             android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:layout_alignParentRight="true"
-            android:padding="4dp">
-
+            android:layout_alignParentRight="true">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:orientation="vertical"
+                android:background="@color/gray"
+                android:layout_height="match_parent">
             <ImageView
                 android:id="@+id/sketch_stroke"
                 style="@style/control_btn"
@@ -43,7 +46,6 @@
                 android:alpha="0.4"
                 android:src="@drawable/ic_redo_grey600_24dp" />
 
-
             <ImageView
                 android:id="@+id/sketch_photo"
                 style="@style/control_btn"
@@ -58,7 +60,26 @@
                 android:id="@+id/sketch_erase"
                 style="@style/control_btn"
                 android:src="@drawable/ic_delete_grey600_48dp" />
-        </LinearLayout>
+            </LinearLayout>
+            <LinearLayout
+                android:background="@color/gray"
+                android:clickable="true"
+                android:visibility="gone"
+                android:orientation="vertical"
+                android:id="@+id/sure_action_layout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+                <ImageView
+                    android:id="@+id/cancel"
+                    style="@style/control_btn"
+                    android:src="@drawable/ic_cancel" />
+
+                <ImageView
+                    android:id="@+id/sure"
+                    style="@style/control_btn"
+                    android:src="@drawable/ic_sure" />
+            </LinearLayout>
+        </FrameLayout>
 
         <FrameLayout
             android:layout_width="match_parent"
@@ -68,29 +89,26 @@
 
             <include layout="@layout/include_draw_content_layout" />
 
-
         </FrameLayout>
-
-
 
     </RelativeLayout>
 
-    <LinearLayout
-        android:layout_gravity="bottom"
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:visibility="gone"
-        android:orientation="horizontal">
-        <Button
-            android:id="@+id/bt_show_bg"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="原图"/>
-        <Button
-            android:id="@+id/bt_show_bg_gray"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="手绘图"/>
-    </LinearLayout>
+    <!--<LinearLayout-->
+        <!--android:layout_gravity="bottom"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="40dp"-->
+        <!--android:visibility="gone"-->
+        <!--android:orientation="horizontal">-->
+        <!--<Button-->
+            <!--android:id="@+id/bt_show_bg"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:text="原图"/>-->
+        <!--<Button-->
+            <!--android:id="@+id/bt_show_bg_gray"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:text="手绘图"/>-->
+    <!--</LinearLayout>-->
 
 </FrameLayout>
