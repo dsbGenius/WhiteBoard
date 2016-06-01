@@ -9,7 +9,6 @@
         android:supportsRtl="true">
         <activity
             android:configChanges="orientation|screenSize"
-            android:screenOrientation="landscape"
             android:theme="@style/Base.Theme.AppCompat.Dialog"
             android:name="com.yinghe.whiteboardlib.MultiImageSelectorActivity" />
     </application>
