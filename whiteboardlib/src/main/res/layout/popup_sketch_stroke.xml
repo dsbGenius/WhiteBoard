@@ -14,31 +14,39 @@
 
     <RadioGroup
         android:layout_width="match_parent"
+        android:id="@+id/stroke_type_radio_group"
         android:layout_height="50dp"
         android:gravity="center"
         android:orientation="horizontal">
 
         <RadioButton
+            android:id="@+id/stroke_type_rbtn_draw"
             style="@style/stroke_color_btn"
+            android:checked="true"
             android:button="@drawable/stroke_type_rbtn_draw" />
 
         <RadioButton
+            android:id="@+id/stroke_type_rbtn_draw_bold"
             style="@style/stroke_color_btn"
             android:button="@drawable/stroke_type_rbtn_draw_bold" />
 
         <RadioButton
+            android:id="@+id/stroke_type_rbtn_line"
             style="@style/stroke_color_btn"
             android:button="@drawable/stroke_type_rbtn_line" />
 
         <RadioButton
+            android:id="@+id/stroke_type_rbtn_circle"
             style="@style/stroke_color_btn"
             android:button="@drawable/stroke_type_rbtn_circle" />
 
         <RadioButton
+            android:id="@+id/stroke_type_rbtn_rectangle"
             style="@style/stroke_color_btn"
             android:button="@drawable/stroke_type_rbtn_rectangle" />
 
         <RadioButton
+            android:id="@+id/stroke_type_rbtn_text"
             style="@style/stroke_color_btn"
             android:button="@drawable/stroke_type_rbtn_text" />
     </RadioGroup>

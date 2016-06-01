@@ -23,7 +23,7 @@ import android.view.View.OnTouchListener;
 import android.widget.ImageView;
 
 import com.yinghe.whiteboardlib.R;
-import com.yinghe.whiteboardlib.Utils.Utils;
+import com.yinghe.whiteboardlib.Utils.BitmapUtils;
 import com.yinghe.whiteboardlib.fragment.WhiteBoardFragment;
 
 import java.io.File;
@@ -44,6 +44,7 @@ public class ScaleView extends ImageView implements
     private static final int MODE_SCALE = 2;
     private static final int MODE_ROTATE = 3;
 
+    float simpleScale = 0.5f;//图片载入的缩放倍数
     Context context;
     int actionMode;
     /**
@@ -58,6 +59,7 @@ public class ScaleView extends ImageView implements
 
 
     RectF photoRectSrc = null;
+    Bitmap photoSampleBM = null;
     Bitmap mirrorMarkBM = BitmapFactory.decodeResource(getResources(), R.drawable.mark_mirror);
     Bitmap deleteMarkBM = BitmapFactory.decodeResource(getResources(), R.drawable.mark_delete);
     Bitmap rotateMarkBM = BitmapFactory.decodeResource(getResources(), R.drawable.mark_rotate);
@@ -132,7 +134,7 @@ public class ScaleView extends ImageView implements
         });
         this.setOnTouchListener(this);
         p.setColor(Color.GRAY);
-        p.setStrokeWidth(Utils.dip2px(context, 0.8f));
+        p.setStrokeWidth(BitmapUtils.dip2px(context, 0.8f));
         p.setStyle(Paint.Style.STROKE);
     }
 
@@ -231,12 +233,11 @@ public class ScaleView extends ImageView implements
     }
 
     public void setPhotoPath(String path) {
-
         File file = new File(path);
         if (file.exists()) {
-            Bitmap bm=Utils.decodeSampledBitmapFromFile(getResources(), path, WhiteBoardFragment.bitmapSize, WhiteBoardFragment.bitmapSize);
-            if (bm != null) {
-                setImageBitmap(bm);
+            photoSampleBM = BitmapUtils.decodeSampleBitMapFromFile(context, path,simpleScale);
+            if (photoSampleBM != null) {
+                setImageBitmap(photoSampleBM);
             }
         }
         first = true;
@@ -516,4 +517,7 @@ public class ScaleView extends ImageView implements
         return matrixValues[Matrix.MTRANS_Y];
     }
 
+    public Bitmap getPhotoSampleBM() {
+        return photoSampleBM;
+    }
 }

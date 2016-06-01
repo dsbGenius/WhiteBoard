@@ -44,7 +44,7 @@ public class FileUtils {
      * Android defines cache directory on device's file system.
      *
      * @param context Application context
-     * @return Cache {@link File directory}.<br />
+     * @return Cache {@link File directory}
      * <b>NOTE:</b> Can be null in some unpredictable cases (if SD card is unmounted and
      * {@link Context#getCacheDir() Context.getCacheDir()} returns null).
      */
@@ -59,7 +59,7 @@ public class FileUtils {
      *
      * @param context        Application context
      * @param preferExternal Whether prefer external location for cache
-     * @return Cache {@link File directory}.<br />
+     * @return Cache {@link File directory}
      * <b>NOTE:</b> Can be null in some unpredictable cases (if SD card is unmounted and
      * {@link Context#getCacheDir() Context.getCacheDir()} returns null).
      */

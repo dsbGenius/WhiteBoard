@@ -18,32 +18,7 @@
             android:layout_above="@id/controlLayout"
             android:background="#efeded">
 
-
-            <ImageView
-                android:id="@+id/iv_bg"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center" />
-
-            <ImageView
-                android:id="@+id/iv_bg_color"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center" />
-
-            <com.yinghe.whiteboardlib.view.SketchView
-                android:id="@+id/drawing"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_gravity="center"
-                android:background="#fff" />
-
-
-            <com.yinghe.whiteboardlib.view.ScaleView
-                android:id="@+id/scale_view"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-            <!--android:src="@drawable/ic_action_draw"-->
+            <include layout="@layout/include_draw_content_layout"/>
         </FrameLayout>
 
         <LinearLayout
