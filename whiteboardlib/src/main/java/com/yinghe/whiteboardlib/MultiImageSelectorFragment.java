@@ -9,7 +9,6 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Color;
-import android.graphics.Point;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -37,11 +36,11 @@ import android.widget.Toast;
 import com.squareup.picasso.Picasso;
 import com.yinghe.whiteboardlib.Utils.DensityUtil;
 import com.yinghe.whiteboardlib.Utils.FileUtils;
-import com.yinghe.whiteboardlib.Utils.ScreenUtils;
 import com.yinghe.whiteboardlib.adapter.FolderAdapter;
 import com.yinghe.whiteboardlib.adapter.ImageGridAdapter;
 import com.yinghe.whiteboardlib.bean.Folder;
 import com.yinghe.whiteboardlib.bean.Image;
+import com.yinghe.whiteboardlib.fragment.WhiteBoardFragment;
 
 import java.io.File;
 import java.io.IOException;
@@ -191,16 +190,19 @@ public class MultiImageSelectorFragment extends Fragment {
      * Create popup ListView
      */
     private void createPopupFolderList() {
-        Point point = ScreenUtils.getScreenSize(getActivity());
-//        int width = point.x;
-        int width =getActivity().getWindow().getDecorView().getWidth()- DensityUtil.dip2px(getActivity(),60);
-        int height = (int) (point.y * (4.5f/8.0f));
+//        Point point = ScreenUtils.getScreenSize(getActivity());
+////        int width = point.x;
+//        int width =getActivity().getWindow().getDecorView().getWidth()- DensityUtil.dip2px(getActivity(),60);
+//        int height = (int) (point.y * (4.5f/8.0f));
+        int orientation = this.getResources().getConfiguration().orientation;
         mFolderPopupWindow = new ListPopupWindow(getActivity());
+
         mFolderPopupWindow.setBackgroundDrawable(new ColorDrawable(Color.WHITE));
         mFolderPopupWindow.setAdapter(mFolderAdapter);
-        mFolderPopupWindow.setContentWidth(width);
-        mFolderPopupWindow.setWidth(width);
-        mFolderPopupWindow.setHeight(height);
+//        mFolderPopupWindow.setContentWidth(width);
+//        mFolderPopupWindow.setWidth(width);
+//        mFolderPopupWindow.setHeight(height);
+        setPopuupWindowSize(orientation);
         mFolderPopupWindow.setAnchorView(mPopupAnchorView);
         mFolderPopupWindow.setModal(true);
         mFolderPopupWindow.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -243,6 +245,22 @@ public class MultiImageSelectorFragment extends Fragment {
 
             }
         });
+    }
+
+    private void setPopuupWindowSize(int orientation) {
+        if(orientation == Configuration.ORIENTATION_LANDSCAPE){//横屏
+            int screenWidth = Math.max(WhiteBoardFragment.sketchViewHight, WhiteBoardFragment.sketchViewWidth);
+            int screenHight = Math.min(WhiteBoardFragment.sketchViewHight, WhiteBoardFragment.sketchViewWidth);
+            mFolderPopupWindow.setWidth(screenWidth/2- DensityUtil.dip2px(getActivity(),60));
+            mFolderPopupWindow.setHeight(screenHight/2);
+        }else if(orientation == Configuration.ORIENTATION_PORTRAIT){//竖屏
+            int screenWidth = Math.min(WhiteBoardFragment.sketchViewHight, WhiteBoardFragment.sketchViewWidth);
+            int screenHight = Math.max(WhiteBoardFragment.sketchViewHight, WhiteBoardFragment.sketchViewWidth);
+            mFolderPopupWindow.setWidth(screenWidth);
+            mFolderPopupWindow.setContentWidth(screenWidth);
+            mFolderPopupWindow.setHeight(screenHight/3);
+        }
+
     }
 
     @Override
@@ -294,6 +312,7 @@ public class MultiImageSelectorFragment extends Fragment {
             if(mFolderPopupWindow.isShowing()){
                 mFolderPopupWindow.dismiss();
             }
+            setPopuupWindowSize(newConfig.orientation);
         }
         super.onConfigurationChanged(newConfig);
     }
