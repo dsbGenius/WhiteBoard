@@ -117,12 +117,12 @@ public class MultiImageSelectorActivity extends AppCompatActivity
         if (toolbar != null) {
             setSupportActionBar(toolbar);
         }
-
+        //设置返回操作
         final ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
-
+        //获取各种配置信息
         final Intent intent = getIntent();
         mDefaultCount = intent.getIntExtra(EXTRA_SELECT_COUNT, DEFAULT_IMAGE_SIZE);
         final int mode = intent.getIntExtra(EXTRA_SELECT_MODE, MODE_MULTI);
@@ -130,7 +130,7 @@ public class MultiImageSelectorActivity extends AppCompatActivity
         if (mode == MODE_MULTI && intent.hasExtra(EXTRA_DEFAULT_SELECTED_LIST)) {
             resultList = intent.getStringArrayListExtra(EXTRA_DEFAULT_SELECTED_LIST);
         }
-
+        //多选模式下的提交按钮
         mSubmitButton = (Button) findViewById(R.id.commit);
         if (mode == MODE_MULTI) {
             updateDoneText(resultList);
@@ -152,7 +152,7 @@ public class MultiImageSelectorActivity extends AppCompatActivity
         } else {
             mSubmitButton.setVisibility(View.GONE);
         }
-
+        //载入fragment
         if (savedInstanceState == null) {
             Bundle bundle = new Bundle();
             bundle.putInt(MultiImageSelectorFragment.EXTRA_SELECT_COUNT, mDefaultCount);
@@ -167,14 +167,16 @@ public class MultiImageSelectorActivity extends AppCompatActivity
 
     }
 
+    /**
+     * 设置activity的尺寸以及在屏幕上的位置
+     * @param orientation
+     */
     private void setActivitySize(int orientation) {
         WindowManager.LayoutParams attr = getWindow().getAttributes();
-        attr.verticalMargin = 0;
-//        statusBarHeight = getStatusBarHeight();
+
         if (orientation == Configuration.ORIENTATION_LANDSCAPE) {//横屏
             screenWidth = Math.max(WhiteBoardFragment.sketchViewHight, WhiteBoardFragment.sketchViewWidth);
             screenHight = Math.min(WhiteBoardFragment.sketchViewHight, WhiteBoardFragment.sketchViewWidth);
-            attr.gravity = Gravity.RIGHT;
             float paddingRightValue = DensityUtil.dip2px(this, 60);
             getStatusBarHeight();
             getWindow().getDecorView().setPadding(0, 0, (int) paddingRightValue, 0);
@@ -206,9 +208,12 @@ public class MultiImageSelectorActivity extends AppCompatActivity
         }
     }
 
+    /**
+     * 屏幕旋转时也需要调整activity的大小
+      * @param newConfig
+     */
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
-
         super.onConfigurationChanged(newConfig);
         int orientation = newConfig.orientation;
         setActivitySize(orientation);

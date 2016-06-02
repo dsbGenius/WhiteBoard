@@ -17,10 +17,9 @@ import java.util.ArrayList;
 public class MultiImageSelector {
 
     public static final String EXTRA_RESULT = MultiImageSelectorActivity.EXTRA_RESULT;
-
-    private boolean mShowCamera = true;
+    private boolean mIsShowCarema = true;
     private int mMaxCount = 9;
-    private int mMode = MultiImageSelectorActivity.MODE_MULTI;
+    private int mSelectMode = MultiImageSelectorActivity.MODE_MULTI;
     private ArrayList<String> mOriginData;
     private static MultiImageSelector sSelector;
     private Context mContext;
@@ -37,7 +36,7 @@ public class MultiImageSelector {
     }
 
     public MultiImageSelector showCamera(boolean show){
-        mShowCamera = show;
+        mIsShowCarema = show;
         return sSelector;
     }
 
@@ -47,12 +46,12 @@ public class MultiImageSelector {
     }
 
     public MultiImageSelector single(){
-        mMode = MultiImageSelectorActivity.MODE_SINGLE;
+        mSelectMode = MultiImageSelectorActivity.MODE_SINGLE;
         return sSelector;
     }
 
     public MultiImageSelector multi(){
-        mMode = MultiImageSelectorActivity.MODE_MULTI;
+        mSelectMode = MultiImageSelectorActivity.MODE_MULTI;
         return sSelector;
     }
 
@@ -88,12 +87,12 @@ public class MultiImageSelector {
 
     private Intent createIntent(){
         Intent intent = new Intent(mContext, MultiImageSelectorActivity.class);
-        intent.putExtra(MultiImageSelectorActivity.EXTRA_SHOW_CAMERA, mShowCamera);
+        intent.putExtra(MultiImageSelectorActivity.EXTRA_SHOW_CAMERA, mIsShowCarema);
         intent.putExtra(MultiImageSelectorActivity.EXTRA_SELECT_COUNT, mMaxCount);
         if(mOriginData != null){
             intent.putStringArrayListExtra(MultiImageSelectorActivity.EXTRA_DEFAULT_SELECTED_LIST, mOriginData);
         }
-        intent.putExtra(MultiImageSelectorActivity.EXTRA_SELECT_MODE, mMode);
+        intent.putExtra(MultiImageSelectorActivity.EXTRA_SELECT_MODE, mSelectMode);
         return intent;
     }
 }
