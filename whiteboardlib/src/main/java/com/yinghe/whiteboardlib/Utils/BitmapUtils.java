@@ -54,7 +54,8 @@ public class BitmapUtils {
         return bm;
     }
 
-    public static BitmapFactory.Options sampleBitmapOptions(Context context, BitmapFactory.Options options, int reqWidth, int reqHeight) {
+    public static BitmapFactory.Options sampleBitmapOptions(
+            Context context, BitmapFactory.Options options, int reqWidth, int reqHeight) {
         int targetDensity = context.getResources().getDisplayMetrics().densityDpi;
         // Calculate inSampleSize
         options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
@@ -67,48 +68,9 @@ public class BitmapUtils {
         options.inDensity = (int) (targetDensity * startScale);
         options.inTargetDensity = targetDensity;
         options.inJustDecodeBounds = false;
+        options.inPreferredConfig = Bitmap.Config.RGB_565;
         return options;
     }
-//    public static Bitmap sampleBitmap(Context context,Bitmap bm, int reqWidth, int reqHeight) {
-//        int targetDensity = context.getResources().getDisplayMetrics().densityDpi;
-//        // Calculate inSampleSize
-//        BitmapFactory.Options options = new BitmapFactory.Options();
-//        options.outWidth = bm.getWidth();
-//        options.outHeight = bm.getHeight();
-//        options = sampleBitmapOptions(context, options, reqWidth, reqHeight);
-//        return options;
-//    }
-
-
-//
-//    public static Bitmap decodeSampledBitmapFromResource(
-//            Resources res, int resId, int reqWidth, int reqHeight) {
-//
-//        // First decode with inJustDecodeBounds=true to check dimensions
-//        final BitmapFactory.Options options = new BitmapFactory.Options();
-//        options.inJustDecodeBounds = true;
-//        BitmapFactory.decodeResource(res, resId, options);
-//        int targetDensity = res.getDisplayMetrics().densityDpi;
-//        // Calculate inSampleSize
-//        options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
-//        double xSScale = ((double) options.outWidth) / ((double) reqWidth);
-//        double ySScale = ((double) options.outHeight) / ((double) reqHeight);
-//
-//        double startScale =Math.max(xSScale , ySScale);
-//
-//        options.inScaled = true;
-//        options.inDensity = (int) (targetDensity*startScale);
-//        options.inTargetDensity = targetDensity;
-//        // Decode bitmap with inSampleSize set
-//        options.inJustDecodeBounds = false;
-//        Bitmap b= BitmapFactory.decodeResource(res, resId, options);
-//        Log.e("xxx", b.getByteCount() + "");
-//        return BitmapFactory.decodeResource(res, resId, options);
-//    }
-
-    //    public static int calculateOptions(BitmapFactory.Options options,int reqWidth ,int reqHeight) {
-//
-//    }
     public static int calculateInSampleSize(
             BitmapFactory.Options options, int reqWidth, int reqHeight) {
         // Raw height and width of image

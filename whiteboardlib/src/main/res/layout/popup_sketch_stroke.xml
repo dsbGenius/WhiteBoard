@@ -28,6 +28,7 @@
         <RadioButton
             android:id="@+id/stroke_type_rbtn_draw_bold"
             style="@style/stroke_color_btn"
+            android:visibility="gone"
             android:button="@drawable/stroke_type_rbtn_draw_bold" />
 
         <RadioButton
