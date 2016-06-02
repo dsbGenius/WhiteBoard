@@ -432,7 +432,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                     .show();
         } else if (id == R.id.sketch_photo) {
             MultiImageSelector selector = MultiImageSelector.create(getActivity());
-            selector.showCamera(false);
+            selector.showCamera(true);
             selector.count(9);
             selector.single();
             selector.origin(mSelectPath);
