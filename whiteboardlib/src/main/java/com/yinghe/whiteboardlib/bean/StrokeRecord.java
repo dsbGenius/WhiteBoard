@@ -9,6 +9,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 
 public class StrokeRecord {
+    public static final int STROKE_TYPE_ERASER = 0;
     public static final int STROKE_TYPE_DRAW= 1;
     //    public static final int STROKE_TYPE_DRAW_BOLD= 1;
     public static final int STROKE_TYPE_LINE= 2;

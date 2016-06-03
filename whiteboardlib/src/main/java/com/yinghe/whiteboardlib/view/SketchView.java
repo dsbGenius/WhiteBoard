@@ -24,9 +24,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.PointF;
-import android.graphics.Rect;
-import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.view.MotionEvent;
@@ -39,13 +36,20 @@ import com.yinghe.whiteboardlib.bean.StrokeRecord;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.yinghe.whiteboardlib.bean.StrokeRecord.STROKE_TYPE_CIRCLE;
+import static com.yinghe.whiteboardlib.bean.StrokeRecord.STROKE_TYPE_DRAW;
+import static com.yinghe.whiteboardlib.bean.StrokeRecord.STROKE_TYPE_ERASER;
+import static com.yinghe.whiteboardlib.bean.StrokeRecord.STROKE_TYPE_LINE;
+import static com.yinghe.whiteboardlib.bean.StrokeRecord.STROKE_TYPE_RECTANGLE;
+import static com.yinghe.whiteboardlib.bean.StrokeRecord.STROKE_TYPE_TEXT;
+
 
 public class SketchView extends ImageView implements OnTouchListener {
 
     private static final float TOUCH_TOLERANCE = 4;
 
-    public static final int STROKE = 0;
-    public static final int ERASER = 1;
+    //    public static final int STROKE = 0;
+//    public static final int ERASER = 1;
     public static final int DEFAULT_STROKE_SIZE = 7;
     public static final int DEFAULT_STROKE_ALPHA = 100;
     public static final int DEFAULT_ERASER_SIZE = 50;
@@ -64,7 +68,7 @@ public class SketchView extends ImageView implements OnTouchListener {
     //	private Canvas mCanvas;
     private Path m_Path;
     private Paint m_Paint;
-    private float downX, downY;
+    private float downX, downY, preX, preY;
     private int width, height;
 
     private List<StrokeRecord> recordList = new ArrayList<>();
@@ -73,10 +77,13 @@ public class SketchView extends ImageView implements OnTouchListener {
 
     private Bitmap bitmap;
 
-    private int strokeMode = STROKE;
 
     public void setStrokeType(int strokeType) {
         this.strokeType = strokeType;
+    }
+
+    public int getStrokeType() {
+        return strokeType;
     }
 
     private int strokeType = StrokeRecord.STROKE_TYPE_DRAW;
@@ -103,16 +110,14 @@ public class SketchView extends ImageView implements OnTouchListener {
         m_Paint.setStrokeJoin(Paint.Join.ROUND);
         m_Paint.setStrokeCap(Paint.Cap.ROUND);
         m_Paint.setStrokeWidth(strokeSize);
-        m_Path = new Path();
-        Paint newPaint = new Paint(m_Paint);
         invalidate();
     }
 
 
-    public void setStrokeMode(int strokeMode) {
-        if (strokeMode == STROKE || strokeMode == ERASER)
-            this.strokeMode = strokeMode;
-    }
+//    public void setStrokeMode(int strokeMode) {
+//        if (strokeMode == STROKE || strokeMode == ERASER)
+//            this.strokeMode = strokeMode;
+//    }
 
 
     public int getStrokeAlpha() {
@@ -122,6 +127,7 @@ public class SketchView extends ImageView implements OnTouchListener {
     public void setStrokeAlpha(int mAlpha) {
         this.strokeAlpha = mAlpha;
         calculColor();
+        m_Paint.setStrokeWidth(strokeSize);
     }
     public int getStrokeColor() {
         return this.strokeRealColor;
@@ -131,6 +137,7 @@ public class SketchView extends ImageView implements OnTouchListener {
     public void setStrokeColor(int color) {
         strokeColor = color;
         calculColor();
+        m_Paint.setColor(strokeRealColor);
     }
 
 
@@ -139,9 +146,9 @@ public class SketchView extends ImageView implements OnTouchListener {
     }
 
 
-    public int getStrokeMode() {
-        return this.strokeMode;
-    }
+//    public int getStrokeMode() {
+//        return this.strokeMode;
+//    }
 
 
     /**
@@ -219,7 +226,7 @@ public class SketchView extends ImageView implements OnTouchListener {
     private void drawRecord(Canvas canvas) {
         for (StrokeRecord record : recordList) {
             int type = record.type;
-            if (type == StrokeRecord.STROKE_TYPE_DRAW) {
+            if (type == StrokeRecord.STROKE_TYPE_ERASER || type == StrokeRecord.STROKE_TYPE_DRAW || type == StrokeRecord.STROKE_TYPE_LINE) {
                 canvas.drawPath(record.path, record.paint);
             } else if (type == StrokeRecord.STROKE_TYPE_BITMAP) {
                 canvas.drawBitmap(record.bitmap,record.matrix,null);
@@ -233,41 +240,48 @@ public class SketchView extends ImageView implements OnTouchListener {
     }
 
     private void touch_start(float x, float y) {
-        downX = x;
-        downY = y;
-        // Clearing undone list
+        preX = downX = x;
+        preY = downY = y;
         redoList.clear();
-        if (strokeType ==StrokeRecord.STROKE_TYPE_DRAW) {
-            if (strokeMode == ERASER) {
-                m_Paint.setColor(Color.WHITE);
-                m_Paint.setStrokeWidth(eraserSize);
-            } else {
-                m_Paint.setColor(strokeRealColor);
-                m_Paint.setStrokeWidth(strokeSize);
-            }
-            Paint newPaint = new Paint(m_Paint); // Clones the mPaint object
-            m_Path.reset();
-            m_Path.moveTo(x, y);
-            StrokeRecord record = new StrokeRecord(StrokeRecord.STROKE_TYPE_DRAW);
-            if (strokeType == StrokeRecord.STROKE_TYPE_DRAW) {
-                m_Path.lineTo(downX, downY);
-                record.paint = new Paint(m_Paint); // Clones the mPaint object
-                record.path = m_Path;
-            }
-            recordList.add(record);
-        } else if (strokeType == StrokeRecord.STROKE_TYPE_LINE) {
-
+        StrokeRecord record = new StrokeRecord(strokeType);
+//        setStrokeType(2);
+        if (strokeType == STROKE_TYPE_ERASER) {
+            m_Path = new Path();
+            m_Path.moveTo(downX, downY);
+            m_Paint.setColor(Color.WHITE);
+            m_Paint.setStrokeWidth(eraserSize);
+            record.paint = new Paint(m_Paint); // Clones the mPaint object
+            record.path = m_Path;
+        } else if (strokeType == STROKE_TYPE_DRAW || strokeType == STROKE_TYPE_LINE) {
+            m_Path = new Path();
+            m_Path.moveTo(downX, downY);
+            record.path = m_Path;
+            m_Paint.setColor(strokeRealColor);
+            m_Paint.setStrokeWidth(strokeSize);
+            record.paint = new Paint(m_Paint); // Clones the mPaint object
+        } else if (strokeType == STROKE_TYPE_CIRCLE) {
+        } else if (strokeType == STROKE_TYPE_RECTANGLE) {
+        } else if (strokeType == STROKE_TYPE_TEXT) {
         }
-
-
+        recordList.add(record);
     }
 
 
     private void touch_move(float x, float y) {
-//        m_Path.rLineTo((x + downX) / 2, (y + downY) / 2);
-        m_Path.quadTo(downX, downY, (x + downX) / 2, (y + downY) / 2);
-        downX = x;
-        downY = y;
+        if (strokeType == STROKE_TYPE_ERASER) {
+            m_Path.quadTo(preX, preY, (x + preX) / 2, (y + preY) / 2);
+        } else if (strokeType == STROKE_TYPE_DRAW) {
+            m_Path.quadTo(preX, preY, (x + preX) / 2, (y + preY) / 2);
+        } else if (strokeType == STROKE_TYPE_LINE) {
+            m_Path.reset();
+            m_Path.moveTo(downX, downY);
+            m_Path.lineTo(x, y);
+        } else if (strokeType == STROKE_TYPE_CIRCLE) {
+        } else if (strokeType == STROKE_TYPE_RECTANGLE) {
+        } else if (strokeType == STROKE_TYPE_TEXT) {
+        }
+        preX = x;
+        preY = y;
     }
 
 
@@ -285,7 +299,13 @@ public class SketchView extends ImageView implements OnTouchListener {
 //        }
 
         // kill this so we don't double draw
-        m_Path = new Path();
+        if (
+                strokeType == STROKE_TYPE_DRAW) {
+        } else if (strokeType == STROKE_TYPE_LINE) {
+        } else if (strokeType == STROKE_TYPE_CIRCLE) {
+        } else if (strokeType == STROKE_TYPE_RECTANGLE) {
+        } else if (strokeType == STROKE_TYPE_TEXT) {
+        }
     }
 
 
@@ -349,10 +369,10 @@ public class SketchView extends ImageView implements OnTouchListener {
 
     public void setSize(int size, int eraserOrStroke) {
         switch (eraserOrStroke) {
-            case STROKE:
+            case STROKE_TYPE_DRAW:
                 strokeSize = size;
                 break;
-            case ERASER:
+            case STROKE_TYPE_ERASER:
                 eraserSize = size;
                 break;
         }

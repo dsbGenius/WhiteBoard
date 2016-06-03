@@ -44,6 +44,14 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 
+import static com.yinghe.whiteboardlib.bean.StrokeRecord.STROKE_TYPE_BITMAP;
+import static com.yinghe.whiteboardlib.bean.StrokeRecord.STROKE_TYPE_CIRCLE;
+import static com.yinghe.whiteboardlib.bean.StrokeRecord.STROKE_TYPE_DRAW;
+import static com.yinghe.whiteboardlib.bean.StrokeRecord.STROKE_TYPE_ERASER;
+import static com.yinghe.whiteboardlib.bean.StrokeRecord.STROKE_TYPE_LINE;
+import static com.yinghe.whiteboardlib.bean.StrokeRecord.STROKE_TYPE_RECTANGLE;
+import static com.yinghe.whiteboardlib.bean.StrokeRecord.STROKE_TYPE_TEXT;
+
 public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawChangedListener, View.OnClickListener {
 
     public static final int COLOR_BLACK = Color.parseColor("#ff000000");
@@ -123,7 +131,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
 
     private void initDrawParams() {
         //默认为画笔模式
-        strokeMode = SketchView.STROKE;
+        strokeMode = STROKE_TYPE_DRAW;
 
         //画笔宽度缩放基准参数
         Drawable circleDrawable = getResources().getDrawable(R.drawable.circle);
@@ -145,15 +153,15 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
                 if (checkedId == R.id.stroke_type_rbtn_draw) {
-                    strokeType = StrokeRecord.STROKE_TYPE_DRAW;
+                    strokeType = STROKE_TYPE_DRAW;
                 } else if (checkedId == R.id.stroke_type_rbtn_line) {
-                    strokeType = StrokeRecord.STROKE_TYPE_LINE;
+                    strokeType = STROKE_TYPE_LINE;
                 } else if (checkedId == R.id.stroke_type_rbtn_circle) {
-                    strokeType = StrokeRecord.STROKE_TYPE_CIRCLE;
+                    strokeType = STROKE_TYPE_CIRCLE;
                 } else if (checkedId == R.id.stroke_type_rbtn_rectangle) {
-                    strokeType = StrokeRecord.STROKE_TYPE_RECTANGLE;
+                    strokeType = STROKE_TYPE_RECTANGLE;
                 }else if (checkedId == R.id.stroke_type_rbtn_text) {
-                    strokeType = StrokeRecord.STROKE_TYPE_TEXT;
+                    strokeType = STROKE_TYPE_TEXT;
                 }
                 mSketchView.setStrokeType(strokeType);
             }
@@ -176,7 +184,6 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                 mSketchView.setStrokeColor(color);
             }
         });
-//        strokeTypeRG.check(R.id.stroke_type_rbtn_draw);
         //画笔宽度拖动条
         strokeSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -192,7 +199,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress,
                                           boolean fromUser) {
-                setSeekBarProgress(progress, SketchView.STROKE);
+                setSeekBarProgress(progress, STROKE_TYPE_DRAW);
             }
         });
         strokeSeekBar.setProgress(SketchView.DEFAULT_STROKE_SIZE);
@@ -244,7 +251,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress,
                                           boolean fromUser) {
-                setSeekBarProgress(progress, SketchView.ERASER);
+                setSeekBarProgress(progress, STROKE_TYPE_ERASER);
             }
         });
         eraserSeekBar.setProgress(SketchView.DEFAULT_ERASER_SIZE);
@@ -297,7 +304,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         strokeSeekBar = (SeekBar) (popupStrokeLayout.findViewById(R.id.stroke_seekbar));
         strokeAlphaSeekBar = (SeekBar) (popupStrokeLayout.findViewById(R.id.stroke_alpha_seekbar));
         //画笔颜色
-        strokeTypeRG = (RadioGroup) popupStrokeLayout.findViewById(R.id.stroke_color_radio_group);
+        strokeTypeRG = (RadioGroup) popupStrokeLayout.findViewById(R.id.stroke_type_radio_group);
         strokeColorRG = (RadioGroup) popupStrokeLayout.findViewById(R.id.stroke_color_radio_group);
         // popupWindow布局
         LayoutInflater inflater2 = (LayoutInflater) getActivity().getSystemService(Activity
@@ -315,15 +322,9 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     }
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
-//        super.onConfigurationChanged(newConfig);
        getSketchSize();
     }
     private void getSketchSize() {
-//        int w = View.MeasureSpec.makeMeasureSpec(0,View.MeasureSpec.UNSPECIFIED);
-//        int h = View.MeasureSpec.makeMeasureSpec(0,View.MeasureSpec.UNSPECIFIED);
-//        mSketchView.measure(w, h);
-//        sketchViewHight = mSketchView.getMeasuredHeight();
-//        sketchViewWidth = mSketchView.getMeasuredWidth();
         ViewTreeObserver vto = mSketchView.getViewTreeObserver();
         vto.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
             public boolean onPreDraw() {
@@ -348,7 +349,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         int offset = Math.round((size - newSize) / 2);
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(newSize, newSize);
         lp.setMargins(offset, offset, offset, offset);
-        if (drawMode == SketchView.STROKE) {
+        if (drawMode == STROKE_TYPE_DRAW) {
             strokeImageView.setLayoutParams(lp);
         } else {
             eraserImageView.setLayoutParams(lp);
@@ -380,24 +381,31 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         int id = v.getId();
         if (id == R.id.sketch_stroke) {
             sketchPhoto.setAlpha(0.4f);
-//            scaleView.setEnabled(false);
-//            scaleView.setFocusable(false);
-            if (mSketchView.getStrokeMode() == SketchView.STROKE) {
-                showPopup(v, SketchView.STROKE);
-
+            if (mSketchView.getStrokeType() != STROKE_TYPE_ERASER) {
+                showPopup(v, STROKE_TYPE_DRAW);
             } else {
-                mSketchView.setStrokeMode(SketchView.STROKE);
+                int checkedId = strokeTypeRG.getCheckedRadioButtonId();
+                if (checkedId == R.id.stroke_type_rbtn_draw) {
+                    strokeType = STROKE_TYPE_DRAW;
+                } else if (checkedId == R.id.stroke_type_rbtn_line) {
+                    strokeType = STROKE_TYPE_LINE;
+                } else if (checkedId == R.id.stroke_type_rbtn_circle) {
+                    strokeType = STROKE_TYPE_CIRCLE;
+                } else if (checkedId == R.id.stroke_type_rbtn_rectangle) {
+                    strokeType = STROKE_TYPE_RECTANGLE;
+                } else if (checkedId == R.id.stroke_type_rbtn_text) {
+                    strokeType = STROKE_TYPE_TEXT;
+                }
+                mSketchView.setStrokeType(strokeType);
                 setAlpha(eraser, 0.4f);
                 setAlpha(stroke, 1f);
             }
         } else if (id == R.id.sketch_eraser) {
             sketchPhoto.setAlpha(0.4f);
-//            scaleView.setEnabled(false);
-//            scaleView.setFocusable(false);
-            if (mSketchView.getStrokeMode() == SketchView.ERASER) {
-                showPopup(v, SketchView.ERASER);
+            if (mSketchView.getStrokeType() == STROKE_TYPE_ERASER) {
+                showPopup(v, STROKE_TYPE_ERASER);
             } else {
-                mSketchView.setStrokeMode(SketchView.ERASER);
+                mSketchView.setStrokeType(STROKE_TYPE_ERASER);
                 setAlpha(stroke, 0.4f);
                 setAlpha(eraser, 1f);
             }
@@ -438,7 +446,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
             selector.origin(mSelectPath);
             selector.start(this, REQUEST_IMAGE);
         } else if (id == R.id.sure_action) {
-            StrokeRecord record = new StrokeRecord(StrokeRecord.STROKE_TYPE_BITMAP);
+            StrokeRecord record = new StrokeRecord(STROKE_TYPE_BITMAP);
             record.bitmap = scaleView.getPhotoSampleBM();
             record.matrix = new Matrix(scaleView.getPhotoMatrix());
             mSketchView.addRecord(record);
@@ -474,16 +482,14 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
 
     private void showPopup(View anchor, int drawMode) {
         if (BitmapUtils.isLandScreen(activity)) {
-//        if (true) {
-            if (drawMode == SketchView.STROKE) {
+            if (drawMode == STROKE_TYPE_DRAW) {
                 strokePopupWindow.showAsDropDown(anchor, BitmapUtils.dip2px(activity, -pupWindowsDPWidth), -anchor.getHeight());
             } else {
                 eraserPopupWindow.showAsDropDown(anchor, BitmapUtils.dip2px(activity, -pupWindowsDPWidth), -anchor.getHeight());
             }
         } else {
-            if (drawMode == SketchView.STROKE) {
+            if (drawMode == STROKE_TYPE_DRAW) {
                 strokePopupWindow.showAsDropDown(anchor, 0, BitmapUtils.dip2px(activity, -strokePupWindowsDPHeight) - anchor.getHeight());
-//                strokePopupWindow.showAsDropDown(anchor,0,);
             } else {
                 eraserPopupWindow.showAsDropDown(anchor, 0, BitmapUtils.dip2px(activity, -eraserPupWindowsDPHeight) - anchor.getHeight());
             }
