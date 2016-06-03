@@ -7,6 +7,8 @@ import android.graphics.BitmapFactory;
 import android.util.Log;
 import android.view.WindowManager;
 
+import java.io.InputStream;
+
 /**
  * Created by TangentLu on 2015/8/19.
  */
@@ -93,6 +95,19 @@ public class BitmapUtils {
 
         return inSampleSize;
     }
+    public static Bitmap getBitmapFromAssets(String path,Context context){
+        InputStream open = null;
+        Bitmap bitmap = null;
 
+        try {
+            String temp = "img/" + path;
+            open = context.getAssets().open(temp);
+            bitmap= BitmapFactory.decodeStream(open);
+            return bitmap;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
 }

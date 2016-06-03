@@ -108,6 +108,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         super.onCreate(savedInstanceState);
         activity = getActivity();//初始化上下文
         bitmapSize = Math.min(activity.getWindowManager().getDefaultDisplay().getWidth(), activity.getWindowManager().getDefaultDisplay().getHeight()) ;
+
         Log.i("xxx", "WhiteBoardFragment onCreate()");
     }
 
@@ -130,7 +131,6 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         assert circleDrawable != null;
         size = circleDrawable.getIntrinsicWidth();
     }
-
     private void initPopupWindows() {
         //画笔弹窗
         strokePopupWindow = new PopupWindow(activity);
