@@ -550,7 +550,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         Bitmap bitmap1 = mSketchView.getBitmap();
         int bgWidth = mSketchView.getWidth();
         int bgHeight =mSketchView.getHeight();
-        final Bitmap newBM = Bitmap.createBitmap(bgWidth, bgHeight, Bitmap.Config.ARGB_8888);
+        final Bitmap newBM = Bitmap.createBitmap(bgWidth, bgHeight, Bitmap.Config.RGB_565);
         Canvas canvas = new Canvas(newBM);
         canvas.setDrawFilter(new PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG));//抗锯齿
         canvas.drawBitmap(bitmap1, 0, 0, null);

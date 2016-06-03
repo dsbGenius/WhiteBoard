@@ -237,7 +237,7 @@ public class SketchView extends ImageView implements OnTouchListener {
         downY = y;
         // Clearing undone list
         redoList.clear();
-        if (strokeType ==StrokeRecord.STROKE_TYPE_DRAW ) {
+        if (strokeType ==StrokeRecord.STROKE_TYPE_DRAW) {
             if (strokeMode == ERASER) {
                 m_Paint.setColor(Color.WHITE);
                 m_Paint.setStrokeWidth(eraserSize);
@@ -298,14 +298,11 @@ public class SketchView extends ImageView implements OnTouchListener {
             return null;
 
         if (bitmap == null) {
-            bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+            bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
             bitmap.eraseColor(background);
         }
         Canvas canvas = new Canvas(bitmap);
         drawRecord(canvas);
-//        for (Pair<Path, Paint> p : paths) {
-//            canvas.drawPath(p.first, p.second);
-//        }
         return bitmap;
     }
 
