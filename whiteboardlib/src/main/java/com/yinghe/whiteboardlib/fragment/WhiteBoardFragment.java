@@ -556,6 +556,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         canvas.drawBitmap(bitmap1, 0, 0, null);
         canvas.save(Canvas.ALL_SAVE_FLAG);
         canvas.restore();
+//        newBM.compress(Bitmap.CompressFormat.PNG,80)
         return newBM;
     }
 
