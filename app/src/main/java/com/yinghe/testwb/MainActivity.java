@@ -1,6 +1,7 @@
 package com.yinghe.testwb;
 
 import android.app.FragmentTransaction;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
@@ -14,6 +15,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_IMAGE = 2;
     private ArrayList<String> mSelectPath;
+    private WhiteBoardFragment whiteBoardFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,5 +58,13 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_HOME);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
     }
 }

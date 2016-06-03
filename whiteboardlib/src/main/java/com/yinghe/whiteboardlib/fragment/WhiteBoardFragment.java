@@ -108,6 +108,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         super.onCreate(savedInstanceState);
         activity = getActivity();//初始化上下文
         bitmapSize = Math.min(activity.getWindowManager().getDefaultDisplay().getWidth(), activity.getWindowManager().getDefaultDisplay().getHeight()) ;
+        Log.i("xxx", "WhiteBoardFragment onCreate()");
     }
 
     @Override
@@ -314,8 +315,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     }
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
-
-        super.onConfigurationChanged(newConfig);
+//        super.onConfigurationChanged(newConfig);
        getSketchSize();
     }
     private void getSketchSize() {
