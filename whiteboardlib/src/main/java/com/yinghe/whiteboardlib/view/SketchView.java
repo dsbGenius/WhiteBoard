@@ -24,6 +24,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.view.MotionEvent;
@@ -76,7 +77,7 @@ public class SketchView extends ImageView implements OnTouchListener {
     private Context mContext;
 
     private Bitmap bitmap;
-
+    StrokeRecord curRecord;
 
     public void setStrokeType(int strokeType) {
         this.strokeType = strokeType;
@@ -230,6 +231,10 @@ public class SketchView extends ImageView implements OnTouchListener {
                 canvas.drawPath(record.path, record.paint);
             } else if (type == StrokeRecord.STROKE_TYPE_BITMAP) {
                 canvas.drawBitmap(record.bitmap,record.matrix,null);
+            } else if (type == STROKE_TYPE_CIRCLE) {
+                canvas.drawOval(record.rect,record.paint);
+            } else if (type == STROKE_TYPE_RECTANGLE) {
+                canvas.drawRect(record.rect,record.paint);
             }
         }
     }
@@ -243,27 +248,31 @@ public class SketchView extends ImageView implements OnTouchListener {
         preX = downX = x;
         preY = downY = y;
         redoList.clear();
-        StrokeRecord record = new StrokeRecord(strokeType);
+        curRecord = new StrokeRecord(strokeType);
 //        setStrokeType(2);
         if (strokeType == STROKE_TYPE_ERASER) {
             m_Path = new Path();
             m_Path.moveTo(downX, downY);
             m_Paint.setColor(Color.WHITE);
             m_Paint.setStrokeWidth(eraserSize);
-            record.paint = new Paint(m_Paint); // Clones the mPaint object
-            record.path = m_Path;
+            curRecord.paint = new Paint(m_Paint); // Clones the mPaint object
+            curRecord.path = m_Path;
         } else if (strokeType == STROKE_TYPE_DRAW || strokeType == STROKE_TYPE_LINE) {
             m_Path = new Path();
             m_Path.moveTo(downX, downY);
-            record.path = m_Path;
+            curRecord.path = m_Path;
             m_Paint.setColor(strokeRealColor);
             m_Paint.setStrokeWidth(strokeSize);
-            record.paint = new Paint(m_Paint); // Clones the mPaint object
-        } else if (strokeType == STROKE_TYPE_CIRCLE) {
-        } else if (strokeType == STROKE_TYPE_RECTANGLE) {
+            curRecord.paint = new Paint(m_Paint); // Clones the mPaint object
+        } else if (strokeType == STROKE_TYPE_CIRCLE||strokeType == STROKE_TYPE_RECTANGLE) {
+            RectF rect = new RectF(x,y,x,y);
+            curRecord.rect = rect;
+            m_Paint.setColor(strokeRealColor);
+            m_Paint.setStrokeWidth(strokeSize);
+            curRecord.paint = new Paint(m_Paint); // Clones the mPaint object
         } else if (strokeType == STROKE_TYPE_TEXT) {
         }
-        recordList.add(record);
+        recordList.add(curRecord);
     }
 
 
@@ -276,9 +285,9 @@ public class SketchView extends ImageView implements OnTouchListener {
             m_Path.reset();
             m_Path.moveTo(downX, downY);
             m_Path.lineTo(x, y);
-        } else if (strokeType == STROKE_TYPE_CIRCLE) {
-        } else if (strokeType == STROKE_TYPE_RECTANGLE) {
-        } else if (strokeType == STROKE_TYPE_TEXT) {
+        } else if (strokeType == STROKE_TYPE_CIRCLE||strokeType == STROKE_TYPE_RECTANGLE) {
+            curRecord.rect.set(downX<x?downX:x,downY<y?downY:y,downX>x?downX:x,downY>y?downY:y);
+        }else if (strokeType == STROKE_TYPE_TEXT) {
         }
         preX = x;
         preY = y;
@@ -299,13 +308,13 @@ public class SketchView extends ImageView implements OnTouchListener {
 //        }
 
         // kill this so we don't double draw
-        if (
-                strokeType == STROKE_TYPE_DRAW) {
-        } else if (strokeType == STROKE_TYPE_LINE) {
-        } else if (strokeType == STROKE_TYPE_CIRCLE) {
-        } else if (strokeType == STROKE_TYPE_RECTANGLE) {
-        } else if (strokeType == STROKE_TYPE_TEXT) {
-        }
+//        if (
+//                strokeType == STROKE_TYPE_DRAW) {
+//        } else if (strokeType == STROKE_TYPE_LINE) {
+//        } else if (strokeType == STROKE_TYPE_CIRCLE) {
+//        } else if (strokeType == STROKE_TYPE_RECTANGLE) {
+//        } else if (strokeType == STROKE_TYPE_TEXT) {
+//        }
     }
 
 

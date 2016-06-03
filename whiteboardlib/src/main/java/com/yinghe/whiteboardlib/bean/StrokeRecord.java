@@ -22,8 +22,8 @@ public class StrokeRecord {
     public Paint paint;//笔类
     public Path path;//画笔路径数据
     public PointF[] linePoints; //线数据
-    public RectF ovalRect; //圆数据
-    public Rect rectangleRect; //矩形数据
+    public RectF rect; //圆数据
+//    public Rect rectangleRect; //矩形数据
     public String text;//文字
     public PointF[] textLocation;//文字位置
     public Bitmap bitmap;//图形
