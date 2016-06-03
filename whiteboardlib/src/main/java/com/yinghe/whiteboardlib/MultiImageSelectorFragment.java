@@ -331,6 +331,10 @@ public class MultiImageSelectorFragment extends Fragment {
         }
     }
 
+    /**
+     * 将裁剪后的图片保存到本地以及回调到画板中
+     * @param bitmap
+     */
     private void dealWithBitmap(Bitmap bitmap) {
         if (bitmap != null) {
             String sdStatus = Environment.getExternalStorageState();
@@ -362,7 +366,6 @@ public class MultiImageSelectorFragment extends Fragment {
                 }
 
             }
-//                        saveInDisk(bitmap);// 保存在SD卡中
 
         }
     }
@@ -426,6 +429,12 @@ public class MultiImageSelectorFragment extends Fragment {
         }
     }
 
+    /**
+     * 请求 写入sd卡权限
+     * @param permission
+     * @param rationale
+     * @param requestCode
+     */
     private void requestPermission(final String permission, String rationale, final int requestCode) {
         if (shouldShowRequestPermissionRationale(permission)) {
             new AlertDialog.Builder(getContext())
