@@ -11,6 +11,9 @@ public class Image {
     public String name;
     public long time;
 
+    public Image() {
+    }
+
     public Image(String path, String name, long time){
         this.path = path;
         this.name = name;

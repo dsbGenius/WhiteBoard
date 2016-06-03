@@ -577,8 +577,29 @@ public class MultiImageSelectorFragment extends Fragment {
                         mImageAdapter.setDefaultSelected(resultList);
                     }
                     if (!hasFolderGened) {
-                        mFolderAdapter.setData(mResultFolder);
-                        hasFolderGened = true;
+                        //在这里添加assets
+                        try {
+                            String[] files =getActivity().getAssets().list("img");
+                            List<Image> AssetImages = new ArrayList<>();
+                            Folder folder = new Folder();
+                            for (int i = 0; i < files.length; i++) {
+                                Image image = new Image();
+                                image.path = files[i];
+                                image.name = "assets/"+files[i];
+                                AssetImages.add(image);
+                            }
+                            folder.cover = AssetImages.get(0);
+                            folder.images = AssetImages;
+                            folder.name = "素材";
+                            folder.path = "assets";
+                            mResultFolder.add(0,folder);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }finally {
+                            mFolderAdapter.setData(mResultFolder);
+                            hasFolderGened = true;
+                        }
+
                     }
                 }
             }
