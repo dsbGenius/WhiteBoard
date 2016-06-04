@@ -24,7 +24,6 @@ import android.widget.ImageView;
 
 import com.yinghe.whiteboardlib.R;
 import com.yinghe.whiteboardlib.Utils.BitmapUtils;
-import com.yinghe.whiteboardlib.fragment.WhiteBoardFragment;
 
 import java.io.File;
 
@@ -233,15 +232,29 @@ public class ScaleView extends ImageView implements
     }
 
     public void setPhotoPath(String path) {
+        if (path.split("/").length > 1) {
+            photoSampleBM = setSDCardPhoto(path);
+        } else {
+            photoSampleBM = setAssetsPhoto(path);
+        }
+        if (photoSampleBM != null) {
+            setImageBitmap(photoSampleBM);
+            first = true;
+            invalidate();
+        }
+    }
+
+    public Bitmap setSDCardPhoto(String path) {
         File file = new File(path);
         if (file.exists()) {
-            photoSampleBM = BitmapUtils.decodeSampleBitMapFromFile(context, path,simpleScale);
-            if (photoSampleBM != null) {
-                setImageBitmap(photoSampleBM);
-            }
+            return BitmapUtils.decodeSampleBitMapFromFile(context, path, simpleScale);
+        } else {
+            return null;
         }
-        first = true;
-        invalidate();
+    }
+
+    public Bitmap setAssetsPhoto(String path) {
+        return BitmapUtils.getBitmapFromAssets(context, path);
     }
     private void drawPhotoBorder(Canvas canvas) {
         if (first) {//首次绘制调整边界

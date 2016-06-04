@@ -174,7 +174,7 @@ public class FolderAdapter extends BaseAdapter {
                     }
                 } else {
                     Bitmap bitmap = null;
-                   bitmap = BitmapUtils.getBitmapFromAssets(data.cover.path, mContext);
+                    bitmap = BitmapUtils.getBitmapFromAssets(mContext, data.cover.path);
                     if (bitmap != null) {
                         cover.setImageBitmap(bitmap);
                     }else {

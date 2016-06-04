@@ -240,7 +240,7 @@ public class ImageGridAdapter extends BaseAdapter {
                 }
             } else {
                 Bitmap bitmap = null;
-                bitmap = BitmapUtils.getBitmapFromAssets(data.path, mContext);
+                bitmap = BitmapUtils.getBitmapFromAssets(mContext,data.path );
                 if (bitmap != null) {
                     image.setImageBitmap(bitmap);
                 }else {

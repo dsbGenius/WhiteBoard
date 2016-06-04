@@ -35,8 +35,8 @@ public class BitmapUtils {
         BitmapFactory.decodeFile(filePath, options);
         //再用屏幕一半高宽、缩小后的高宽对比，取小值进行缩放
         WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-        int reqWidth = wm.getDefaultDisplay().getWidth()/2;
-        int reqHeight = wm.getDefaultDisplay().getWidth()/2;
+        int reqWidth = wm.getDefaultDisplay().getWidth();
+        int reqHeight = wm.getDefaultDisplay().getWidth();
         int scaleWidth = (int) (options.outWidth * sampleScale);
         int scaleHeight = (int) (options.outHeight * sampleScale);
         reqWidth = Math.min(reqWidth, scaleWidth);
@@ -95,17 +95,15 @@ public class BitmapUtils {
 
         return inSampleSize;
     }
-    public static Bitmap getBitmapFromAssets(String path,Context context){
+    public static Bitmap getBitmapFromAssets(Context context,String path){
         InputStream open = null;
         Bitmap bitmap = null;
-
         try {
             String temp = "img/" + path;
             open = context.getAssets().open(temp);
             bitmap= BitmapFactory.decodeStream(open);
             return bitmap;
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception e) {e.printStackTrace();
             return null;
         }
     }
