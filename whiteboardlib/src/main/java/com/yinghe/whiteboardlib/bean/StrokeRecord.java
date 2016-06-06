@@ -7,6 +7,8 @@ import android.graphics.Path;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.location.Location;
+import android.text.TextPaint;
 
 public class StrokeRecord {
     public static final int STROKE_TYPE_ERASER = 1;
@@ -25,7 +27,11 @@ public class StrokeRecord {
     public RectF rect; //圆数据
 //    public Rect rectangleRect; //矩形数据
     public String text;//文字
-    public PointF[] textLocation;//文字位置
+    public TextPaint textPaint;//笔类
+
+    public int textOffX;
+    public int textOffY;
+    public int textWidth;//文字位置
     public Bitmap bitmap;//图形
     public Matrix matrix;//图形
 

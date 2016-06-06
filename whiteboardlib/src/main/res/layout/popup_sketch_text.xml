@@ -4,17 +4,18 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="4dp"
-    android:minWidth="300dp">
+    android:padding="0dp">
 
     <EditText
         android:id="@+id/text_pupwindow_et"
-        android:layout_width="match_parent"
-        android:minHeight="40dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:minWidth="100dp"
+        android:maxWidth="200dp"
         android:hint="请输入文字"
+        android:imeOptions="actionDone"
         android:selectAllOnFocus="true"
-        android:textSize="18sp" />
+        android:textSize="18dp" />
 
 
 </LinearLayout>

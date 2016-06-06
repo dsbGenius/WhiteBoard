@@ -25,6 +25,9 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
+import android.text.Layout;
+import android.text.StaticLayout;
+import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.view.MotionEvent;
@@ -48,7 +51,7 @@ import static com.yinghe.whiteboardlib.bean.StrokeRecord.STROKE_TYPE_TEXT;
 public class SketchView extends ImageView implements OnTouchListener {
 
     public interface TextWindowCallback {
-        void onText(View view, int xOff, int yOff, String s);
+        void onText(View view, StrokeRecord record);
     }
 
 
@@ -245,6 +248,14 @@ public class SketchView extends ImageView implements OnTouchListener {
                 canvas.drawOval(record.rect,record.paint);
             } else if (type == STROKE_TYPE_RECTANGLE) {
                 canvas.drawRect(record.rect,record.paint);
+            } else if (type == STROKE_TYPE_TEXT) {
+                if (record.text != null) {
+                    StaticLayout layout = new StaticLayout(record.text, record.textPaint, record.textWidth, Layout.Alignment.ALIGN_NORMAL, 1.0F, 0.0F, true);
+//                    StaticLayout layout = new StaticLayout(record.text, record.textPaint,50, Layout.Alignment.ALIGN_NORMAL, 1.0F, 0.0F, true);
+                    canvas.translate(record.textOffX, record.textOffY);
+                    layout.draw(canvas);
+                    canvas.translate(-record.textOffX, -record.textOffY);
+                }
             }
         }
     }
@@ -258,7 +269,7 @@ public class SketchView extends ImageView implements OnTouchListener {
         preX = downX = x;
         preY = downY = y;
         redoList.clear();
-//        setStrokeType(6);
+        setStrokeType(6);
         curRecord = new StrokeRecord(strokeType);
         if (strokeType == STROKE_TYPE_ERASER) {
             m_Path = new Path();
@@ -281,7 +292,12 @@ public class SketchView extends ImageView implements OnTouchListener {
             m_Paint.setStrokeWidth(strokeSize);
             curRecord.paint = new Paint(m_Paint); // Clones the mPaint object
         } else if (strokeType == STROKE_TYPE_TEXT) {
-            textWindowCallback.onText(this, (int) x, (int) y - height, "1111111");
+            curRecord.textOffX = (int) x;
+            curRecord.textOffY = (int) y;
+            TextPaint tp = new TextPaint();
+            tp.setColor(strokeRealColor);
+            curRecord.textPaint = tp; // Clones the mPaint object
+            textWindowCallback.onText(this, curRecord);
         }
         recordList.add(curRecord);
     }
@@ -299,6 +315,7 @@ public class SketchView extends ImageView implements OnTouchListener {
         } else if (strokeType == STROKE_TYPE_CIRCLE||strokeType == STROKE_TYPE_RECTANGLE) {
             curRecord.rect.set(downX<x?downX:x,downY<y?downY:y,downX>x?downX:x,downY>y?downY:y);
         }else if (strokeType == STROKE_TYPE_TEXT) {
+
         }
         preX = x;
         preY = y;
@@ -306,26 +323,6 @@ public class SketchView extends ImageView implements OnTouchListener {
 
 
     private void touch_up() {
-//        StrokeRecord record = new StrokeRecord(STROKE_TYPE_DRAW);
-//        if (strokeType == STROKE_TYPE_DRAW) {
-//            m_Path.lineTo(downX, downY);
-//            record.paint = new Paint(m_Paint); // Clones the mPaint object
-//            record.path = m_Path;
-//        }
-//        recordList.add(record);
-//        // Avoids that a sketch with just erasures is saved
-//        if (!(paths.size() == 0 && strokeMode == ERASER && bitmap == null)) {
-//            paths.add(new Pair<>(m_Path, newPaint));
-//        }
-
-        // kill this so we don't double draw
-//        if (
-//                strokeType == STROKE_TYPE_DRAW) {
-//        } else if (strokeType == STROKE_TYPE_LINE) {
-//        } else if (strokeType == STROKE_TYPE_CIRCLE) {
-//        } else if (strokeType == STROKE_TYPE_RECTANGLE) {
-//        } else if (strokeType == STROKE_TYPE_TEXT) {
-//        }
     }
 
 

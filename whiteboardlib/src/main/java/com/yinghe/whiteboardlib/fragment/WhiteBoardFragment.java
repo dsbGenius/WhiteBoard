@@ -3,6 +3,7 @@ package com.yinghe.whiteboardlib.fragment;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Fragment;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -12,6 +13,7 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PaintFlagsDrawFilter;
+import android.graphics.PointF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
@@ -24,6 +26,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -260,10 +263,20 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
 
         textPopupWindow = new PopupWindow(activity);
         textPopupWindow.setContentView(popupTextLayout);
-        textPopupWindow.setWidth(BitmapUtils.dip2px(getActivity(), pupWindowsDPWidth));//宽度200dp
+//        textPopupWindow.setWidth(BitmapUtils.dip2px(getActivity(), pupWindowsDPWidth));//宽度200dp
+        textPopupWindow.setWidth(WindowManager.LayoutParams.WRAP_CONTENT);//宽度200dp
         textPopupWindow.setHeight(WindowManager.LayoutParams.WRAP_CONTENT);//高度自适应
         textPopupWindow.setFocusable(true);
         textPopupWindow.setBackgroundDrawable(new BitmapDrawable());//设置空白背景
+        textPopupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
+            @Override
+            public void onDismiss() {
+                if (!editText.getText().toString().equals("")) {
+                    StrokeRecord record = new StrokeRecord(strokeType);
+                    record.text = editText.getText().toString();
+                }
+            }
+        });
     }
 
 
@@ -304,8 +317,8 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         cancelAction.setOnClickListener(this);
         mSketchView.setTextWindowCallback(new SketchView.TextWindowCallback() {
             @Override
-            public void onText(View anchor, int x, int y, String s) {
-                showTextPopupWindow(anchor, x, y, s);
+            public void onText(View anchor, StrokeRecord record) {
+                showTextPopupWindow(anchor, record);
             }
         });
 
@@ -433,7 +446,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
             askForErase();
         } else if (id == R.id.sketch_save) {
             if (mSketchView.getRecordCount() == 0) {
-                Toast.makeText(getActivity(), "你还没有手绘", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), "您还没有绘图", Toast.LENGTH_SHORT).show();
                 return;
             }
             //保存
@@ -512,9 +525,22 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         }
     }
 
-    private void showTextPopupWindow(View anchor, int xOff, int yOff, String s) {
-        editText.setText(s);
-        textPopupWindow.showAsDropDown(anchor, xOff, yOff);
+    private void showTextPopupWindow(View anchor, final StrokeRecord record) {
+//        editText.setText(s);
+        editText.requestFocus();
+        textPopupWindow.showAsDropDown(anchor, record.textOffX, record.textOffY - mSketchView.getHeight());
+//        textPopupWindow.setSoftInputMode( WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
+        InputMethodManager imm = (InputMethodManager) activity
+                .getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.toggleSoftInput(0, InputMethodManager.HIDE_NOT_ALWAYS);
+        textPopupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
+            @Override
+            public void onDismiss() {
+                record.text = editText.getText().toString();
+                record.textPaint.setTextSize(editText.getTextSize());
+                record.textWidth = editText.getMaxWidth();
+            }
+        });
     }
 
     public void save(final String imgName) {
