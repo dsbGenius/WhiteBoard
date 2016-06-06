@@ -38,7 +38,7 @@ public class ScaleView extends ImageView implements
 {
     private static final String TAG = ScaleView.class.getSimpleName();
     public static  float SCALE_MAX = 4.0f;
-    private static  float SCALE_MIN = 0.1f;
+    private static  float SCALE_MIN = 0.2f;
     private static final int MODE_DRAG = 1;
     private static final int MODE_SCALE = 2;
     private static final int MODE_ROTATE = 3;
@@ -149,6 +149,7 @@ public class ScaleView extends ImageView implements
         float scaleFactor = detector.getScaleFactor();
         //设置Matrix缩放参数
         if ((scaleFactor < 1 && len >= photoLen * SCALE_MIN) || (scaleFactor > 1 && len <= photoLen * SCALE_MAX)) {
+            Log.e(scaleFactor + "", scaleFactor + "");
             mScaleMatrix.postScale(scaleFactor, scaleFactor, photoCorners[8], photoCorners[9]);
             setImageMatrix(mScaleMatrix);
         }
@@ -228,7 +229,7 @@ public class ScaleView extends ImageView implements
 
     private void setLimitScale() {
         SCALE_MAX = Math.max(getWidth(), getHeight()) / Math.max(photoRectSrc.width(), photoRectSrc.height());
-        SCALE_MIN = SCALE_MAX / 5;
+//        SCALE_MIN = SCALE_MAX / 5;
     }
 
     public void setPhotoPath(String path) {
