@@ -298,6 +298,7 @@ public class SketchView extends ImageView implements OnTouchListener {
             tp.setColor(strokeRealColor);
             curRecord.textPaint = tp; // Clones the mPaint object
             textWindowCallback.onText(this, curRecord);
+            return;
         }
         recordList.add(curRecord);
     }

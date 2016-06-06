@@ -13,7 +13,6 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PaintFlagsDrawFilter;
-import android.graphics.PointF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
@@ -529,7 +528,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
 //        editText.setText(s);
         editText.requestFocus();
         textPopupWindow.showAsDropDown(anchor, record.textOffX, record.textOffY - mSketchView.getHeight());
-//        textPopupWindow.setSoftInputMode( WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
+        textPopupWindow.setSoftInputMode(PopupWindow.INPUT_METHOD_NEEDED);
         InputMethodManager imm = (InputMethodManager) activity
                 .getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.toggleSoftInput(0, InputMethodManager.HIDE_NOT_ALWAYS);
@@ -539,6 +538,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                 record.text = editText.getText().toString();
                 record.textPaint.setTextSize(editText.getTextSize());
                 record.textWidth = editText.getMaxWidth();
+                mSketchView.addRecord(record);
             }
         });
     }
