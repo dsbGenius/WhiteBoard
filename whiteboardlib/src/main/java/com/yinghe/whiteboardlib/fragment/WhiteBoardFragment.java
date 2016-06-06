@@ -23,6 +23,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -97,10 +98,11 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     int strokePupWindowsDPHeight = 275;//画笔弹窗高度，单位DP
     int eraserPupWindowsDPHeight = 90;//橡皮擦弹窗高度，单位DP
 
-    PopupWindow strokePopupWindow, eraserPopupWindow;//画笔、橡皮擦参数设置弹窗实例
-    private View popupStrokeLayout, popupEraserLayout;//画笔、橡皮擦弹窗布局
+    PopupWindow strokePopupWindow, eraserPopupWindow, textPopupWindow;//画笔、橡皮擦参数设置弹窗实例
+    private View popupStrokeLayout, popupEraserLayout, popupTextLayout;//画笔、橡皮擦弹窗布局
     private SeekBar strokeSeekBar, strokeAlphaSeekBar, eraserSeekBar;
     private ImageView strokeImageView, strokeAlphaImage, eraserImageView;//画笔宽度，画笔不透明度，橡皮擦宽度IV
+    private EditText editText;//绘制文字的内容
     private int size;
     private AlertDialog dialog;
     private ArrayList<String> mSelectPath;
@@ -255,6 +257,13 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
             }
         });
         eraserSeekBar.setProgress(SketchView.DEFAULT_ERASER_SIZE);
+
+        textPopupWindow = new PopupWindow(activity);
+        textPopupWindow.setContentView(popupTextLayout);
+        textPopupWindow.setWidth(BitmapUtils.dip2px(getActivity(), pupWindowsDPWidth));//宽度200dp
+        textPopupWindow.setHeight(WindowManager.LayoutParams.WRAP_CONTENT);//高度自适应
+        textPopupWindow.setFocusable(true);
+        textPopupWindow.setBackgroundDrawable(new BitmapDrawable());//设置空白背景
     }
 
 
@@ -293,11 +302,17 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         sketchPhoto.setOnClickListener(this);
         sureAction.setOnClickListener(this);
         cancelAction.setOnClickListener(this);
+        mSketchView.setTextWindowCallback(new SketchView.TextWindowCallback() {
+            @Override
+            public void onText(View anchor, int x, int y, String s) {
+                showTextPopupWindow(anchor, x, y, s);
+            }
+        });
 
         // popupWindow布局
         LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Activity
                 .LAYOUT_INFLATER_SERVICE);
-        //画笔参数布局
+        //画笔弹窗布局
         popupStrokeLayout = inflater.inflate(R.layout.popup_sketch_stroke, null);
         strokeImageView = (ImageView) popupStrokeLayout.findViewById(R.id.stroke_circle);
         strokeAlphaImage = (ImageView) popupStrokeLayout.findViewById(R.id.stroke_alpha_circle);
@@ -306,14 +321,15 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         //画笔颜色
         strokeTypeRG = (RadioGroup) popupStrokeLayout.findViewById(R.id.stroke_type_radio_group);
         strokeColorRG = (RadioGroup) popupStrokeLayout.findViewById(R.id.stroke_color_radio_group);
-        // popupWindow布局
-        LayoutInflater inflater2 = (LayoutInflater) getActivity().getSystemService(Activity
-                .LAYOUT_INFLATER_SERVICE);
-        //橡皮擦参数布局
-        popupEraserLayout = inflater2.inflate(R.layout.popup_sketch_eraser, null);
+
+        //橡皮擦弹窗布局
+        popupEraserLayout = inflater.inflate(R.layout.popup_sketch_eraser, null);
         eraserImageView = (ImageView) popupEraserLayout.findViewById(R.id.stroke_circle);
         eraserSeekBar = (SeekBar) (popupEraserLayout.findViewById(R.id.stroke_seekbar));
-        getSketchSize();
+        //文本录入弹窗布局
+        popupTextLayout = inflater.inflate(R.layout.popup_sketch_text, null);
+        editText = (EditText) popupTextLayout.findViewById(R.id.text_pupwindow_et);
+        getSketchSize();//计算选择图片弹窗的高宽
     }
 
     @Override
@@ -382,7 +398,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         if (id == R.id.sketch_stroke) {
             sketchPhoto.setAlpha(0.4f);
             if (mSketchView.getStrokeType() != STROKE_TYPE_ERASER) {
-                showPopup(v, STROKE_TYPE_DRAW);
+                showParamsPopupWindow(v, STROKE_TYPE_DRAW);
             } else {
                 int checkedId = strokeTypeRG.getCheckedRadioButtonId();
                 if (checkedId == R.id.stroke_type_rbtn_draw) {
@@ -403,7 +419,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         } else if (id == R.id.sketch_eraser) {
             sketchPhoto.setAlpha(0.4f);
             if (mSketchView.getStrokeType() == STROKE_TYPE_ERASER) {
-                showPopup(v, STROKE_TYPE_ERASER);
+                showParamsPopupWindow(v, STROKE_TYPE_ERASER);
             } else {
                 mSketchView.setStrokeType(STROKE_TYPE_ERASER);
                 setAlpha(stroke, 0.4f);
@@ -480,7 +496,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         }
     }
 
-    private void showPopup(View anchor, int drawMode) {
+    private void showParamsPopupWindow(View anchor, int drawMode) {
         if (BitmapUtils.isLandScreen(activity)) {
             if (drawMode == STROKE_TYPE_DRAW) {
                 strokePopupWindow.showAsDropDown(anchor, BitmapUtils.dip2px(activity, -pupWindowsDPWidth), -anchor.getHeight());
@@ -494,6 +510,11 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                 eraserPopupWindow.showAsDropDown(anchor, 0, BitmapUtils.dip2px(activity, -eraserPupWindowsDPHeight) - anchor.getHeight());
             }
         }
+    }
+
+    private void showTextPopupWindow(View anchor, int xOff, int yOff, String s) {
+        editText.setText(s);
+        textPopupWindow.showAsDropDown(anchor, xOff, yOff);
     }
 
     public void save(final String imgName) {

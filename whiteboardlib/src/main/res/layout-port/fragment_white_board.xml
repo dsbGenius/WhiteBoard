@@ -18,67 +18,74 @@
             android:layout_above="@id/controlLayout"
             android:background="#efeded">
 
-            <include layout="@layout/include_draw_content_layout"/>
+            <include layout="@layout/include_draw_content_layout" />
         </FrameLayout>
 
         <FrameLayout
             android:id="@+id/controlLayout"
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:orientation="horizontal"
+            android:layout_alignParentBottom="true"
             android:background="@color/gray"
-            android:layout_alignParentBottom="true">
+            android:orientation="horizontal">
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:background="@color/gray"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:background="@color/gray">
 
                 <ImageView
-                android:id="@+id/sketch_stroke"
-                style="@style/control_btn"
-                android:src="@drawable/ic_brush_grey600_24dp" />
+                    android:id="@+id/sketch_stroke"
+                    style="@style/control_btn"
+                    android:src="@drawable/ic_brush_grey600_24dp" />
 
                 <ImageView
-                android:id="@+id/sketch_eraser"
-                android:alpha="0.4"
-                style="@style/control_btn"
-                android:src="@drawable/ic_eraser" />
+                    android:id="@+id/sketch_eraser"
+                    style="@style/control_btn"
+                    android:alpha="0.4"
+                    android:src="@drawable/ic_eraser" />
 
                 <ImageView
-                android:id="@+id/sketch_undo"
-                style="@style/control_btn"
-                android:alpha="0.4"
-                android:src="@drawable/ic_undo_grey600_24dp" />
+                    android:id="@+id/sketch_undo"
+                    style="@style/control_btn"
+                    android:alpha="0.4"
+                    android:src="@drawable/ic_undo_grey600_24dp" />
 
                 <ImageView
-                android:id="@+id/sketch_redo"
-                style="@style/control_btn"
-                android:alpha="0.4"
-                android:src="@drawable/ic_redo_grey600_24dp" />
+                    android:id="@+id/sketch_redo"
+                    style="@style/control_btn"
+                    android:alpha="0.4"
+                    android:src="@drawable/ic_redo_grey600_24dp" />
 
                 <ImageView
-                android:id="@+id/sketch_photo"
-                style="@style/control_btn"
-                android:src="@drawable/ic_photo_dark" />
+                    android:id="@+id/sketch_photo"
+                    style="@style/control_btn"
+                    android:src="@drawable/ic_photo_dark" />
+
+                <!--<ImageView-->
+                <!--android:id="@+id/sketch_backgroud"-->
+                <!--style="@style/control_btn"-->
+                <!--android:src="@drawable/ic_backgroud" />-->
 
                 <ImageView
-                android:id="@+id/sketch_save"
-                style="@style/control_btn"
-                android:src="@drawable/ic_file" />
+                    android:id="@+id/sketch_save"
+                    style="@style/control_btn"
+                    android:src="@drawable/ic_file" />
 
                 <ImageView
-                android:id="@+id/sketch_erase"
-                style="@style/control_btn"
-                android:src="@drawable/ic_delete_grey600_48dp" />
+                    android:id="@+id/sketch_erase"
+                    style="@style/control_btn"
+                    android:src="@drawable/ic_delete_grey600_48dp" />
             </LinearLayout>
+
             <LinearLayout
-                android:background="@color/gray"
-                android:visibility="gone"
-                android:orientation="horizontal"
                 android:id="@+id/sure_action_layout"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:background="@color/gray"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
                 <ImageView
                     android:id="@+id/cancel_action"
                     style="@style/control_btn.action"
@@ -92,25 +99,26 @@
         </FrameLayout>
 
 
-
     </RelativeLayout>
 
     <LinearLayout
-        android:layout_gravity="bottom"
         android:layout_width="match_parent"
         android:layout_height="40dp"
-        android:visibility="gone"
-        android:orientation="horizontal">
+        android:layout_gravity="bottom"
+        android:orientation="horizontal"
+        android:visibility="gone">
+
         <Button
             android:id="@+id/bt_show_bg"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="原图"/>
+            android:text="原图" />
+
         <Button
             android:id="@+id/bt_show_bg_gray"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="手绘图"/>
+            android:text="手绘图" />
     </LinearLayout>
 
 </FrameLayout>

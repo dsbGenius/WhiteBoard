@@ -47,6 +47,16 @@ import static com.yinghe.whiteboardlib.bean.StrokeRecord.STROKE_TYPE_TEXT;
 
 public class SketchView extends ImageView implements OnTouchListener {
 
+    public interface TextWindowCallback {
+        void onText(View view, int xOff, int yOff, String s);
+    }
+
+
+    public void setTextWindowCallback(TextWindowCallback textWindowCallback) {
+        this.textWindowCallback = textWindowCallback;
+    }
+
+    private TextWindowCallback textWindowCallback;
     private static final float TOUCH_TOLERANCE = 4;
 
     //    public static final int STROKE = 0;
@@ -248,8 +258,8 @@ public class SketchView extends ImageView implements OnTouchListener {
         preX = downX = x;
         preY = downY = y;
         redoList.clear();
+//        setStrokeType(6);
         curRecord = new StrokeRecord(strokeType);
-//        setStrokeType(2);
         if (strokeType == STROKE_TYPE_ERASER) {
             m_Path = new Path();
             m_Path.moveTo(downX, downY);
@@ -271,6 +281,7 @@ public class SketchView extends ImageView implements OnTouchListener {
             m_Paint.setStrokeWidth(strokeSize);
             curRecord.paint = new Paint(m_Paint); // Clones the mPaint object
         } else if (strokeType == STROKE_TYPE_TEXT) {
+            textWindowCallback.onText(this, (int) x, (int) y - height, "1111111");
         }
         recordList.add(curRecord);
     }
