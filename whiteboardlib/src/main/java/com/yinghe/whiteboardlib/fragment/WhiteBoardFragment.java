@@ -88,9 +88,6 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
 
     RadioGroup strokeTypeRG,strokeColorRG;
 
-    Button btShowBg;
-    Button btShowBgGray;
-
     Activity activity;//上下文
 
     int strokeMode;//模式
@@ -262,11 +259,11 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
 
         textPopupWindow = new PopupWindow(activity);
         textPopupWindow.setContentView(popupTextLayout);
-//        textPopupWindow.setWidth(BitmapUtils.dip2px(getActivity(), pupWindowsDPWidth));//宽度200dp
         textPopupWindow.setWidth(WindowManager.LayoutParams.WRAP_CONTENT);//宽度200dp
         textPopupWindow.setHeight(WindowManager.LayoutParams.WRAP_CONTENT);//高度自适应
         textPopupWindow.setFocusable(true);
-        textPopupWindow.setBackgroundDrawable(new BitmapDrawable());//设置空白背景
+        textPopupWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE | WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+        textPopupWindow.setInputMethodMode(PopupWindow.INPUT_METHOD_NEEDED);
         textPopupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
             @Override
             public void onDismiss() {
@@ -300,8 +297,8 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         sureActionLayout = view.findViewById(R.id.sure_action_layout);
         sureAction = (ImageView) view.findViewById(R.id.sure_action);
         cancelAction = (ImageView) view.findViewById(R.id.cancel_action);
-        btShowBg = (Button) view.findViewById(R.id.bt_show_bg);
-        btShowBgGray = (Button) view.findViewById(R.id.bt_show_bg_gray);
+//        btShowBg = (Button) view.findViewById(R.id.bt_show_bg);
+//        btShowBgGray = (Button) view.findViewById(R.id.bt_show_bg_gray);
 
         //设置点击监听
         mSketchView.setOnDrawChangedListener(this);//设置撤销动作监听器
@@ -363,8 +360,6 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                     sketchViewWidth = width;
                     Log.i("onPreDraw", sketchViewHight + "  " + sketchViewWidth);
                 }
-//                Log.i("onPreDraw h w", height + "  " + width);
-
                 return true;
             }
         });

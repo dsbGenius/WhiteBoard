@@ -1,21 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="0dp">
-
-    <EditText
-        android:id="@+id/text_pupwindow_et"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:minWidth="100dp"
-        android:maxWidth="200dp"
-        android:hint="请输入文字"
-        android:imeOptions="actionDone"
-        android:selectAllOnFocus="true"
-        android:textSize="18dp" />
-
-
-</LinearLayout>
+<EditText xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/text_pupwindow_et"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:hint="请输入文字"
+    android:imeOptions="actionDone"
+    android:maxWidth="200dp"
+    android:minWidth="100dp"
+    android:background="@color/gray"
+    android:selectAllOnFocus="true"
+    android:textSize="25dp" />

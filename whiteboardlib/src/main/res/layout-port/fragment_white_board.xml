@@ -4,17 +4,21 @@
     android:clipToPadding="false"
     android:fitsSystemWindows="false">
 
+    <!--<ScrollView-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="match_parent"-->
+    <!--android:fillViewport="true">-->
 
     <RelativeLayout
         android:id="@+id/white_board"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="#FFFFFF"
-        android:orientation="horizontal">
-
-        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+        android:background="#FFFFFF"
+            android:orientation="horizontal">
+
+        <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
             android:layout_above="@id/controlLayout"
             android:background="#efeded">
 
@@ -100,25 +104,5 @@
 
 
     </RelativeLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:layout_gravity="bottom"
-        android:orientation="horizontal"
-        android:visibility="gone">
-
-        <Button
-            android:id="@+id/bt_show_bg"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="原图" />
-
-        <Button
-            android:id="@+id/bt_show_bg_gray"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="手绘图" />
-    </LinearLayout>
-
+    <!--</ScrollView>-->
 </FrameLayout>
