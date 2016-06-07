@@ -13,6 +13,7 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PaintFlagsDrawFilter;
+import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
@@ -68,6 +69,11 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     View rootView;
     ScaleView scaleView;
 
+    int keyboardHeight;
+    int isTextPopVisible;
+    int textOffX;
+    int textOffY;
+
     RelativeLayout whiteBoardLayout;//画板布局
     SketchView mSketchView;//画板
     ImageView ivBg;//画板背景图片
@@ -93,8 +99,6 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     int strokeMode;//模式
     int strokeType;//模式
 
-    int isLayoutUp;//
-    int keyHeight;
 
     int pupWindowsDPWidth = 300;//弹窗宽度，单位DP
     int strokePupWindowsDPHeight = 275;//画笔弹窗高度，单位DP
@@ -127,7 +131,25 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_white_board, container, false);
+        final View view = inflater.inflate(R.layout.fragment_white_board, container, false);
+        view.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                Rect r = new Rect();
+                view.getWindowVisibleDisplayFrame(r);
+                int screenHeight = view.getHeight();
+                keyboardHeight = screenHeight - (r.bottom - r.top);
+                if (textOffY > (sketchViewHeight - keyboardHeight)) {
+                    view.setTop(-keyboardHeight);
+                    int x = textOffX;
+                    int y = textOffY - mSketchView.getHeight();
+                    Log.d("1111", "offx=" + textOffX + ";offy=" + textOffY + ";x=" + x + ";y=" + y);
+                    textPopupWindow.update(mSketchView, textOffX, textOffY - mSketchView.getHeight(),
+                            WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.WRAP_CONTENT);
+
+                }
+            }
+        });
         findView(view);//载入所有的按钮实例
         initDrawParams();//初始化绘画参数
         initPopupWindows();//初始化弹框
@@ -323,6 +345,8 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         mSketchView.setTextWindowCallback(new SketchView.TextWindowCallback() {
             @Override
             public void onText(View anchor, StrokeRecord record) {
+                textOffX = record.textOffX;
+                textOffY = record.textOffY;
                 showTextPopupWindow(anchor, record);
             }
         });
@@ -529,10 +553,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     }
 
     private void showTextPopupWindow(View anchor, final StrokeRecord record) {
-
         editText.requestFocus();
-
-//        ViewGroup.LayoutParams params=rootView.getLayoutParams();
         textPopupWindow.showAsDropDown(anchor, record.textOffX, record.textOffY - mSketchView.getHeight());
         textPopupWindow.setSoftInputMode(PopupWindow.INPUT_METHOD_NEEDED);
         InputMethodManager imm = (InputMethodManager) activity
@@ -541,10 +562,12 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         textPopupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
             @Override
             public void onDismiss() {
-                record.text = editText.getText().toString();
-                record.textPaint.setTextSize(editText.getTextSize());
-                record.textWidth = editText.getMaxWidth();
-                mSketchView.addRecord(record);
+                if (!editText.getText().toString().equals("")) {
+                    record.text = editText.getText().toString();
+                    record.textPaint.setTextSize(editText.getTextSize());
+                    record.textWidth = editText.getMaxWidth();
+                    mSketchView.addRecord(record);
+                }
             }
         });
     }
