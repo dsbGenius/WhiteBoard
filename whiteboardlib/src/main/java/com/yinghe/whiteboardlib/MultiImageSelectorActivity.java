@@ -96,7 +96,7 @@ public class MultiImageSelectorActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setTheme(R.style.dialogActivity);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-        screenHight = WhiteBoardFragment.sketchViewHight;
+        screenHight = WhiteBoardFragment.sketchViewHeight;
         screenWidth = WhiteBoardFragment.sketchViewWidth;
         int orientation = this.getResources().getConfiguration().orientation;
         setActivitySize(orientation);
@@ -175,8 +175,8 @@ public class MultiImageSelectorActivity extends AppCompatActivity
         WindowManager.LayoutParams attr = getWindow().getAttributes();
 
         if (orientation == Configuration.ORIENTATION_LANDSCAPE) {//横屏
-            screenWidth = Math.max(WhiteBoardFragment.sketchViewHight, WhiteBoardFragment.sketchViewWidth);
-            screenHight = Math.min(WhiteBoardFragment.sketchViewHight, WhiteBoardFragment.sketchViewWidth);
+            screenWidth = Math.max(WhiteBoardFragment.sketchViewHeight, WhiteBoardFragment.sketchViewWidth);
+            screenHight = Math.min(WhiteBoardFragment.sketchViewHeight, WhiteBoardFragment.sketchViewWidth);
             float paddingRightValue = DensityUtil.dip2px(this, 60);
             getStatusBarHeight();
             getWindow().getDecorView().setPadding(0, 0, (int) paddingRightValue, 0);
@@ -191,8 +191,8 @@ public class MultiImageSelectorActivity extends AppCompatActivity
             getWindow().setAttributes(p);
             getWindow().setGravity(Gravity.RIGHT | Gravity.BOTTOM);
         } else if (orientation == Configuration.ORIENTATION_PORTRAIT) {//竖屏
-            screenWidth = Math.min(WhiteBoardFragment.sketchViewHight, WhiteBoardFragment.sketchViewWidth);
-            screenHight = Math.max(WhiteBoardFragment.sketchViewHight, WhiteBoardFragment.sketchViewWidth);
+            screenWidth = Math.min(WhiteBoardFragment.sketchViewHeight, WhiteBoardFragment.sketchViewWidth);
+            screenHight = Math.max(WhiteBoardFragment.sketchViewHeight, WhiteBoardFragment.sketchViewWidth);
             attr.gravity = Gravity.BOTTOM;
             float paddingButtomValue = DensityUtil.dip2px(this, 50);
             getWindow().getDecorView().setPadding(0, 0, 0, (int) paddingButtomValue);

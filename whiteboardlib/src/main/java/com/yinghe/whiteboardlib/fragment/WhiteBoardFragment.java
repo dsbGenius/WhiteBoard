@@ -26,7 +26,6 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -66,6 +65,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
 
     public static int bitmapSize = 300;
 
+    View rootView;
     ScaleView scaleView;
 
     RelativeLayout whiteBoardLayout;//画板布局
@@ -93,6 +93,9 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     int strokeMode;//模式
     int strokeType;//模式
 
+    int isLayoutUp;//
+    int keyHeight;
+
     int pupWindowsDPWidth = 300;//弹窗宽度，单位DP
     int strokePupWindowsDPHeight = 275;//画笔弹窗高度，单位DP
     int eraserPupWindowsDPHeight = 90;//橡皮擦弹窗高度，单位DP
@@ -105,7 +108,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     private int size;
     private AlertDialog dialog;
     private ArrayList<String> mSelectPath;
-    public static int sketchViewHight;
+    public static int sketchViewHeight;
     public static int sketchViewWidth;
 
     public static WhiteBoardFragment newInstance() {
@@ -141,6 +144,62 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         size = circleDrawable.getIntrinsicWidth();
     }
     private void initPopupWindows() {
+        initStrokePop();
+        initEraserPop();
+        initTextPop();
+    }
+
+    private void initTextPop() {
+        textPopupWindow = new PopupWindow(activity);
+        textPopupWindow.setContentView(popupTextLayout);
+        textPopupWindow.setWidth(WindowManager.LayoutParams.WRAP_CONTENT);//宽度200dp
+        textPopupWindow.setHeight(WindowManager.LayoutParams.WRAP_CONTENT);//高度自适应
+        textPopupWindow.setFocusable(true);
+        textPopupWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+        textPopupWindow.setInputMethodMode(PopupWindow.INPUT_METHOD_NEEDED);
+        textPopupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
+            @Override
+            public void onDismiss() {
+                if (!editText.getText().toString().equals("")) {
+                    StrokeRecord record = new StrokeRecord(strokeType);
+                    record.text = editText.getText().toString();
+                }
+            }
+        });
+    }
+
+    private void initEraserPop() {
+        //橡皮擦弹窗
+        eraserPopupWindow = new PopupWindow(activity);
+        eraserPopupWindow.setContentView(popupEraserLayout);//设置主体布局
+        eraserPopupWindow.setWidth(BitmapUtils.dip2px(getActivity(), pupWindowsDPWidth));//宽度200dp
+//        eraserPopupWindow.setHeight(WindowManager.LayoutParams.WRAP_CONTENT);//高度自适应
+        eraserPopupWindow.setHeight(BitmapUtils.dip2px(getActivity(), eraserPupWindowsDPHeight));//高度自适应
+        eraserPopupWindow.setFocusable(true);
+        eraserPopupWindow.setBackgroundDrawable(new BitmapDrawable());//设置空白背景
+        eraserPopupWindow.setAnimationStyle(R.style.mypopwindow_anim_style);//动画
+        //橡皮擦宽度拖动条
+        eraserSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
+
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+
+
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress,
+                                          boolean fromUser) {
+                setSeekBarProgress(progress, STROKE_TYPE_ERASER);
+            }
+        });
+        eraserSeekBar.setProgress(SketchView.DEFAULT_ERASER_SIZE);
+    }
+
+    private void initStrokePop() {
         //画笔弹窗
         strokePopupWindow = new PopupWindow(activity);
         strokePopupWindow.setContentView(popupStrokeLayout);//设置主体布局
@@ -227,59 +286,11 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
             }
         });
         strokeAlphaSeekBar.setProgress(SketchView.DEFAULT_STROKE_ALPHA);
-
-        //橡皮擦弹窗
-        eraserPopupWindow = new PopupWindow(activity);
-        eraserPopupWindow.setContentView(popupEraserLayout);//设置主体布局
-        eraserPopupWindow.setWidth(BitmapUtils.dip2px(getActivity(), pupWindowsDPWidth));//宽度200dp
-//        eraserPopupWindow.setHeight(WindowManager.LayoutParams.WRAP_CONTENT);//高度自适应
-        eraserPopupWindow.setHeight(BitmapUtils.dip2px(getActivity(), eraserPupWindowsDPHeight));//高度自适应
-        eraserPopupWindow.setFocusable(true);
-        eraserPopupWindow.setBackgroundDrawable(new BitmapDrawable());//设置空白背景
-        eraserPopupWindow.setAnimationStyle(R.style.mypopwindow_anim_style);//动画
-        //橡皮擦宽度拖动条
-        eraserSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-            }
-
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-            }
-
-
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress,
-                                          boolean fromUser) {
-                setSeekBarProgress(progress, STROKE_TYPE_ERASER);
-            }
-        });
-        eraserSeekBar.setProgress(SketchView.DEFAULT_ERASER_SIZE);
-
-        textPopupWindow = new PopupWindow(activity);
-        textPopupWindow.setContentView(popupTextLayout);
-        textPopupWindow.setWidth(WindowManager.LayoutParams.WRAP_CONTENT);//宽度200dp
-        textPopupWindow.setHeight(WindowManager.LayoutParams.WRAP_CONTENT);//高度自适应
-        textPopupWindow.setFocusable(true);
-        textPopupWindow.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE | WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
-        textPopupWindow.setInputMethodMode(PopupWindow.INPUT_METHOD_NEEDED);
-        textPopupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
-            @Override
-            public void onDismiss() {
-                if (!editText.getText().toString().equals("")) {
-                    StrokeRecord record = new StrokeRecord(strokeType);
-                    record.text = editText.getText().toString();
-                }
-            }
-        });
     }
 
 
     private void findView(View view) {
-
         scaleView = (ScaleView) view.findViewById(R.id.scale_view);
-//        scaleView.setEnabled(false);
         //画板整体布局
         whiteBoardLayout = (RelativeLayout) view.findViewById(R.id.white_board);
         mSketchView = (SketchView) view.findViewById(R.id.drawing);
@@ -297,8 +308,6 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         sureActionLayout = view.findViewById(R.id.sure_action_layout);
         sureAction = (ImageView) view.findViewById(R.id.sure_action);
         cancelAction = (ImageView) view.findViewById(R.id.cancel_action);
-//        btShowBg = (Button) view.findViewById(R.id.bt_show_bg);
-//        btShowBgGray = (Button) view.findViewById(R.id.bt_show_bg_gray);
 
         //设置点击监听
         mSketchView.setOnDrawChangedListener(this);//设置撤销动作监听器
@@ -353,17 +362,17 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         ViewTreeObserver vto = mSketchView.getViewTreeObserver();
         vto.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
             public boolean onPreDraw() {
-                if(sketchViewHight==0&&sketchViewWidth==0) {
+                if (sketchViewHeight == 0 && sketchViewWidth == 0) {
                     int height = mSketchView.getMeasuredHeight();
                     int width = mSketchView.getMeasuredWidth();
-                    sketchViewHight = height;
+                    sketchViewHeight = height;
                     sketchViewWidth = width;
-                    Log.i("onPreDraw", sketchViewHight + "  " + sketchViewWidth);
+                    Log.i("onPreDraw", sketchViewHeight + "  " + sketchViewWidth);
                 }
                 return true;
             }
         });
-        Log.i("getSketchSize", sketchViewHight + "  " + sketchViewWidth);
+        Log.i("getSketchSize", sketchViewHeight + "  " + sketchViewWidth);
     }
 
     protected void setSeekBarProgress(int progress, int drawMode) {
@@ -520,8 +529,10 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     }
 
     private void showTextPopupWindow(View anchor, final StrokeRecord record) {
-//        editText.setText(s);
+
         editText.requestFocus();
+
+//        ViewGroup.LayoutParams params=rootView.getLayoutParams();
         textPopupWindow.showAsDropDown(anchor, record.textOffX, record.textOffY - mSketchView.getHeight());
         textPopupWindow.setSoftInputMode(PopupWindow.INPUT_METHOD_NEEDED);
         InputMethodManager imm = (InputMethodManager) activity

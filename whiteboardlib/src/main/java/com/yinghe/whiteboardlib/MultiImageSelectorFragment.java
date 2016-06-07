@@ -263,13 +263,13 @@ public class MultiImageSelectorFragment extends Fragment {
 
     private void setPopupWindowSize(int orientation) {
         if (orientation == Configuration.ORIENTATION_LANDSCAPE) {//横屏
-            int screenWidth = Math.max(WhiteBoardFragment.sketchViewHight, WhiteBoardFragment.sketchViewWidth);
-            int screenHight = Math.min(WhiteBoardFragment.sketchViewHight, WhiteBoardFragment.sketchViewWidth);
+            int screenWidth = Math.max(WhiteBoardFragment.sketchViewHeight, WhiteBoardFragment.sketchViewWidth);
+            int screenHight = Math.min(WhiteBoardFragment.sketchViewHeight, WhiteBoardFragment.sketchViewWidth);
             mFolderPopupWindow.setWidth(screenWidth / 2 - DensityUtil.dip2px(getActivity(), 60));
             mFolderPopupWindow.setHeight(screenHight / 2);
         } else if (orientation == Configuration.ORIENTATION_PORTRAIT) {//竖屏
-            int screenWidth = Math.min(WhiteBoardFragment.sketchViewHight, WhiteBoardFragment.sketchViewWidth);
-            int screenHight = Math.max(WhiteBoardFragment.sketchViewHight, WhiteBoardFragment.sketchViewWidth);
+            int screenWidth = Math.min(WhiteBoardFragment.sketchViewHeight, WhiteBoardFragment.sketchViewWidth);
+            int screenHight = Math.max(WhiteBoardFragment.sketchViewHeight, WhiteBoardFragment.sketchViewWidth);
             mFolderPopupWindow.setWidth(screenWidth);
             mFolderPopupWindow.setContentWidth(screenWidth);
             mFolderPopupWindow.setHeight(screenHight / 3);

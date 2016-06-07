@@ -1,13 +1,9 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:tool="http://schemas.android.com/tools"
     android:clipToPadding="false"
     android:fitsSystemWindows="false">
-
-    <!--<ScrollView-->
-    <!--android:layout_width="match_parent"-->
-    <!--android:layout_height="match_parent"-->
-    <!--android:fillViewport="true">-->
 
     <RelativeLayout
         android:id="@+id/white_board"
@@ -98,8 +94,22 @@
             <include layout="@layout/include_draw_content_layout" />
 
         </FrameLayout>
+        <!--<EditText xmlns:android="http://schemas.android.com/apk/res/android"-->
+        <!--android:id="@+id/stroke_text_et"-->
+        <!--android:visibility="gone"-->
+        <!--tool:visibility="visible"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:hint="请输入文字"-->
+        <!--android:layout_alignTop="@id/drawing"-->
+        <!--android:layout_alignLeft="@id/drawing"-->
+        <!--android:imeOptions="actionDone"-->
+        <!--android:maxWidth="200dp"-->
+        <!--android:minWidth="100dp"-->
+        <!--android:background="@color/gray"-->
+        <!--android:selectAllOnFocus="true"-->
+        <!--android:textSize="22dp" />-->
 
     </RelativeLayout>
-    <!--</ScrollView>-->
 
 </FrameLayout>
