@@ -135,6 +135,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         view.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
+                //下面的代码主要是为了解决软键盘弹出后遮挡住文字录入PopWindow的问题
                 Rect r = new Rect();
                 view.getWindowVisibleDisplayFrame(r);
                 int screenHeight = view.getHeight();
@@ -146,7 +147,6 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                     Log.d("1111", "offx=" + textOffX + ";offy=" + textOffY + ";x=" + x + ";y=" + y);
                     textPopupWindow.update(mSketchView, textOffX, textOffY - mSketchView.getHeight(),
                             WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.WRAP_CONTENT);
-
                 }
             }
         });
