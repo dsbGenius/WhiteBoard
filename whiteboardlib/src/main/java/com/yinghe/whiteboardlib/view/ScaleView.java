@@ -12,6 +12,7 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
+import android.os.Environment;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -233,7 +234,7 @@ public class ScaleView extends ImageView implements
     }
 
     public void setPhotoPath(String path) {
-        if (path.split("/").length > 1) {
+        if (path.contains(Environment.getExternalStorageDirectory().toString())) {
             photoSampleBM = setSDCardPhoto(path);
         } else {
             photoSampleBM = setAssetsPhoto(path);

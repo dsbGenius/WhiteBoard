@@ -342,7 +342,7 @@ public class MultiImageSelectorFragment extends Fragment {
                 return;
             }
             FileOutputStream b = null;
-            String path = "/sdcard/whiteBoardLib/";
+            String path = Environment.getExternalStorageDirectory().getPath()+"/whiteBoardLib/";
             File file = new File(path);
             file.mkdirs();// 创建文件夹
             String fileName = path + UUID.randomUUID() + ".jpg";// 图片名字
@@ -584,7 +584,7 @@ public class MultiImageSelectorFragment extends Fragment {
                             Folder folder = new Folder();
                             for (int i = 0; i < files.length; i++) {
                                 Image image = new Image();
-                                image.path = files[i];
+                                image.path = "img/" +files[i];
                                 image.name = "assets/"+files[i];
                                 AssetImages.add(image);
                             }
