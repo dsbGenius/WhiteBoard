@@ -6,7 +6,7 @@
     android:hint="请输入文字"
     android:imeOptions="actionDone"
     android:maxWidth="200dp"
-    android:minWidth="100dp"
+    android:minWidth="120dp"
     android:background="@color/gray"
     android:selectAllOnFocus="true"
-    android:textSize="25dp" />
+    android:textSize="22dp" />

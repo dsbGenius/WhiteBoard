@@ -14,7 +14,7 @@
 
         <FrameLayout
             android:id="@+id/controlLayout"
-            android:layout_width="60dp"
+            android:layout_width="45dp"
             android:layout_height="match_parent"
             android:layout_alignParentRight="true"
             android:background="@color/gray">
@@ -57,13 +57,13 @@
                     android:id="@+id/sketch_backgroud"
                     style="@style/control_btn"
                     android:padding="8dp"
-                    android:alpha="0.5"
+                    android:alpha="0.6"
                     android:src="@drawable/ic_backgroud" />
 
                 <ImageView
                     android:id="@+id/sketch_drag"
                     style="@style/control_btn"
-                    android:alpha="0.5"
+                    android:alpha="0.6"
                     android:src="@drawable/ic_drag" />
 
                 <ImageView
