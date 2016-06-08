@@ -29,17 +29,17 @@ import com.yinghe.whiteboardlib.Utils.BitmapUtils;
 import java.io.File;
 
 /**
- *
  * @author tangentLu
- * 博客地址：http://www.jianshu.com/users/9efe1db2c646/latest_articles
+ *         博客地址：http://www.jianshu.com/users/9efe1db2c646/latest_articles
  */
 public class ScaleView extends ImageView implements
         OnTouchListener
 
 {
     private static final String TAG = ScaleView.class.getSimpleName();
-    public static  float SCALE_MAX = 4.0f;
-    private static  float SCALE_MIN = 0.2f;
+    public static float SCALE_MAX = 4.0f;
+    private static float SCALE_MIN = 0.2f;
+    private static final int MODE_NONE = 0;
     private static final int MODE_DRAG = 1;
     private static final int MODE_SCALE = 2;
     private static final int MODE_ROTATE = 3;
@@ -63,9 +63,9 @@ public class ScaleView extends ImageView implements
     Bitmap mirrorMarkBM = BitmapFactory.decodeResource(getResources(), R.drawable.mark_mirror);
     Bitmap deleteMarkBM = BitmapFactory.decodeResource(getResources(), R.drawable.mark_delete);
     Bitmap rotateMarkBM = BitmapFactory.decodeResource(getResources(), R.drawable.mark_rotate);
-//    Bitmap rotateMarkBM = BitmapFactory.decodeResource(getResources(), R.drawable.test);
-    RectF markerMirrorRect = new RectF(0, 0, mirrorMarkBM.getWidth(), mirrorMarkBM.getHeight());//旋转标记边界
-    RectF markerDeleteRect = new RectF(0, 0, deleteMarkBM.getWidth(), deleteMarkBM.getHeight());//旋转标记边界
+    //    Bitmap rotateMarkBM = BitmapFactory.decodeResource(getResources(), R.drawable.test);
+    RectF markerMirrorRect = new RectF(0, 0, mirrorMarkBM.getWidth(), mirrorMarkBM.getHeight());//镜像标记边界
+    RectF markerDeleteRect = new RectF(0, 0, deleteMarkBM.getWidth(), deleteMarkBM.getHeight());//删除标记边界
     RectF markerRotateRect = new RectF(0, 0, rotateMarkBM.getWidth(), rotateMarkBM.getHeight());//旋转标记边界
 
 
@@ -95,20 +95,19 @@ public class ScaleView extends ImageView implements
      */
     private GestureDetector mGestureDetector;
 
-    private final Matrix mScaleMatrix = new Matrix();
-    private final Matrix markerScaleMatrix = new Matrix();
+    private final Matrix mPhotoMatrix = new Matrix();//图片的变换矩阵
+    private final Matrix mInvertPhotoMatrix = new Matrix();//图片的变换逆矩阵
+    //    private final Matrix markerMatrix = new Matrix();
     private boolean isAutoScale;
 
     private boolean isCheckTopAndBottom = true;
     private boolean isCheckLeftAndRight = true;
 
-    public ScaleView(Context context)
-    {
+    public ScaleView(Context context) {
         this(context, null);
     }
 
-    public ScaleView(Context context, AttributeSet attrs)
-    {
+    public ScaleView(Context context, AttributeSet attrs) {
         super(context, attrs);
         this.context = context;
         super.setScaleType(ScaleType.MATRIX);
@@ -139,8 +138,8 @@ public class ScaleView extends ImageView implements
     }
 
     private void onDragAction(float distanceX, float distanceY) {
-        mScaleMatrix.postTranslate((int) distanceX, (int) distanceY);
-        setImageMatrix(mScaleMatrix);
+        mPhotoMatrix.postTranslate((int) distanceX, (int) distanceY);
+        setImageMatrix(mPhotoMatrix);
 
     }
 
@@ -151,8 +150,8 @@ public class ScaleView extends ImageView implements
         //设置Matrix缩放参数
         if ((scaleFactor < 1 && len >= photoLen * SCALE_MIN) || (scaleFactor > 1 && len <= photoLen * SCALE_MAX)) {
             Log.e(scaleFactor + "", scaleFactor + "");
-            mScaleMatrix.postScale(scaleFactor, scaleFactor, photoCorners[8], photoCorners[9]);
-            setImageMatrix(mScaleMatrix);
+            mPhotoMatrix.postScale(scaleFactor, scaleFactor, photoCorners[8], photoCorners[9]);
+            setImageMatrix(mPhotoMatrix);
         }
     }
 
@@ -174,10 +173,10 @@ public class ScaleView extends ImageView implements
         float b = (float) Math.sqrt(Math.pow(photoCorners[4] - photoCorners[0], 2) + Math.pow(photoCorners[5] - photoCorners[1], 2)) / 2;
 
         //设置Matrix缩放参数
-        if (a>=photoLen/2* SCALE_MIN &&a<=photoLen/2*SCALE_MAX){
+        if (a >= photoLen / 2 * SCALE_MIN && a <= photoLen / 2 * SCALE_MAX) {
             //这种计算方法可以保持旋转图标坐标与触摸点同步缩放
             float scale = a / b;
-            mScaleMatrix.postScale(scale, scale, photoCorners[8], photoCorners[9]);
+            mPhotoMatrix.postScale(scale, scale, photoCorners[8], photoCorners[9]);
         }
 
         //旋转
@@ -195,7 +194,7 @@ public class ScaleView extends ImageView implements
             cosAlpha = 1.0f;
         }
         //本次的角度已经计算出来。
-        double dAngle = Math.acos(cosAlpha) * 180.0 /Math.PI;
+        double dAngle = Math.acos(cosAlpha) * 180.0 / Math.PI;
         // 判断顺时针和逆时针.
         //判断方法其实很简单，这里的v1v2其实相差角度很小的。
         //先转换成单位向量
@@ -213,8 +212,8 @@ public class ScaleView extends ImageView implements
         } else {
             dAngle = -dAngle;
         }
-        mScaleMatrix.postRotate((float) dAngle, photoCorners[8], photoCorners[9]);
-        setImageMatrix(mScaleMatrix);
+        mPhotoMatrix.postRotate((float) dAngle, photoCorners[8], photoCorners[9]);
+        setImageMatrix(mPhotoMatrix);
     }
 
     @Override
@@ -223,7 +222,7 @@ public class ScaleView extends ImageView implements
             drawPhotoBorder(canvas);
             super.onDraw(canvas);
             drawMarkers(canvas);
-        }else {
+        } else {
             super.onDraw(canvas);
         }
     }
@@ -258,9 +257,10 @@ public class ScaleView extends ImageView implements
     public Bitmap setAssetsPhoto(String path) {
         return BitmapUtils.getBitmapFromAssets(context, path);
     }
+
     private void drawPhotoBorder(Canvas canvas) {
         if (first) {//首次绘制调整边界
-            mScaleMatrix.reset();
+            mPhotoMatrix.reset();
             getGlobalVisibleRect(viewRect);
             photoRectSrc = new RectF(getDrawable().getBounds());//图片的边界
             setLimitScale();//放大倍数
@@ -275,13 +275,13 @@ public class ScaleView extends ImageView implements
             photoCornersSrc[8] = photoRectSrc.centerX();
             photoCornersSrc[9] = photoRectSrc.centerY();
             photoLen = Math.sqrt(Math.pow(photoRectSrc.width(), 2) + Math.pow(photoRectSrc.height(), 2));
-            markerScaleMatrix.postTranslate((getWidth() + photoRectSrc.width() - markerRotateRect.width()) / 2,
-                    (getHeight() + photoRectSrc.height() - markerRotateRect.height()) / 2);//将标记Matrix与图片同步
+//            markerMatrix.postTranslate((getWidth() + photoRectSrc.width() - markerRotateRect.width()) / 2,
+//                    (getHeight() + photoRectSrc.height() - markerRotateRect.height()) / 2);//将标记Matrix与图片同步
             first = false;
-            mScaleMatrix.postTranslate(getWidth() / 2-photoRectSrc.width()/2, getHeight() / 2-photoRectSrc.height()/2);
-            setImageMatrix(mScaleMatrix);
+            mPhotoMatrix.postTranslate(getWidth() / 2 - photoRectSrc.width() / 2, getHeight() / 2 - photoRectSrc.height() / 2);
+            setImageMatrix(mPhotoMatrix);
         }
-        mScaleMatrix.mapPoints(photoCorners, photoCornersSrc);
+        mPhotoMatrix.mapPoints(photoCorners, photoCornersSrc);
         photoBorderPath.reset();
         photoBorderPath.moveTo(photoCorners[0], photoCorners[1]);
         photoBorderPath.lineTo(photoCorners[2], photoCorners[3]);
@@ -298,29 +298,28 @@ public class ScaleView extends ImageView implements
 
         x = photoCorners[0] - markerMirrorRect.width() / 2;
         y = photoCorners[1] - markerMirrorRect.height() / 2;
-        markerMirrorRect.offsetTo(x,y);
+        markerMirrorRect.offsetTo(x, y);
 //        canvas.drawRect(markerMirrorRect, p);
 //        canvas.drawBitmap(mirrorMarkBM,x,y,null);
 
         x = photoCorners[2] - markerDeleteRect.width() / 2;
         y = photoCorners[3] - markerDeleteRect.height() / 2;
-        markerDeleteRect.offsetTo(x,y);
+        markerDeleteRect.offsetTo(x, y);
 //        canvas.drawRect(markerDeleteRect, p);
 //        canvas.drawBitmap(deleteMarkBM,x,y,null);
 
         x = photoCorners[4] - markerRotateRect.width() / 2;
         y = photoCorners[5] - markerRotateRect.height() / 2;
-        markerRotateRect.offsetTo(x,y);
+        markerRotateRect.offsetTo(x, y);
 //        canvas.drawRect(markerRotateRect, p);
-        canvas.drawBitmap(rotateMarkBM,x,y,null);
+        canvas.drawBitmap(rotateMarkBM, x, y, null);
     }
 
 
     /**
      * 在缩放时，进行图片显示范围的控制
      */
-    private void checkBorderAndCenterWhenScale()
-    {
+    private void checkBorderAndCenterWhenScale() {
 
         RectF rect = getMatrixRectF();
         float deltaX = 0;
@@ -330,40 +329,32 @@ public class ScaleView extends ImageView implements
         int height = getHeight();
 
         // 如果宽或高大于屏幕，则控制范围
-        if (rect.width() >= width)
-        {
-            if (rect.left > 0)
-            {
+        if (rect.width() >= width) {
+            if (rect.left > 0) {
                 deltaX = -rect.left;
             }
-            if (rect.right < width)
-            {
+            if (rect.right < width) {
                 deltaX = width - rect.right;
             }
         }
-        if (rect.height() >= height)
-        {
-            if (rect.top > 0)
-            {
+        if (rect.height() >= height) {
+            if (rect.top > 0) {
                 deltaY = -rect.top;
             }
-            if (rect.bottom < height)
-            {
+            if (rect.bottom < height) {
                 deltaY = height - rect.bottom;
             }
         }
         // 如果宽或高小于屏幕，则让其居中
-        if (rect.width() < width)
-        {
+        if (rect.width() < width) {
             deltaX = width * 0.5f - rect.right + 0.5f * rect.width();
         }
-        if (rect.height() < height)
-        {
+        if (rect.height() < height) {
             deltaY = height * 0.5f - rect.bottom + 0.5f * rect.height();
         }
         Log.e(TAG, "deltaX = " + deltaX + " , deltaY = " + deltaY);
 
-        mScaleMatrix.postTranslate(deltaX, deltaY);
+        mPhotoMatrix.postTranslate(deltaX, deltaY);
 
     }
 
@@ -372,13 +363,11 @@ public class ScaleView extends ImageView implements
      *
      * @return
      */
-    private RectF getMatrixRectF()
-    {
-        Matrix matrix = mScaleMatrix;
+    private RectF getMatrixRectF() {
+        Matrix matrix = mPhotoMatrix;
         RectF rect = new RectF();
         Drawable d = getDrawable();
-        if (null != d)
-        {
+        if (null != d) {
             rect.set(0, 0, d.getIntrinsicWidth(), d.getIntrinsicHeight());
             matrix.mapRect(rect);
         }
@@ -388,13 +377,21 @@ public class ScaleView extends ImageView implements
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
-        curP.set(event.getX(), event.getY());
+        float x = event.getX();
+        float y = event.getY();
+        curP.set(x, y);
         switch (event.getAction() & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN:
-                startP.set(event.getX(), event.getY());
-                if (markerRotateRect.contains((int) startP.x, (int) startP.y)) {
+                startP.set(x, y);
+                actionMode = MODE_NONE;//重置操作模式
+                mPhotoMatrix.invert(mInvertPhotoMatrix);//计算最新的逆矩阵
+                float[] invertPoint = new float[2];
+                mInvertPhotoMatrix.mapPoints(invertPoint, new float[]{x, y});//对点击点进行逆矩阵变换
+                if (markerRotateRect.contains((int) startP.x, (int) startP.y)) {//判断是否在区域内
                     actionMode = MODE_ROTATE;
-                } else {
+                    break;
+                }
+                if (photoRectSrc.contains(invertPoint[0], invertPoint[1])) {
                     actionMode = MODE_DRAG;
                 }
                 break;
@@ -410,7 +407,7 @@ public class ScaleView extends ImageView implements
                 } else if (actionMode == MODE_ROTATE) {
                     onRotateAction();
                 }
-                preP.set(event.getX(), event.getY());
+                preP.set(x, y);
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_POINTER_UP:
@@ -418,23 +415,20 @@ public class ScaleView extends ImageView implements
             default:
                 break;
         }
-        preP.set(event.getX(), event.getY());
+        preP.set(x, y);
         return true;
     }
 
 
-
     @Override
-    protected void onAttachedToWindow()
-    {
+    protected void onAttachedToWindow() {
         super.onAttachedToWindow();
 //        getViewTreeObserver().addOnGlobalLayoutListener(this);
     }
 
     @SuppressWarnings("deprecation")
     @Override
-    protected void onDetachedFromWindow()
-    {
+    protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
 //        getViewTreeObserver().removeGlobalOnLayoutListener(this);
     }
@@ -471,11 +465,11 @@ public class ScaleView extends ImageView implements
 //            initScale = scale;
 //
 //            Log.e(TAG, "initScale = " + initScale);
-//            mScaleMatrix.postTranslate((width - dw) / 2, (height - dh) / 2);
-//            mScaleMatrix.postScale(scale, scale, getWidth() / 2,
+//            mPhotoMatrix.postTranslate((width - dw) / 2, (height - dh) / 2);
+//            mPhotoMatrix.postScale(scale, scale, getWidth() / 2,
 //                    getHeight() / 2);
 //            // 图片移动至屏幕中心
-//            setImageMatrix(mScaleMatrix);
+//            setImageMatrix(mPhotoMatrix);
 //            once = false;
 //        }
 //
@@ -508,34 +502,34 @@ public class ScaleView extends ImageView implements
 //        {
 //            deltaX = viewWidth - rect.right;
 //        }
-//        mScaleMatrix.postTranslate(deltaX, deltaY);
+//        mPhotoMatrix.postTranslate(deltaX, deltaY);
     }
 
     public float getScale() {
-        mScaleMatrix.getValues(matrixValues);
+        mPhotoMatrix.getValues(matrixValues);
         return matrixValues[Matrix.MSCALE_X];
     }
 
     public float getTranslateX() {
-        mScaleMatrix.getValues(matrixValues);
+        mPhotoMatrix.getValues(matrixValues);
         return matrixValues[Matrix.MTRANS_X];
     }
 
     public float getTranslateY() {
-        mScaleMatrix.getValues(matrixValues);
+        mPhotoMatrix.getValues(matrixValues);
         return matrixValues[Matrix.MTRANS_Y];
     }
 
-    public float getRotate()
-    {
-        mScaleMatrix.getValues(matrixValues);
+    public float getRotate() {
+        mPhotoMatrix.getValues(matrixValues);
         return matrixValues[Matrix.MTRANS_Y];
     }
 
     public Bitmap getPhotoSampleBM() {
         return photoSampleBM;
     }
+
     public Matrix getPhotoMatrix() {
-        return mScaleMatrix;
+        return mPhotoMatrix;
     }
 }
