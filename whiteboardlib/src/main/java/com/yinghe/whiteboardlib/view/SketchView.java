@@ -69,8 +69,6 @@ public class SketchView extends ImageView implements OnTouchListener {
     public static final int DEFAULT_ERASER_SIZE = 50;
 
 
-
-
     private float strokeSize = DEFAULT_STROKE_SIZE;
     private int strokeRealColor = Color.BLACK;//画笔实际颜色
     private int strokeColor = Color.BLACK;//画笔颜色
@@ -143,6 +141,7 @@ public class SketchView extends ImageView implements OnTouchListener {
         calculColor();
         m_Paint.setStrokeWidth(strokeSize);
     }
+
     public int getStrokeColor() {
         return this.strokeRealColor;
     }
@@ -167,7 +166,6 @@ public class SketchView extends ImageView implements OnTouchListener {
 
     /**
      * Change canvass background and force redraw
-     *
      */
     public void setBackgroundBitmap(Activity mActivity, Bitmap bitmap) {
         if (!bitmap.isMutable()) {
@@ -185,17 +183,17 @@ public class SketchView extends ImageView implements OnTouchListener {
     }
 
 
-	private Bitmap getScaledBitmap(Activity mActivity, Bitmap bitmap) {
-		DisplayMetrics display = new DisplayMetrics();
-		mActivity.getWindowManager().getDefaultDisplay().getMetrics(display);
-		int screenWidth = display.widthPixels;
-		int screenHeight = display.heightPixels;
-		float scale = bitmap.getWidth() / screenWidth > bitmap.getHeight() / screenHeight ? bitmap.getWidth() /
- screenWidth : bitmap.getHeight() / screenHeight;
-		int scaledWidth = (int) (bitmap.getWidth() / scale);
-		int scaledHeight = (int) (bitmap.getHeight() / scale);
-		return Bitmap.createScaledBitmap(bitmap, scaledWidth, scaledHeight, true);
-	}
+    private Bitmap getScaledBitmap(Activity mActivity, Bitmap bitmap) {
+        DisplayMetrics display = new DisplayMetrics();
+        mActivity.getWindowManager().getDefaultDisplay().getMetrics(display);
+        int screenWidth = display.widthPixels;
+        int screenHeight = display.heightPixels;
+        float scale = bitmap.getWidth() / screenWidth > bitmap.getHeight() / screenHeight ? bitmap.getWidth() /
+                screenWidth : bitmap.getHeight() / screenHeight;
+        int scaledWidth = (int) (bitmap.getWidth() / scale);
+        int scaledHeight = (int) (bitmap.getHeight() / scale);
+        return Bitmap.createScaledBitmap(bitmap, scaledWidth, scaledHeight, true);
+    }
 
 
     @Override
@@ -234,7 +232,8 @@ public class SketchView extends ImageView implements OnTouchListener {
             canvas.drawBitmap(bitmap, 0, 0, null);
         }
         drawRecord(canvas);
-        onDrawChangedListener.onDrawChanged();
+        if (onDrawChangedListener != null)
+            onDrawChangedListener.onDrawChanged();
     }
 
     private void drawRecord(Canvas canvas) {
@@ -243,11 +242,11 @@ public class SketchView extends ImageView implements OnTouchListener {
             if (type == StrokeRecord.STROKE_TYPE_ERASER || type == StrokeRecord.STROKE_TYPE_DRAW || type == StrokeRecord.STROKE_TYPE_LINE) {
                 canvas.drawPath(record.path, record.paint);
             } else if (type == StrokeRecord.STROKE_TYPE_BITMAP) {
-                canvas.drawBitmap(record.bitmap,record.matrix,null);
+                canvas.drawBitmap(record.bitmap, record.matrix, null);
             } else if (type == STROKE_TYPE_CIRCLE) {
-                canvas.drawOval(record.rect,record.paint);
+                canvas.drawOval(record.rect, record.paint);
             } else if (type == STROKE_TYPE_RECTANGLE) {
-                canvas.drawRect(record.rect,record.paint);
+                canvas.drawRect(record.rect, record.paint);
             } else if (type == STROKE_TYPE_TEXT) {
                 if (record.text != null) {
                     StaticLayout layout = new StaticLayout(record.text, record.textPaint, record.textWidth, Layout.Alignment.ALIGN_NORMAL, 1.0F, 0.0F, true);
@@ -285,8 +284,8 @@ public class SketchView extends ImageView implements OnTouchListener {
             m_Paint.setColor(strokeRealColor);
             m_Paint.setStrokeWidth(strokeSize);
             curRecord.paint = new Paint(m_Paint); // Clones the mPaint object
-        } else if (strokeType == STROKE_TYPE_CIRCLE||strokeType == STROKE_TYPE_RECTANGLE) {
-            RectF rect = new RectF(x,y,x,y);
+        } else if (strokeType == STROKE_TYPE_CIRCLE || strokeType == STROKE_TYPE_RECTANGLE) {
+            RectF rect = new RectF(x, y, x, y);
             curRecord.rect = rect;
             m_Paint.setColor(strokeRealColor);
             m_Paint.setStrokeWidth(strokeSize);
@@ -313,9 +312,9 @@ public class SketchView extends ImageView implements OnTouchListener {
             m_Path.reset();
             m_Path.moveTo(downX, downY);
             m_Path.lineTo(x, y);
-        } else if (strokeType == STROKE_TYPE_CIRCLE||strokeType == STROKE_TYPE_RECTANGLE) {
-            curRecord.rect.set(downX<x?downX:x,downY<y?downY:y,downX>x?downX:x,downY>y?downY:y);
-        }else if (strokeType == STROKE_TYPE_TEXT) {
+        } else if (strokeType == STROKE_TYPE_CIRCLE || strokeType == STROKE_TYPE_RECTANGLE) {
+            curRecord.rect.set(downX < x ? downX : x, downY < y ? downY : y, downX > x ? downX : x, downY > y ? downY : y);
+        } else if (strokeType == STROKE_TYPE_TEXT) {
 
         }
         preX = x;
@@ -329,7 +328,6 @@ public class SketchView extends ImageView implements OnTouchListener {
 
     /**
      * Returns a new bitmap associated with drawed canvas
-     *
      */
     public Bitmap getBitmap() {
         if (recordList.size() == 0)
@@ -365,7 +363,7 @@ public class SketchView extends ImageView implements OnTouchListener {
             recordList.add(redoList.get(redoList.size() - 1));
             redoList.remove(redoList.size() - 1);
         }
-            invalidate();
+        invalidate();
     }
 
 
@@ -377,7 +375,6 @@ public class SketchView extends ImageView implements OnTouchListener {
     public int getRecordCount() {
         return recordList.size();
     }
-
 
 
     public int getStrokeSize() {
@@ -396,7 +393,6 @@ public class SketchView extends ImageView implements OnTouchListener {
         }
 
     }
-
 
 
     public void erase() {
@@ -421,7 +417,6 @@ public class SketchView extends ImageView implements OnTouchListener {
 
         public void onDrawChanged();
     }
-
 
 
 }

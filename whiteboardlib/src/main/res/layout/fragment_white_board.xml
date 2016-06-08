@@ -54,6 +54,19 @@
                     android:src="@drawable/ic_photo_dark" />
 
                 <ImageView
+                    android:id="@+id/sketch_backgroud"
+                    style="@style/control_btn"
+                    android:padding="8dp"
+                    android:alpha="0.5"
+                    android:src="@drawable/ic_backgroud" />
+
+                <ImageView
+                    android:id="@+id/sketch_drag"
+                    style="@style/control_btn"
+                    android:alpha="0.5"
+                    android:src="@drawable/ic_drag" />
+
+                <ImageView
                     android:id="@+id/sketch_save"
                     style="@style/control_btn"
                     android:src="@drawable/ic_file" />

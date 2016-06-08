@@ -11,14 +11,14 @@
 
     <RelativeLayout
         android:id="@+id/white_board"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:background="#FFFFFF"
-            android:orientation="horizontal">
+        android:orientation="horizontal">
 
         <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:layout_above="@id/controlLayout"
             android:background="#efeded">
 
@@ -66,10 +66,18 @@
                     style="@style/control_btn"
                     android:src="@drawable/ic_photo_dark" />
 
-                <!--<ImageView-->
-                <!--android:id="@+id/sketch_backgroud"-->
-                <!--style="@style/control_btn"-->
-                <!--android:src="@drawable/ic_backgroud" />-->
+                <ImageView
+                    android:id="@+id/sketch_backgroud"
+                    style="@style/control_btn"
+                    android:alpha="0.5"
+                    android:padding="8dp"
+                    android:src="@drawable/ic_backgroud" />
+
+                <ImageView
+                    android:id="@+id/sketch_drag"
+                    style="@style/control_btn"
+                    android:alpha="0.5"
+                    android:src="@drawable/ic_drag" />
 
                 <ImageView
                     android:id="@+id/sketch_save"

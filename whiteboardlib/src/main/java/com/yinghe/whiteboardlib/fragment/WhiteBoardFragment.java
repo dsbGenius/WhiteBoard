@@ -325,7 +325,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         erase = (ImageView) view.findViewById(R.id.sketch_erase);
         sketchSave = (ImageView) view.findViewById(R.id.sketch_save);
         sketchPhoto = (ImageView) view.findViewById(R.id.sketch_photo);
-        sketchPhoto.setAlpha(0.4f);
+//        sketchPhoto.setAlpha(0.4f);
         controlLayout = view.findViewById(R.id.controlLayout);
         sureActionLayout = view.findViewById(R.id.sure_action_layout);
         sureAction = (ImageView) view.findViewById(R.id.sure_action);
@@ -436,7 +436,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     public void onClick(View v) {
         int id = v.getId();
         if (id == R.id.sketch_stroke) {
-            sketchPhoto.setAlpha(0.4f);
+//            sketchPhoto.setAlpha(0.4f);
             if (mSketchView.getStrokeType() != STROKE_TYPE_ERASER) {
                 showParamsPopupWindow(v, STROKE_TYPE_DRAW);
             } else {
@@ -457,7 +457,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                 setAlpha(stroke, 1f);
             }
         } else if (id == R.id.sketch_eraser) {
-            sketchPhoto.setAlpha(0.4f);
+//            sketchPhoto.setAlpha(0.4f);
             if (mSketchView.getStrokeType() == STROKE_TYPE_ERASER) {
                 showParamsPopupWindow(v, STROKE_TYPE_ERASER);
             } else {
@@ -529,7 +529,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                 }
                 //加载图片
                 scaleView.setPhotoPath(path);
-                sketchPhoto.setAlpha(1.0f);
+//                sketchPhoto.setAlpha(1.0f);
                 scaleView.setVisibility(View.VISIBLE);
                 sureActionLayout.setVisibility(View.VISIBLE);
             }
