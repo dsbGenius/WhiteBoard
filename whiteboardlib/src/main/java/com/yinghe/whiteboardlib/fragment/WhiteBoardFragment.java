@@ -131,29 +131,29 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        final View view = inflater.inflate(R.layout.fragment_white_board, container, false);
-        view.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+        final View rootView = inflater.inflate(R.layout.fragment_white_board, container, false);
+        rootView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
                 //下面的代码主要是为了解决软键盘弹出后遮挡住文字录入PopWindow的问题
                 Rect r = new Rect();
-                view.getWindowVisibleDisplayFrame(r);
-                int screenHeight = view.getHeight();
-                keyboardHeight = screenHeight - (r.bottom - r.top);
-                if (textOffY > (sketchViewHeight - keyboardHeight)) {
-                    view.setTop(-keyboardHeight);
+                rootView.getWindowVisibleDisplayFrame(r);//获取rootView的可视区域
+                int screenHeight = rootView.getHeight();//获取rootView的高度
+                keyboardHeight = screenHeight - (r.bottom - r.top);//用rootView的高度减去rootView的可视区域高度得到软键盘高度
+                if (textOffY > (sketchViewHeight - keyboardHeight)) {//如果输入焦点出现在软键盘显示的范围内则进行布局上移操作
+                    rootView.setTop(-keyboardHeight);//rootView整体上移软键盘高度
+                    //更新PopupWindow的位置
                     int x = textOffX;
                     int y = textOffY - mSketchView.getHeight();
-                    Log.d("1111", "offx=" + textOffX + ";offy=" + textOffY + ";x=" + x + ";y=" + y);
-                    textPopupWindow.update(mSketchView, textOffX, textOffY - mSketchView.getHeight(),
+                    textPopupWindow.update(mSketchView, x, y,
                             WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.WRAP_CONTENT);
                 }
             }
         });
-        findView(view);//载入所有的按钮实例
+        findView(rootView);//载入所有的按钮实例
         initDrawParams();//初始化绘画参数
         initPopupWindows();//初始化弹框
-        return view;
+        return rootView;
     }
 
     private void initDrawParams() {
