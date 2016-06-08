@@ -99,7 +99,7 @@ public class BitmapUtils {
         InputStream open = null;
         Bitmap bitmap = null;
         try {
-            String temp = "img/" + path;
+            String temp =  path;
             open = context.getAssets().open(temp);
             bitmap= BitmapFactory.decodeStream(open);
             return bitmap;
