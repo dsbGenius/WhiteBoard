@@ -20,6 +20,7 @@ package com.yinghe.whiteboardlib.view;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
@@ -37,6 +38,7 @@ import android.view.View;
 import android.view.View.OnTouchListener;
 import android.widget.ImageView;
 
+import com.yinghe.whiteboardlib.R;
 import com.yinghe.whiteboardlib.Utils.BitmapUtils;
 import com.yinghe.whiteboardlib.bean.DrawRecord;
 
@@ -80,9 +82,15 @@ public class SketchView extends ImageView implements OnTouchListener {
     private int strokeAlpha = 255;//画笔透明度
     private float eraserSize = DEFAULT_ERASER_SIZE;
     private int background = Color.WHITE;
-//    private int background = Color.TRANSPARENT;
 
-    //	private Canvas mCanvas;
+    Bitmap mirrorMarkBM = BitmapFactory.decodeResource(getResources(), R.drawable.mark_mirror);
+    Bitmap deleteMarkBM = BitmapFactory.decodeResource(getResources(), R.drawable.mark_delete);
+    Bitmap rotateMarkBM = BitmapFactory.decodeResource(getResources(), R.drawable.mark_rotate);
+    //    Bitmap rotateMarkBM = BitmapFactory.decodeResource(getResources(), R.drawable.test);
+    RectF markerMirrorRect = new RectF(0, 0, mirrorMarkBM.getWidth(), mirrorMarkBM.getHeight());//镜像标记边界
+    RectF markerDeleteRect = new RectF(0, 0, deleteMarkBM.getWidth(), deleteMarkBM.getHeight());//删除标记边界
+    RectF markerRotateRect = new RectF(0, 0, rotateMarkBM.getWidth(), rotateMarkBM.getHeight());//旋转标记边界
+
     private Path m_Path;
     private Paint m_Paint;
     private float downX, downY, preX, preY;
@@ -98,7 +106,10 @@ public class SketchView extends ImageView implements OnTouchListener {
     DrawRecord curStrokeRecord;
     DrawRecord curPhotoRecord;
 
+
     private int editMode = EDIT_STROKE;
+    private static float SCALE_MAX = 4.0f;
+    private static float SCALE_MIN = 0.2f;
 
     float simpleScale = 0.5f;//图片载入的缩放倍数
 
@@ -252,8 +263,11 @@ public class SketchView extends ImageView implements OnTouchListener {
         for (DrawRecord record : photoRecordList) {
             canvas.drawBitmap(record.bitmap, record.matrix, null);
         }
-        if (editMode == EDIT_PHOTO && curPhotoRecord == null) {
-
+        if (editMode == EDIT_PHOTO && curPhotoRecord != null) {
+            SCALE_MAX = curPhotoRecord.scaleMax;
+            float[] photoCorners = calculateCorners(curPhotoRecord);//计算图片四个角点和中心点
+            drawBoard(canvas, photoCorners);//绘制图形边线
+            drawMarks(canvas, photoCorners);//绘制边角图片
         }
         for (DrawRecord record : strokeRecordList) {
             int type = record.type;
@@ -274,6 +288,60 @@ public class SketchView extends ImageView implements OnTouchListener {
         }
     }
 
+    private void drawBoard(Canvas canvas, float[] photoCorners) {
+        Path photoBorderPath = new Path();
+        photoBorderPath.moveTo(photoCorners[0], photoCorners[1]);
+        photoBorderPath.lineTo(photoCorners[2], photoCorners[3]);
+        photoBorderPath.lineTo(photoCorners[4], photoCorners[5]);
+        photoBorderPath.lineTo(photoCorners[6], photoCorners[7]);
+        photoBorderPath.lineTo(photoCorners[0], photoCorners[1]);
+        canvas.drawPath(photoBorderPath, curPhotoRecord.paint);
+    }
+
+    private void drawMarks(Canvas canvas, float[] photoCorners) {
+        float x;
+        float y;
+        x = photoCorners[0] - markerMirrorRect.width() / 2;
+        y = photoCorners[1] - markerMirrorRect.height() / 2;
+        markerMirrorRect.offsetTo(x, y);
+//        canvas.drawRect(markerMirrorRect, p);
+//        canvas.drawBitmap(mirrorMarkBM,x,y,null);
+
+        x = photoCorners[2] - markerDeleteRect.width() / 2;
+        y = photoCorners[3] - markerDeleteRect.height() / 2;
+        markerDeleteRect.offsetTo(x, y);
+//        canvas.drawRect(markerDeleteRect, p);
+//        canvas.drawBitmap(deleteMarkBM,x,y,null);
+
+        x = photoCorners[4] - markerRotateRect.width() / 2;
+        y = photoCorners[5] - markerRotateRect.height() / 2;
+        markerRotateRect.offsetTo(x, y);
+//        canvas.drawRect(markerRotateRect, p);
+        canvas.drawBitmap(rotateMarkBM, x, y, null);
+    }
+
+    private float[] calculateCorners(DrawRecord record) {
+        float[] photoCornersSrc = new float[10];//0,1代表左上角点XY，2,3代表右上角点XY，4,5代表右下角点XY，6,7代表左下角点XY，8,9代表中心点XY
+        float[] photoCorners = new float[10];//0,1代表左上角点XY，2,3代表右上角点XY，4,5代表右下角点XY，6,7代表左下角点XY，8,9代表中心点XY
+        RectF rectF = record.photoRectSrc;
+        photoCornersSrc[0] = rectF.left;
+        photoCornersSrc[1] = rectF.top;
+        photoCornersSrc[2] = rectF.right;
+        photoCornersSrc[3] = rectF.top;
+        photoCornersSrc[4] = rectF.right;
+        photoCornersSrc[5] = rectF.bottom;
+        photoCornersSrc[6] = rectF.left;
+        photoCornersSrc[7] = rectF.bottom;
+        photoCornersSrc[8] = rectF.centerX();
+        photoCornersSrc[9] = rectF.centerY();
+        curPhotoRecord.matrix.mapPoints(photoCorners, photoCornersSrc);
+        return photoCorners;
+    }
+
+    private float getMaxScale(RectF photoSrc) {
+        return Math.max(getWidth(), getHeight()) / Math.max(photoSrc.width(), photoSrc.height());
+//        SCALE_MIN = SCALE_MAX / 5;
+    }
     public void addStrokeRecord(DrawRecord record) {
         strokeRecordList.add(record);
         invalidate();
@@ -446,7 +514,7 @@ public class SketchView extends ImageView implements OnTouchListener {
         public void onDrawChanged();
     }
 
-    public void setPhotoPath(String path) {
+    public void addPhotoByPath(String path) {
         Bitmap sampleBM = null;
         if (path.contains(Environment.getExternalStorageDirectory().toString())) {
             sampleBM = setSDCardPhoto(path);
@@ -454,12 +522,18 @@ public class SketchView extends ImageView implements OnTouchListener {
             sampleBM = setAssetsPhoto(path);
         }
         if (sampleBM != null) {
-            DrawRecord record = new DrawRecord(STROKE_TYPE_BITMAP);
-            record.bitmap = sampleBM;
-            record.matrix = new Matrix();
-            record.matrix.postTranslate(getWidth() / 2 - sampleBM.getWidth() / 2, getHeight() / 2 - sampleBM.getHeight() / 2);
-            photoRecordList.add(record);
-            setCurPhotoRecord(record);
+            DrawRecord newRecord = new DrawRecord(STROKE_TYPE_BITMAP);
+            newRecord.bitmap = sampleBM;
+            newRecord.photoRectSrc = new RectF(0, 0, newRecord.bitmap.getWidth(), newRecord.bitmap.getHeight());
+            newRecord.scaleMax = getMaxScale(newRecord.photoRectSrc);//放大倍数
+            newRecord.matrix = new Matrix();
+            newRecord.matrix.postTranslate(getWidth() / 2 - sampleBM.getWidth() / 2, getHeight() / 2 - sampleBM.getHeight() / 2);
+            newRecord.paint = new Paint();
+            newRecord.paint.setColor(Color.GRAY);
+            newRecord.paint.setStrokeWidth(BitmapUtils.dip2px(mContext, 0.8f));
+            newRecord.paint.setStyle(Paint.Style.STROKE);
+            photoRecordList.add(newRecord);
+            setCurPhotoRecord(newRecord);
         }
     }
 

@@ -528,7 +528,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                     Toast.makeText(getActivity(), "图片加载失败,请重试!", Toast.LENGTH_LONG).show();
                 }
                 //加载图片
-                mSketchView.setPhotoPath(path);
+                mSketchView.addPhotoByPath(path);
                 mSketchView.setEditMode(SketchView.EDIT_PHOTO);
             }
         }

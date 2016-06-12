@@ -24,8 +24,7 @@ public class DrawRecord {
     public Paint paint;//笔类
     public Path path;//画笔路径数据
     public PointF[] linePoints; //线数据
-    public RectF rect; //圆数据
-//    public Rect rectangleRect; //矩形数据
+    public RectF rect; //圆、矩形区域
     public String text;//文字
     public TextPaint textPaint;//笔类
 
@@ -34,6 +33,8 @@ public class DrawRecord {
     public int textWidth;//文字位置
     public Bitmap bitmap;//图形
     public Matrix matrix;//图形
+    public RectF photoRectSrc = new RectF();
+    public float scaleMax = 3;
 
     public DrawRecord(int type) {
         this.type = type;
