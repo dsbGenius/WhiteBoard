@@ -39,8 +39,8 @@ public class BitmapUtils {
         int reqHeight = wm.getDefaultDisplay().getWidth();
         int scaleWidth = (int) (options.outWidth * sampleScale);
         int scaleHeight = (int) (options.outHeight * sampleScale);
-        reqWidth = Math.max(reqWidth, scaleWidth);
-        reqHeight = Math.max(reqHeight, scaleHeight);
+        reqWidth = Math.min(reqWidth, scaleWidth);
+        reqHeight = Math.min(reqHeight, scaleHeight);
         options = sampleBitmapOptions(context, options, reqWidth, reqHeight);
         Bitmap bm = BitmapFactory.decodeFile(filePath, options);
         Log.e("xxx", bm.getByteCount() + "");

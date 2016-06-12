@@ -39,7 +39,7 @@ import android.widget.Toast;
 import com.yinghe.whiteboardlib.MultiImageSelector;
 import com.yinghe.whiteboardlib.R;
 import com.yinghe.whiteboardlib.Utils.BitmapUtils;
-import com.yinghe.whiteboardlib.bean.StrokeRecord;
+import com.yinghe.whiteboardlib.bean.DrawRecord;
 import com.yinghe.whiteboardlib.view.ScaleView;
 import com.yinghe.whiteboardlib.view.SketchView;
 
@@ -47,13 +47,13 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 
-import static com.yinghe.whiteboardlib.bean.StrokeRecord.STROKE_TYPE_BITMAP;
-import static com.yinghe.whiteboardlib.bean.StrokeRecord.STROKE_TYPE_CIRCLE;
-import static com.yinghe.whiteboardlib.bean.StrokeRecord.STROKE_TYPE_DRAW;
-import static com.yinghe.whiteboardlib.bean.StrokeRecord.STROKE_TYPE_ERASER;
-import static com.yinghe.whiteboardlib.bean.StrokeRecord.STROKE_TYPE_LINE;
-import static com.yinghe.whiteboardlib.bean.StrokeRecord.STROKE_TYPE_RECTANGLE;
-import static com.yinghe.whiteboardlib.bean.StrokeRecord.STROKE_TYPE_TEXT;
+import static com.yinghe.whiteboardlib.bean.DrawRecord.STROKE_TYPE_BITMAP;
+import static com.yinghe.whiteboardlib.bean.DrawRecord.STROKE_TYPE_CIRCLE;
+import static com.yinghe.whiteboardlib.bean.DrawRecord.STROKE_TYPE_DRAW;
+import static com.yinghe.whiteboardlib.bean.DrawRecord.STROKE_TYPE_ERASER;
+import static com.yinghe.whiteboardlib.bean.DrawRecord.STROKE_TYPE_LINE;
+import static com.yinghe.whiteboardlib.bean.DrawRecord.STROKE_TYPE_RECTANGLE;
+import static com.yinghe.whiteboardlib.bean.DrawRecord.STROKE_TYPE_TEXT;
 
 public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawChangedListener, View.OnClickListener {
 
@@ -183,7 +183,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
             @Override
             public void onDismiss() {
                 if (!editText.getText().toString().equals("")) {
-                    StrokeRecord record = new StrokeRecord(strokeType);
+                    DrawRecord record = new DrawRecord(strokeType);
                     record.text = editText.getText().toString();
                 }
             }
@@ -344,7 +344,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         cancelAction.setOnClickListener(this);
         mSketchView.setTextWindowCallback(new SketchView.TextWindowCallback() {
             @Override
-            public void onText(View anchor, StrokeRecord record) {
+            public void onText(View anchor, DrawRecord record) {
                 textOffX = record.textOffX;
                 textOffY = record.textOffY;
                 showTextPopupWindow(anchor, record);
@@ -502,7 +502,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
             selector.origin(mSelectPath);
             selector.start(this, REQUEST_IMAGE);
         } else if (id == R.id.sure_action) {
-            StrokeRecord record = new StrokeRecord(STROKE_TYPE_BITMAP);
+            DrawRecord record = new DrawRecord(STROKE_TYPE_BITMAP);
             record.bitmap = scaleView.getPhotoSampleBM();
             record.matrix = new Matrix(scaleView.getPhotoMatrix());
             mSketchView.addPhotoRecord(record);
@@ -528,10 +528,8 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                     Toast.makeText(getActivity(), "图片加载失败,请重试!", Toast.LENGTH_LONG).show();
                 }
                 //加载图片
-                scaleView.setPhotoPath(path);
-//                sketchPhoto.setAlpha(1.0f);
-                scaleView.setVisibility(View.VISIBLE);
-                sureActionLayout.setVisibility(View.VISIBLE);
+                mSketchView.setPhotoPath(path);
+                mSketchView.setEditMode(SketchView.EDIT_PHOTO);
             }
         }
     }
@@ -552,7 +550,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         }
     }
 
-    private void showTextPopupWindow(View anchor, final StrokeRecord record) {
+    private void showTextPopupWindow(View anchor, final DrawRecord record) {
         editText.requestFocus();
         textPopupWindow.showAsDropDown(anchor, record.textOffX, record.textOffY - mSketchView.getHeight());
         textPopupWindow.setSoftInputMode(PopupWindow.INPUT_METHOD_NEEDED);

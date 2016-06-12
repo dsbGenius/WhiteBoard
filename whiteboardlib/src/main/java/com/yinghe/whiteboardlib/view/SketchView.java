@@ -22,9 +22,11 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
+import android.os.Environment;
 import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
@@ -35,23 +37,26 @@ import android.view.View;
 import android.view.View.OnTouchListener;
 import android.widget.ImageView;
 
-import com.yinghe.whiteboardlib.bean.StrokeRecord;
+import com.yinghe.whiteboardlib.Utils.BitmapUtils;
+import com.yinghe.whiteboardlib.bean.DrawRecord;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.yinghe.whiteboardlib.bean.StrokeRecord.STROKE_TYPE_CIRCLE;
-import static com.yinghe.whiteboardlib.bean.StrokeRecord.STROKE_TYPE_DRAW;
-import static com.yinghe.whiteboardlib.bean.StrokeRecord.STROKE_TYPE_ERASER;
-import static com.yinghe.whiteboardlib.bean.StrokeRecord.STROKE_TYPE_LINE;
-import static com.yinghe.whiteboardlib.bean.StrokeRecord.STROKE_TYPE_RECTANGLE;
-import static com.yinghe.whiteboardlib.bean.StrokeRecord.STROKE_TYPE_TEXT;
+import static com.yinghe.whiteboardlib.bean.DrawRecord.STROKE_TYPE_BITMAP;
+import static com.yinghe.whiteboardlib.bean.DrawRecord.STROKE_TYPE_CIRCLE;
+import static com.yinghe.whiteboardlib.bean.DrawRecord.STROKE_TYPE_DRAW;
+import static com.yinghe.whiteboardlib.bean.DrawRecord.STROKE_TYPE_ERASER;
+import static com.yinghe.whiteboardlib.bean.DrawRecord.STROKE_TYPE_LINE;
+import static com.yinghe.whiteboardlib.bean.DrawRecord.STROKE_TYPE_RECTANGLE;
+import static com.yinghe.whiteboardlib.bean.DrawRecord.STROKE_TYPE_TEXT;
 
 
 public class SketchView extends ImageView implements OnTouchListener {
 
     public interface TextWindowCallback {
-        void onText(View view, StrokeRecord record);
+        void onText(View view, DrawRecord record);
     }
 
 
@@ -62,8 +67,8 @@ public class SketchView extends ImageView implements OnTouchListener {
     private TextWindowCallback textWindowCallback;
     private static final float TOUCH_TOLERANCE = 4;
 
-    //    public static final int STROKE = 0;
-//    public static final int ERASER = 1;
+    public static final int EDIT_STROKE = 1;
+    public static final int EDIT_PHOTO = 2;
     public static final int DEFAULT_STROKE_SIZE = 7;
     public static final int DEFAULT_STROKE_ALPHA = 100;
     public static final int DEFAULT_ERASER_SIZE = 50;
@@ -83,13 +88,19 @@ public class SketchView extends ImageView implements OnTouchListener {
     private float downX, downY, preX, preY;
     private int width, height;
 
-    private List<StrokeRecord> photoRecordList = new ArrayList<>();
-    private List<StrokeRecord> strokeRecordList = new ArrayList<>();
-    private List<StrokeRecord> strokeRedoList = new ArrayList<>();
+    private List<DrawRecord> photoRecordList = new ArrayList<>();
+    private List<DrawRecord> strokeRecordList = new ArrayList<>();
+    private List<DrawRecord> strokeRedoList = new ArrayList<>();
     private Context mContext;
 
     private Bitmap bitmap;
-    StrokeRecord curRecord;
+    private Bitmap curPhotoBM;
+    DrawRecord curStrokeRecord;
+    DrawRecord curPhotoRecord;
+
+    private int editMode = EDIT_STROKE;
+
+    float simpleScale = 0.5f;//图片载入的缩放倍数
 
     public void setStrokeType(int strokeType) {
         this.strokeType = strokeType;
@@ -99,7 +110,7 @@ public class SketchView extends ImageView implements OnTouchListener {
         return strokeType;
     }
 
-    private int strokeType = StrokeRecord.STROKE_TYPE_DRAW;
+    private int strokeType = DrawRecord.STROKE_TYPE_DRAW;
 
     private OnDrawChangedListener onDrawChangedListener;
 
@@ -238,12 +249,15 @@ public class SketchView extends ImageView implements OnTouchListener {
     }
 
     private void drawRecord(Canvas canvas) {
-        for (StrokeRecord record : photoRecordList) {
+        for (DrawRecord record : photoRecordList) {
             canvas.drawBitmap(record.bitmap, record.matrix, null);
         }
-        for (StrokeRecord record : strokeRecordList) {
+        if (editMode == EDIT_PHOTO && curPhotoRecord == null) {
+
+        }
+        for (DrawRecord record : strokeRecordList) {
             int type = record.type;
-            if (type == StrokeRecord.STROKE_TYPE_ERASER || type == StrokeRecord.STROKE_TYPE_DRAW || type == StrokeRecord.STROKE_TYPE_LINE) {
+            if (type == DrawRecord.STROKE_TYPE_ERASER || type == DrawRecord.STROKE_TYPE_DRAW || type == DrawRecord.STROKE_TYPE_LINE) {
                 canvas.drawPath(record.path, record.paint);
             } else if (type == STROKE_TYPE_CIRCLE) {
                 canvas.drawOval(record.rect, record.paint);
@@ -260,12 +274,12 @@ public class SketchView extends ImageView implements OnTouchListener {
         }
     }
 
-    public void addStrokeRecord(StrokeRecord record) {
+    public void addStrokeRecord(DrawRecord record) {
         strokeRecordList.add(record);
         invalidate();
     }
 
-    public void addPhotoRecord(StrokeRecord record) {
+    public void addPhotoRecord(DrawRecord record) {
         photoRecordList.add(record);
         invalidate();
     }
@@ -273,54 +287,62 @@ public class SketchView extends ImageView implements OnTouchListener {
     private void touch_start(float x, float y) {
         preX = downX = x;
         preY = downY = y;
-        strokeRedoList.clear();
-//        setStrokeType(6);
-        curRecord = new StrokeRecord(strokeType);
-        if (strokeType == STROKE_TYPE_ERASER) {
-            m_Path = new Path();
-            m_Path.moveTo(downX, downY);
-            m_Paint.setColor(Color.WHITE);
-            m_Paint.setStrokeWidth(eraserSize);
-            curRecord.paint = new Paint(m_Paint); // Clones the mPaint object
-            curRecord.path = m_Path;
-        } else if (strokeType == STROKE_TYPE_DRAW || strokeType == STROKE_TYPE_LINE) {
-            m_Path = new Path();
-            m_Path.moveTo(downX, downY);
-            curRecord.path = m_Path;
-            m_Paint.setColor(strokeRealColor);
-            m_Paint.setStrokeWidth(strokeSize);
-            curRecord.paint = new Paint(m_Paint); // Clones the mPaint object
-        } else if (strokeType == STROKE_TYPE_CIRCLE || strokeType == STROKE_TYPE_RECTANGLE) {
-            RectF rect = new RectF(x, y, x, y);
-            curRecord.rect = rect;
-            m_Paint.setColor(strokeRealColor);
-            m_Paint.setStrokeWidth(strokeSize);
-            curRecord.paint = new Paint(m_Paint); // Clones the mPaint object
-        } else if (strokeType == STROKE_TYPE_TEXT) {
-            curRecord.textOffX = (int) x;
-            curRecord.textOffY = (int) y;
-            TextPaint tp = new TextPaint();
-            tp.setColor(strokeRealColor);
-            curRecord.textPaint = tp; // Clones the mPaint object
-            textWindowCallback.onText(this, curRecord);
-            return;
+        if (editMode == EDIT_STROKE) {
+            strokeRedoList.clear();
+            curStrokeRecord = new DrawRecord(strokeType);
+            if (strokeType == STROKE_TYPE_ERASER) {
+                m_Path = new Path();
+                m_Path.moveTo(downX, downY);
+                m_Paint.setColor(Color.WHITE);
+                m_Paint.setStrokeWidth(eraserSize);
+                curStrokeRecord.paint = new Paint(m_Paint); // Clones the mPaint object
+                curStrokeRecord.path = m_Path;
+            } else if (strokeType == STROKE_TYPE_DRAW || strokeType == STROKE_TYPE_LINE) {
+                m_Path = new Path();
+                m_Path.moveTo(downX, downY);
+                curStrokeRecord.path = m_Path;
+                m_Paint.setColor(strokeRealColor);
+                m_Paint.setStrokeWidth(strokeSize);
+                curStrokeRecord.paint = new Paint(m_Paint); // Clones the mPaint object
+            } else if (strokeType == STROKE_TYPE_CIRCLE || strokeType == STROKE_TYPE_RECTANGLE) {
+                RectF rect = new RectF(x, y, x, y);
+                curStrokeRecord.rect = rect;
+                m_Paint.setColor(strokeRealColor);
+                m_Paint.setStrokeWidth(strokeSize);
+                curStrokeRecord.paint = new Paint(m_Paint); // Clones the mPaint object
+            } else if (strokeType == STROKE_TYPE_TEXT) {
+                curStrokeRecord.textOffX = (int) x;
+                curStrokeRecord.textOffY = (int) y;
+                TextPaint tp = new TextPaint();
+                tp.setColor(strokeRealColor);
+                curStrokeRecord.textPaint = tp; // Clones the mPaint object
+                textWindowCallback.onText(this, curStrokeRecord);
+                return;
+            }
+            strokeRecordList.add(curStrokeRecord);
+        } else if (editMode == EDIT_PHOTO) {
+
         }
-        strokeRecordList.add(curRecord);
+
     }
 
 
     private void touch_move(float x, float y) {
-        if (strokeType == STROKE_TYPE_ERASER) {
-            m_Path.quadTo(preX, preY, (x + preX) / 2, (y + preY) / 2);
-        } else if (strokeType == STROKE_TYPE_DRAW) {
-            m_Path.quadTo(preX, preY, (x + preX) / 2, (y + preY) / 2);
-        } else if (strokeType == STROKE_TYPE_LINE) {
-            m_Path.reset();
-            m_Path.moveTo(downX, downY);
-            m_Path.lineTo(x, y);
-        } else if (strokeType == STROKE_TYPE_CIRCLE || strokeType == STROKE_TYPE_RECTANGLE) {
-            curRecord.rect.set(downX < x ? downX : x, downY < y ? downY : y, downX > x ? downX : x, downY > y ? downY : y);
-        } else if (strokeType == STROKE_TYPE_TEXT) {
+        if (editMode == EDIT_STROKE) {
+            if (strokeType == STROKE_TYPE_ERASER) {
+                m_Path.quadTo(preX, preY, (x + preX) / 2, (y + preY) / 2);
+            } else if (strokeType == STROKE_TYPE_DRAW) {
+                m_Path.quadTo(preX, preY, (x + preX) / 2, (y + preY) / 2);
+            } else if (strokeType == STROKE_TYPE_LINE) {
+                m_Path.reset();
+                m_Path.moveTo(downX, downY);
+                m_Path.lineTo(x, y);
+            } else if (strokeType == STROKE_TYPE_CIRCLE || strokeType == STROKE_TYPE_RECTANGLE) {
+                curStrokeRecord.rect.set(downX < x ? downX : x, downY < y ? downY : y, downX > x ? downX : x, downY > y ? downY : y);
+            } else if (strokeType == STROKE_TYPE_TEXT) {
+
+            }
+        } else if (editMode == EDIT_PHOTO) {
 
         }
         preX = x;
@@ -424,5 +446,42 @@ public class SketchView extends ImageView implements OnTouchListener {
         public void onDrawChanged();
     }
 
+    public void setPhotoPath(String path) {
+        Bitmap sampleBM = null;
+        if (path.contains(Environment.getExternalStorageDirectory().toString())) {
+            sampleBM = setSDCardPhoto(path);
+        } else {
+            sampleBM = setAssetsPhoto(path);
+        }
+        if (sampleBM != null) {
+            DrawRecord record = new DrawRecord(STROKE_TYPE_BITMAP);
+            record.bitmap = sampleBM;
+            record.matrix = new Matrix();
+            record.matrix.postTranslate(getWidth() / 2 - sampleBM.getWidth() / 2, getHeight() / 2 - sampleBM.getHeight() / 2);
+            photoRecordList.add(record);
+            setCurPhotoRecord(record);
+        }
+    }
 
+    private void setCurPhotoRecord(DrawRecord record) {
+        curPhotoRecord = record;
+        invalidate();
+    }
+
+    public Bitmap setSDCardPhoto(String path) {
+        File file = new File(path);
+        if (file.exists()) {
+            return BitmapUtils.decodeSampleBitMapFromFile(mContext, path, simpleScale);
+        } else {
+            return null;
+        }
+    }
+
+    public Bitmap setAssetsPhoto(String path) {
+        return BitmapUtils.getBitmapFromAssets(mContext, path);
+    }
+
+    public void setEditMode(int editMode) {
+        this.editMode = editMode;
+    }
 }

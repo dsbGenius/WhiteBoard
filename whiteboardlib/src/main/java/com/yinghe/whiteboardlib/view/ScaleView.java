@@ -261,7 +261,7 @@ public class ScaleView extends ImageView implements
     private void drawPhotoBorder(Canvas canvas) {
         if (first) {//首次绘制调整边界
             mPhotoMatrix.reset();
-            getGlobalVisibleRect(viewRect);
+//            getGlobalVisibleRect(viewRect);
             photoRectSrc = new RectF(getDrawable().getBounds());//图片的边界
             setLimitScale();//放大倍数
             photoCornersSrc[0] = photoRectSrc.left;

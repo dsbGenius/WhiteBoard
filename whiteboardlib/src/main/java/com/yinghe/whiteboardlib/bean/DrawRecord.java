@@ -10,7 +10,7 @@ import android.graphics.RectF;
 import android.location.Location;
 import android.text.TextPaint;
 
-public class StrokeRecord {
+public class DrawRecord {
     public static final int STROKE_TYPE_ERASER = 1;
     public static final int STROKE_TYPE_DRAW = 2;
     //    public static final int STROKE_TYPE_DRAW_BOLD= 1;
@@ -35,7 +35,7 @@ public class StrokeRecord {
     public Bitmap bitmap;//图形
     public Matrix matrix;//图形
 
-    public StrokeRecord(int type) {
+    public DrawRecord(int type) {
         this.type = type;
     }
 }
