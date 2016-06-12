@@ -505,7 +505,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
             StrokeRecord record = new StrokeRecord(STROKE_TYPE_BITMAP);
             record.bitmap = scaleView.getPhotoSampleBM();
             record.matrix = new Matrix(scaleView.getPhotoMatrix());
-            mSketchView.addRecord(record);
+            mSketchView.addPhotoRecord(record);
             scaleView.setImageBitmap(null);
             scaleView.setVisibility(View.GONE);
             sureActionLayout.setVisibility(View.GONE);
@@ -566,7 +566,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                     record.text = editText.getText().toString();
                     record.textPaint.setTextSize(editText.getTextSize());
                     record.textWidth = editText.getMaxWidth();
-                    mSketchView.addRecord(record);
+                    mSketchView.addStrokeRecord(record);
                 }
             }
         });

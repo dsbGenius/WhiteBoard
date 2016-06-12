@@ -83,8 +83,9 @@ public class SketchView extends ImageView implements OnTouchListener {
     private float downX, downY, preX, preY;
     private int width, height;
 
-    private List<StrokeRecord> recordList = new ArrayList<>();
-    private List<StrokeRecord> redoList = new ArrayList<>();
+    private List<StrokeRecord> photoRecordList = new ArrayList<>();
+    private List<StrokeRecord> strokeRecordList = new ArrayList<>();
+    private List<StrokeRecord> strokeRedoList = new ArrayList<>();
     private Context mContext;
 
     private Bitmap bitmap;
@@ -237,12 +238,13 @@ public class SketchView extends ImageView implements OnTouchListener {
     }
 
     private void drawRecord(Canvas canvas) {
-        for (StrokeRecord record : recordList) {
+        for (StrokeRecord record : photoRecordList) {
+            canvas.drawBitmap(record.bitmap, record.matrix, null);
+        }
+        for (StrokeRecord record : strokeRecordList) {
             int type = record.type;
             if (type == StrokeRecord.STROKE_TYPE_ERASER || type == StrokeRecord.STROKE_TYPE_DRAW || type == StrokeRecord.STROKE_TYPE_LINE) {
                 canvas.drawPath(record.path, record.paint);
-            } else if (type == StrokeRecord.STROKE_TYPE_BITMAP) {
-                canvas.drawBitmap(record.bitmap, record.matrix, null);
             } else if (type == STROKE_TYPE_CIRCLE) {
                 canvas.drawOval(record.rect, record.paint);
             } else if (type == STROKE_TYPE_RECTANGLE) {
@@ -250,7 +252,6 @@ public class SketchView extends ImageView implements OnTouchListener {
             } else if (type == STROKE_TYPE_TEXT) {
                 if (record.text != null) {
                     StaticLayout layout = new StaticLayout(record.text, record.textPaint, record.textWidth, Layout.Alignment.ALIGN_NORMAL, 1.0F, 0.0F, true);
-//                    StaticLayout layout = new StaticLayout(record.text, record.textPaint,50, Layout.Alignment.ALIGN_NORMAL, 1.0F, 0.0F, true);
                     canvas.translate(record.textOffX, record.textOffY);
                     layout.draw(canvas);
                     canvas.translate(-record.textOffX, -record.textOffY);
@@ -259,16 +260,21 @@ public class SketchView extends ImageView implements OnTouchListener {
         }
     }
 
-    public void addRecord(StrokeRecord record) {
-        recordList.add(record);
+    public void addStrokeRecord(StrokeRecord record) {
+        strokeRecordList.add(record);
+        invalidate();
+    }
+
+    public void addPhotoRecord(StrokeRecord record) {
+        photoRecordList.add(record);
         invalidate();
     }
 
     private void touch_start(float x, float y) {
         preX = downX = x;
         preY = downY = y;
-        redoList.clear();
-        setStrokeType(6);
+        strokeRedoList.clear();
+//        setStrokeType(6);
         curRecord = new StrokeRecord(strokeType);
         if (strokeType == STROKE_TYPE_ERASER) {
             m_Path = new Path();
@@ -299,7 +305,7 @@ public class SketchView extends ImageView implements OnTouchListener {
             textWindowCallback.onText(this, curRecord);
             return;
         }
-        recordList.add(curRecord);
+        strokeRecordList.add(curRecord);
     }
 
 
@@ -330,7 +336,7 @@ public class SketchView extends ImageView implements OnTouchListener {
      * Returns a new bitmap associated with drawed canvas
      */
     public Bitmap getBitmap() {
-        if (recordList.size() == 0)
+        if (strokeRecordList.size() == 0)
             return null;
 
         if (bitmap == null) {
@@ -347,9 +353,9 @@ public class SketchView extends ImageView implements OnTouchListener {
      * 删除一笔
      */
     public void undo() {
-        if (recordList.size() > 0) {
-            redoList.add(recordList.get(recordList.size() - 1));
-            recordList.remove(recordList.size() - 1);
+        if (strokeRecordList.size() > 0) {
+            strokeRedoList.add(strokeRecordList.get(strokeRecordList.size() - 1));
+            strokeRecordList.remove(strokeRecordList.size() - 1);
             invalidate();
         }
     }
@@ -359,21 +365,21 @@ public class SketchView extends ImageView implements OnTouchListener {
      * 撤销
      */
     public void redo() {
-        if (redoList.size() > 0) {
-            recordList.add(redoList.get(redoList.size() - 1));
-            redoList.remove(redoList.size() - 1);
+        if (strokeRedoList.size() > 0) {
+            strokeRecordList.add(strokeRedoList.get(strokeRedoList.size() - 1));
+            strokeRedoList.remove(strokeRedoList.size() - 1);
         }
         invalidate();
     }
 
 
     public int getRedoCount() {
-        return redoList.size();
+        return strokeRedoList.size();
     }
 
 
     public int getRecordCount() {
-        return recordList.size();
+        return strokeRecordList.size();
     }
 
 
@@ -396,8 +402,8 @@ public class SketchView extends ImageView implements OnTouchListener {
 
 
     public void erase() {
-        recordList.clear();
-        redoList.clear();
+        strokeRecordList.clear();
+        strokeRedoList.clear();
         // 先判断是否已经回收
         if (bitmap != null && !bitmap.isRecycled()) {
             // 回收并且置为null
