@@ -62,7 +62,8 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     public static final int COLOR_GREEN = Color.parseColor("#ff99cc00");
     public static final int COLOR_ORANGE = Color.parseColor("#ffffbb33");
     public static final int COLOR_BLUE = Color.parseColor("#ff33b5e5");
-    private static final int REQUEST_IMAGE = 2;
+    public static final int REQUEST_IMAGE = 2;
+    public static final int REQUEST_BACKGROUND = 3;
 
     public static int bitmapSize = 300;
 
@@ -114,6 +115,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     private ArrayList<String> mSelectPath;
     public static int sketchViewHeight;
     public static int sketchViewWidth;
+    private ImageView sketchBackground;
 
     public static WhiteBoardFragment newInstance() {
         return new WhiteBoardFragment();
@@ -325,6 +327,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         erase = (ImageView) view.findViewById(R.id.sketch_erase);
         sketchSave = (ImageView) view.findViewById(R.id.sketch_save);
         sketchPhoto = (ImageView) view.findViewById(R.id.sketch_photo);
+        sketchBackground = (ImageView) view.findViewById(R.id.sketch_backgroud);
 //        sketchPhoto.setAlpha(0.4f);
         controlLayout = view.findViewById(R.id.controlLayout);
         sureActionLayout = view.findViewById(R.id.sure_action_layout);
@@ -340,6 +343,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         erase.setOnClickListener(this);
         sketchSave.setOnClickListener(this);
         sketchPhoto.setOnClickListener(this);
+        sketchBackground.setOnClickListener(this);
         sureAction.setOnClickListener(this);
         cancelAction.setOnClickListener(this);
         mSketchView.setTextWindowCallback(new SketchView.TextWindowCallback() {
@@ -501,6 +505,14 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
             selector.single();
             selector.origin(mSelectPath);
             selector.start(this, REQUEST_IMAGE);
+        }
+        else if (id == R.id.sketch_backgroud) {
+            MultiImageSelector selector = MultiImageSelector.create(getActivity());
+            selector.showCamera(true);
+            selector.count(9);
+            selector.single();
+            selector.origin(mSelectPath);
+            selector.start(this, REQUEST_BACKGROUND);
         } else if (id == R.id.sure_action) {
             DrawRecord record = new DrawRecord(STROKE_TYPE_BITMAP);
             record.bitmap = scaleView.getPhotoSampleBM();
@@ -530,6 +542,19 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                 //加载图片
                 mSketchView.addPhotoByPath(path);
                 mSketchView.setEditMode(SketchView.EDIT_PHOTO);
+            }
+        }else if (requestCode ==REQUEST_BACKGROUND){//设置背景成功
+            if (resultCode == getActivity().RESULT_OK) {
+                mSelectPath = data.getStringArrayListExtra(MultiImageSelector.EXTRA_RESULT);
+                String path = "";
+                if (mSelectPath.size() == 1) {
+                    path = mSelectPath.get(0);
+                } else if (mSelectPath == null || mSelectPath.size() == 0) {
+                    Toast.makeText(getActivity(), "图片加载失败,请重试!", Toast.LENGTH_LONG).show();
+                }
+                Log.i("imgPath", path);
+                //加载图片设置画板背景
+
             }
         }
     }

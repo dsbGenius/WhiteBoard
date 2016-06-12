@@ -111,9 +111,11 @@ public class MultiImageSelectorFragment extends Fragment {
     private TextView mCategoryText;
     private View mPopupAnchorView;
 
-    private boolean hasFolderGened = false;
+    private boolean hasFolderGened = false;//在生成图片,文件夹等数据时判断是否已经全部加载完成
 
     private File mTmpFile;
+    private int mRequestType;
+    private boolean mIsFristLoad;
 
     @Override
     public void onAttach(Context context) {
@@ -134,23 +136,32 @@ public class MultiImageSelectorFragment extends Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         final int mode = selectMode();
-        if (mode == MODE_MULTI) {
+        getRequstType();
+        if (mode == MODE_MULTI) {//多选模式
             ArrayList<String> tmp = getArguments().getStringArrayList(EXTRA_DEFAULT_SELECTED_LIST);
             if (tmp != null && tmp.size() > 0) {
                 resultList = tmp;
             }
         }
-        mImageAdapter = new ImageGridAdapter(getActivity(), showCamera(), 3);
+        mImageAdapter = new ImageGridAdapter(getActivity(), showCamera(), 3,mRequestType);
         mImageAdapter.showSelectIndicator(mode == MODE_MULTI);
 
         mPopupAnchorView = view.findViewById(R.id.footer);
 
         mCategoryText = (TextView) view.findViewById(R.id.category_btn);
-        mCategoryText.setText(R.string.folder_all);
+        if (mRequestType== WhiteBoardFragment.REQUEST_IMAGE) {
+            mCategoryText.setText(R.string.folder_all);
+        } else if (mRequestType == WhiteBoardFragment.REQUEST_BACKGROUND) {
+            mCategoryText.setText(R.string.folder_first);
+        }
+
+        /**
+         * 左下角文字的点击事件
+         */
         mCategoryText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (mFolderPopupWindow == null) {
+                if (mFolderPopupWindow == null) {//初次点击时创建弹出框以及数据初始化
                     createPopupFolderList();
                 }
                 if (mFolderPopupWindow.isShowing()) {
@@ -198,7 +209,11 @@ public class MultiImageSelectorFragment extends Fragment {
             }
         });
 
-        mFolderAdapter = new FolderAdapter(getActivity());
+        mFolderAdapter = new FolderAdapter(getActivity(),mRequestType);
+    }
+
+    private void getRequstType() {
+        mRequestType = getArguments().getInt(MultiImageSelectorActivity.EXTRA_REQUEST_TYPE);
     }
 
     /**
@@ -233,7 +248,7 @@ public class MultiImageSelectorFragment extends Fragment {
                     public void run() {
                         mFolderPopupWindow.dismiss();
 
-                        if (index == 0) {
+                        if (index == getAllPicIndex()) {
                             getActivity().getSupportLoaderManager().restartLoader(LOADER_ALL, null, mLoaderCallback);
                             mCategoryText.setText(R.string.folder_all);
                             if (showCamera()) {
@@ -260,7 +275,15 @@ public class MultiImageSelectorFragment extends Fragment {
             }
         });
     }
-
+    private int getAllPicIndex() {
+        int showCameraIndex = 0;
+        if (mRequestType == WhiteBoardFragment.REQUEST_IMAGE) {
+            showCameraIndex = 0;
+        } else if (mRequestType == WhiteBoardFragment.REQUEST_BACKGROUND) {
+            showCameraIndex = 1;
+        }
+        return showCameraIndex;
+    }
     private void setPopupWindowSize(int orientation) {
         if (orientation == Configuration.ORIENTATION_LANDSCAPE) {//横屏
             int screenWidth = Math.max(WhiteBoardFragment.sketchViewHeight, WhiteBoardFragment.sketchViewWidth);
@@ -295,22 +318,34 @@ public class MultiImageSelectorFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         // load image data
+        getRequstType();
+        mIsFristLoad = true;
         getActivity().getSupportLoaderManager().initLoader(LOADER_ALL, null, mLoaderCallback);
     }
 
+    /**
+     * 拍照成功后的回调
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CAMERA) {
             if (resultCode == Activity.RESULT_OK) {
                 if (mTmpFile != null) {
-                    cropPhoto(Uri.fromFile(mTmpFile));// 裁剪图片
-//                    if (mCallback != null) {
-//                        mCallback.onCameraShot(mTmpFile);
-//                    }
+                    if(mRequestType==WhiteBoardFragment.REQUEST_IMAGE) {//如果是拍照作为画板素材的话
+                        cropPhoto(Uri.fromFile(mTmpFile));// 裁剪图片
+                    }else if(mRequestType==WhiteBoardFragment.REQUEST_BACKGROUND) {//拍照作为画板背景
+                        if (mCallback != null) {
+                            mCallback.onCameraShot(mTmpFile);
+                        }
+                    }
                 }
             } else {
                 // delete tmp file
+                Toast.makeText(getActivity(),"拍照失败,请重新拍照",Toast.LENGTH_SHORT).show();
                 while (mTmpFile != null && mTmpFile.exists()) {
                     boolean success = mTmpFile.delete();
                     if (success) {
@@ -538,7 +573,7 @@ public class MultiImageSelectorFragment extends Fragment {
         public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
             if (data != null) {
                 if (data.getCount() > 0) {
-                    List<Image> images = new ArrayList<>();
+                    List<Image> images = new ArrayList<>();//所有的图片
                     data.moveToFirst();
                     do {
                         String path = data.getString(data.getColumnIndexOrThrow(IMAGE_PROJECTION[0]));
@@ -572,25 +607,31 @@ public class MultiImageSelectorFragment extends Fragment {
 
                     } while (data.moveToNext());
 
-                    mImageAdapter.setData(images);
-                    if (resultList != null && resultList.size() > 0) {
-                        mImageAdapter.setDefaultSelected(resultList);
-                    }
+
                     if (!hasFolderGened) {
                         //在这里添加assets
                         try {
-                            String[] files =getActivity().getAssets().list("img");
+                            String assestPath = "img";
+                            String folderName = "素材";
+                            if(mRequestType==WhiteBoardFragment.REQUEST_IMAGE) {
+                                assestPath = "img";
+                                folderName = "素材";
+                            }else if (mRequestType==WhiteBoardFragment.REQUEST_BACKGROUND){
+                                assestPath = "background";
+                                folderName = "背景素材";
+                            }
+                            String[] files =getActivity().getAssets().list(assestPath);
                             List<Image> AssetImages = new ArrayList<>();
                             Folder folder = new Folder();
                             for (int i = 0; i < files.length; i++) {
                                 Image image = new Image();
-                                image.path = "img/" +files[i];
+                                image.path =assestPath+ "/" +files[i];
                                 image.name = "assets/"+files[i];
                                 AssetImages.add(image);
                             }
                             folder.cover = AssetImages.get(0);
                             folder.images = AssetImages;
-                            folder.name = "素材";
+                            folder.name =folderName ;
                             folder.path = "assets";
                             mResultFolder.add(0,folder);
                         } catch (IOException e) {
@@ -600,6 +641,23 @@ public class MultiImageSelectorFragment extends Fragment {
                             hasFolderGened = true;
                         }
 
+                    }
+                    if(mRequestType==WhiteBoardFragment.REQUEST_IMAGE) {
+                        mImageAdapter.setData(images);
+                        mImageAdapter.setShowCamera(true);
+                    } else if (mRequestType == WhiteBoardFragment.REQUEST_BACKGROUND) {
+                        if(mIsFristLoad) {
+                            mImageAdapter.setShowCamera(false);
+                            mImageAdapter.setData(mResultFolder.get(0).images);
+                            mIsFristLoad = false;
+                        }else {
+                            mImageAdapter.setShowCamera(true);
+                            mImageAdapter.setData(images);
+                        }
+                    }
+
+                    if (resultList != null && resultList.size() > 0) {
+                        mImageAdapter.setDefaultSelected(resultList);
                     }
                 }
             }
@@ -622,14 +680,33 @@ public class MultiImageSelectorFragment extends Fragment {
         return null;
     }
 
+    /**
+     *
+     * 是否显示拍照
+     * @return
+     */
     private boolean showCamera() {
-        return getArguments() == null || getArguments().getBoolean(EXTRA_SHOW_CAMERA, true);
+        boolean isShowCamera =getArguments() == null || getArguments().getBoolean(EXTRA_SHOW_CAMERA, true);
+        if (mRequestType== WhiteBoardFragment.REQUEST_IMAGE) {
+            return isShowCamera;
+        } else if (mRequestType == WhiteBoardFragment.REQUEST_BACKGROUND) {
+            return false;
+        }
+        return isShowCamera;
     }
 
+    /**
+     * 多选模式还是单选模式
+     * @return
+     */
     private int selectMode() {
         return getArguments() == null ? MODE_MULTI : getArguments().getInt(EXTRA_SELECT_MODE);
     }
 
+    /**
+     * 多选模式下最多的选择图片张数
+     * @return
+     */
     private int selectImageCount() {
         return getArguments() == null ? 9 : getArguments().getInt(EXTRA_SELECT_COUNT);
     }

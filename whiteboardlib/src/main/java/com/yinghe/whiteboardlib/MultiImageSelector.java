@@ -23,6 +23,7 @@ public class MultiImageSelector {
     private ArrayList<String> mOriginData;
     private static MultiImageSelector sSelector;
     private Context mContext;
+    private int mRequstType;
 
     private MultiImageSelector(Context context){
         mContext = context;
@@ -70,6 +71,7 @@ public class MultiImageSelector {
 
     public void start(android.app.Fragment fragment, int requestCode){
         if(hasPermission()) {
+            mRequstType = requestCode;
             fragment.startActivityForResult(createIntent(), requestCode);
         }else{
             Toast.makeText(mContext, R.string.error_no_permission, Toast.LENGTH_SHORT).show();
@@ -93,6 +95,7 @@ public class MultiImageSelector {
             intent.putStringArrayListExtra(MultiImageSelectorActivity.EXTRA_DEFAULT_SELECTED_LIST, mOriginData);
         }
         intent.putExtra(MultiImageSelectorActivity.EXTRA_SELECT_MODE, mSelectMode);
+        intent.putExtra(MultiImageSelectorActivity.EXTRA_REQUEST_TYPE, mRequstType);
         return intent;
     }
 }

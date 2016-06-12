@@ -13,6 +13,7 @@ import com.squareup.picasso.Picasso;
 import com.yinghe.whiteboardlib.R;
 import com.yinghe.whiteboardlib.Utils.BitmapUtils;
 import com.yinghe.whiteboardlib.bean.Folder;
+import com.yinghe.whiteboardlib.fragment.WhiteBoardFragment;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -34,9 +35,11 @@ public class FolderAdapter extends BaseAdapter {
     int mImageSize;
 
     int lastSelected = 0;
+    private int mRequestType;
 
-    public FolderAdapter(Context context) {
+    public FolderAdapter(Context context,int requstType) {
         mContext = context;
+        mRequestType = requstType;
         mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         mImageSize = mContext.getResources().getDimensionPixelOffset(R.dimen.folder_cover_size);
     }
@@ -57,11 +60,23 @@ public class FolderAdapter extends BaseAdapter {
 
     @Override
     public int getCount() {
+        if (mRequestType== WhiteBoardFragment.REQUEST_IMAGE) {
+            return mFolders.size() + 1;
+        } else if (mRequestType == WhiteBoardFragment.REQUEST_BACKGROUND) {
+            return mFolders.size();
+        }
         return mFolders.size() + 1;
     }
 
     @Override
     public Folder getItem(int i) {
+        if (mRequestType== WhiteBoardFragment.REQUEST_IMAGE) {
+            if (i == 0) return null;
+            return mFolders.get(i - 1);
+        } else if (mRequestType == WhiteBoardFragment.REQUEST_BACKGROUND) {
+            if(i==1) return null;
+            return mFolders.get(i);
+        }
         if (i == 0) return null;
         return mFolders.get(i - 1);
     }
@@ -81,13 +96,19 @@ public class FolderAdapter extends BaseAdapter {
             holder = (ViewHolder) view.getTag();
         }
         if (holder != null) {
-            if (i == 0) {
+            int showAllIndex = 0;
+            if (mRequestType== WhiteBoardFragment.REQUEST_IMAGE) {
+                showAllIndex = 0;
+            } else if (mRequestType == WhiteBoardFragment.REQUEST_BACKGROUND) {
+                showAllIndex = 1;
+            }
+            if (i == showAllIndex) {//这里要改
                 holder.name.setText(R.string.folder_all);
                 holder.path.setText("/sdcard");
                 holder.size.setText(String.format("%d%s",
                         getTotalImageSize(), mContext.getResources().getString(R.string.photo_unit)));
                 if (mFolders.size() > 0) {
-                    Folder f = mFolders.get(0);
+                    Folder f = mFolders.get(1);
                     File coverFile = new File(f.cover.path);
                     if (f != null) {
                         Picasso.with(mContext)

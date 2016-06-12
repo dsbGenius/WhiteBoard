@@ -16,6 +16,7 @@ import com.yinghe.whiteboardlib.MultiImageSelectorFragment;
 import com.yinghe.whiteboardlib.R;
 import com.yinghe.whiteboardlib.Utils.BitmapUtils;
 import com.yinghe.whiteboardlib.bean.Image;
+import com.yinghe.whiteboardlib.fragment.WhiteBoardFragment;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -23,13 +24,12 @@ import java.util.List;
 
 /**
  * 图片Adapter
- * Created by Nereo on 2015/4/7.
- * Updated by nereo on 2016/1/19.
  */
 public class ImageGridAdapter extends BaseAdapter {
 
     private static final int TYPE_CAMERA = 0;
     private static final int TYPE_NORMAL = 1;
+    private final int mRequestType;
 
     private Context mContext;
 
@@ -42,8 +42,9 @@ public class ImageGridAdapter extends BaseAdapter {
 
     final int mGridWidth;
 
-    public ImageGridAdapter(Context context, boolean showCamera, int column) {
+    public ImageGridAdapter(Context context, boolean showCamera, int column, int requestType) {
         mContext = context;
+        mRequestType = requestType;
         mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         this.showCamera = showCamera;
         WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
@@ -149,6 +150,16 @@ public class ImageGridAdapter extends BaseAdapter {
         return TYPE_NORMAL;
     }
 
+    private int getAllPicIndex() {
+        int showCameraIndex = 0;
+        if (mRequestType == WhiteBoardFragment.REQUEST_IMAGE) {
+            showCameraIndex = 0;
+        } else if (mRequestType == WhiteBoardFragment.REQUEST_BACKGROUND) {
+            showCameraIndex = 1;
+        }
+        return showCameraIndex;
+    }
+
     @Override
     public int getCount() {
         return showCamera ? mImages.size() + 1 : mImages.size();
@@ -157,7 +168,7 @@ public class ImageGridAdapter extends BaseAdapter {
     @Override
     public Image getItem(int i) {
         if (showCamera) {
-            if (i == 0) {
+            if (i ==0) {
                 return null;
             }
             return mImages.get(i - 1);
@@ -240,10 +251,10 @@ public class ImageGridAdapter extends BaseAdapter {
                 }
             } else {
                 Bitmap bitmap = null;
-                bitmap = BitmapUtils.getBitmapFromAssets(mContext,data.path );
+                bitmap = BitmapUtils.getBitmapFromAssets(mContext, data.path);
                 if (bitmap != null) {
                     image.setImageBitmap(bitmap);
-                }else {
+                } else {
                     image.setImageResource(R.drawable.default_error);
                 }
             }
