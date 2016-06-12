@@ -60,6 +60,7 @@ public class MultiImageSelectorActivity extends AppCompatActivity
     public static final String EXTRA_DEFAULT_SELECTED_LIST = "default_list";
     // Default image size
     private static final int DEFAULT_IMAGE_SIZE = 9;
+    public static final String EXTRA_REQUEST_TYPE = "request_type";
 
     private ArrayList<String> resultList = new ArrayList<>();
     private Button mSubmitButton;
@@ -68,6 +69,7 @@ public class MultiImageSelectorActivity extends AppCompatActivity
     private LinearLayout layout;
     private int screenHight;
     private int screenWidth;
+    private int mRequestType;
 
     /**
      * 获取状态栏高度
@@ -112,8 +114,18 @@ public class MultiImageSelectorActivity extends AppCompatActivity
             getWindow().setStatusBarColor(Color.BLACK);
         }
 
+
+        //获取各种配置信息
+        final Intent intent = getIntent();
+        mDefaultCount = intent.getIntExtra(EXTRA_SELECT_COUNT, DEFAULT_IMAGE_SIZE);
+        mRequestType = intent.getIntExtra(EXTRA_REQUEST_TYPE, WhiteBoardFragment.REQUEST_IMAGE);
+        final int mode = intent.getIntExtra(EXTRA_SELECT_MODE, MODE_MULTI);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle("选择图片");
+        if (mRequestType == WhiteBoardFragment.REQUEST_BACKGROUND) {
+            toolbar.setTitle("选择背景");
+        } else if (mRequestType == WhiteBoardFragment.REQUEST_IMAGE) {
+            toolbar.setTitle("选择图片");
+        }
         if (toolbar != null) {
             setSupportActionBar(toolbar);
         }
@@ -122,10 +134,6 @@ public class MultiImageSelectorActivity extends AppCompatActivity
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
-        //获取各种配置信息
-        final Intent intent = getIntent();
-        mDefaultCount = intent.getIntExtra(EXTRA_SELECT_COUNT, DEFAULT_IMAGE_SIZE);
-        final int mode = intent.getIntExtra(EXTRA_SELECT_MODE, MODE_MULTI);
         final boolean isShow = intent.getBooleanExtra(EXTRA_SHOW_CAMERA, true);
         if (mode == MODE_MULTI && intent.hasExtra(EXTRA_DEFAULT_SELECTED_LIST)) {
             resultList = intent.getStringArrayListExtra(EXTRA_DEFAULT_SELECTED_LIST);
@@ -159,7 +167,7 @@ public class MultiImageSelectorActivity extends AppCompatActivity
             bundle.putInt(MultiImageSelectorFragment.EXTRA_SELECT_MODE, mode);
             bundle.putBoolean(MultiImageSelectorFragment.EXTRA_SHOW_CAMERA, isShow);
             bundle.putStringArrayList(MultiImageSelectorFragment.EXTRA_DEFAULT_SELECTED_LIST, resultList);
-
+            bundle.putInt(EXTRA_REQUEST_TYPE,mRequestType);
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.image_grid, Fragment.instantiate(this, MultiImageSelectorFragment.class.getName(), bundle))
                     .commit();
@@ -169,6 +177,7 @@ public class MultiImageSelectorActivity extends AppCompatActivity
 
     /**
      * 设置activity的尺寸以及在屏幕上的位置
+     *
      * @param orientation
      */
     private void setActivitySize(int orientation) {
@@ -186,7 +195,7 @@ public class MultiImageSelectorActivity extends AppCompatActivity
             Point point = new Point();
             d.getSize(point);
             p.height = (int) (screenHight);   //高度设置为屏幕的1.0
-            p.width = (int) (screenWidth/2);
+            p.width = (int) (screenWidth / 2);
             Log.i("orientaion", "横屏 hight:" + p.height + "  width:" + p.width);
             getWindow().setAttributes(p);
             getWindow().setGravity(Gravity.RIGHT | Gravity.BOTTOM);
@@ -210,7 +219,8 @@ public class MultiImageSelectorActivity extends AppCompatActivity
 
     /**
      * 屏幕旋转时也需要调整activity的大小
-      * @param newConfig
+     *
+     * @param newConfig
      */
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
