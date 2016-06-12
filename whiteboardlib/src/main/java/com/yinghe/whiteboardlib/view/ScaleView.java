@@ -299,7 +299,7 @@ public class ScaleView extends ImageView implements
         x = photoCorners[0] - markerMirrorRect.width() / 2;
         y = photoCorners[1] - markerMirrorRect.height() / 2;
         markerMirrorRect.offsetTo(x, y);
-//        canvas.drawRect(markerMirrorRect, p);
+//        canvas.drawRect(markerCopyRect, p);
 //        canvas.drawBitmap(mirrorMarkBM,x,y,null);
 
         x = photoCorners[2] - markerDeleteRect.width() / 2;

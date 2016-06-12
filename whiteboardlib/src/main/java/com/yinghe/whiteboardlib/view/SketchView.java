@@ -26,8 +26,10 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.PointF;
 import android.graphics.RectF;
 import android.os.Environment;
+import android.support.annotation.NonNull;
 import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
@@ -71,6 +73,12 @@ public class SketchView extends ImageView implements OnTouchListener {
 
     public static final int EDIT_STROKE = 1;
     public static final int EDIT_PHOTO = 2;
+
+    private static final int ACTION_NONE = 0;
+    private static final int ACTION_DRAG = 1;
+    private static final int ACTION_SCALE = 2;
+    private static final int ACTION_ROTATE = 3;
+
     public static final int DEFAULT_STROKE_SIZE = 7;
     public static final int DEFAULT_STROKE_ALPHA = 100;
     public static final int DEFAULT_ERASER_SIZE = 50;
@@ -87,13 +95,13 @@ public class SketchView extends ImageView implements OnTouchListener {
     Bitmap deleteMarkBM = BitmapFactory.decodeResource(getResources(), R.drawable.mark_delete);
     Bitmap rotateMarkBM = BitmapFactory.decodeResource(getResources(), R.drawable.mark_rotate);
     //    Bitmap rotateMarkBM = BitmapFactory.decodeResource(getResources(), R.drawable.test);
-    RectF markerMirrorRect = new RectF(0, 0, mirrorMarkBM.getWidth(), mirrorMarkBM.getHeight());//镜像标记边界
+    RectF markerCopyRect = new RectF(0, 0, mirrorMarkBM.getWidth(), mirrorMarkBM.getHeight());//镜像标记边界
     RectF markerDeleteRect = new RectF(0, 0, deleteMarkBM.getWidth(), deleteMarkBM.getHeight());//删除标记边界
     RectF markerRotateRect = new RectF(0, 0, rotateMarkBM.getWidth(), rotateMarkBM.getHeight());//旋转标记边界
 
     private Path m_Path;
     private Paint m_Paint;
-    private float downX, downY, preX, preY;
+    private float downX, downY, preX, preY, curX, curY;
     private int width, height;
 
     private List<DrawRecord> photoRecordList = new ArrayList<>();
@@ -106,6 +114,7 @@ public class SketchView extends ImageView implements OnTouchListener {
     DrawRecord curStrokeRecord;
     DrawRecord curPhotoRecord;
 
+    int actionMode;
 
     private int editMode = EDIT_STROKE;
     private static float SCALE_MAX = 4.0f;
@@ -229,15 +238,15 @@ public class SketchView extends ImageView implements OnTouchListener {
 
     @Override
     public boolean onTouch(View arg0, MotionEvent event) {
-        float x = event.getX();
-        float y = event.getY();
+        curX = event.getX();
+        curY = event.getY();
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                touch_down(x, y);
+                touch_down(curX, curY);
                 invalidate();
                 break;
             case MotionEvent.ACTION_MOVE:
-                touch_move(x, y);
+                touch_move(curX, curY);
                 invalidate();
                 break;
             case MotionEvent.ACTION_UP:
@@ -261,7 +270,8 @@ public class SketchView extends ImageView implements OnTouchListener {
 
     private void drawRecord(Canvas canvas) {
         for (DrawRecord record : photoRecordList) {
-            canvas.drawBitmap(record.bitmap, record.matrix, null);
+            if (record != null)
+                canvas.drawBitmap(record.bitmap, record.matrix, null);
         }
         if (editMode == EDIT_PHOTO && curPhotoRecord != null) {
             SCALE_MAX = curPhotoRecord.scaleMax;
@@ -301,17 +311,17 @@ public class SketchView extends ImageView implements OnTouchListener {
     private void drawMarks(Canvas canvas, float[] photoCorners) {
         float x;
         float y;
-        x = photoCorners[0] - markerMirrorRect.width() / 2;
-        y = photoCorners[1] - markerMirrorRect.height() / 2;
-        markerMirrorRect.offsetTo(x, y);
-//        canvas.drawRect(markerMirrorRect, p);
-//        canvas.drawBitmap(mirrorMarkBM,x,y,null);
+        x = photoCorners[0] - markerCopyRect.width() / 2;
+        y = photoCorners[1] - markerCopyRect.height() / 2;
+        markerCopyRect.offsetTo(x, y);
+//        canvas.drawRect(markerCopyRect, p);
+        canvas.drawBitmap(mirrorMarkBM, x, y, null);
 
         x = photoCorners[2] - markerDeleteRect.width() / 2;
         y = photoCorners[3] - markerDeleteRect.height() / 2;
         markerDeleteRect.offsetTo(x, y);
 //        canvas.drawRect(markerDeleteRect, p);
-//        canvas.drawBitmap(deleteMarkBM,x,y,null);
+        canvas.drawBitmap(deleteMarkBM, x, y, null);
 
         x = photoCorners[4] - markerRotateRect.width() / 2;
         y = photoCorners[5] - markerRotateRect.height() / 2;
@@ -342,6 +352,7 @@ public class SketchView extends ImageView implements OnTouchListener {
         return Math.max(getWidth(), getHeight()) / Math.max(photoSrc.width(), photoSrc.height());
 //        SCALE_MIN = SCALE_MAX / 5;
     }
+
     public void addStrokeRecord(DrawRecord record) {
         strokeRecordList.add(record);
         invalidate();
@@ -390,18 +401,62 @@ public class SketchView extends ImageView implements OnTouchListener {
             strokeRecordList.add(curStrokeRecord);
         } else if (editMode == EDIT_PHOTO) {
             float[] downPoint = new float[]{downX, downY};
-            float[] invertPoint = new float[2];
-            Matrix invertMatrix = new Matrix();
-            for (DrawRecord record : photoRecordList) {
-                record.matrix.invert(invertMatrix);
-                invertMatrix.mapPoints(invertPoint, downPoint);
-                if (record.photoRectSrc.contains(invertPoint[0], invertPoint[1])) {
-                    setCurPhotoRecord(record);
-                    break;
-                }
+            if (isInMarkRect(downPoint)) {// 先判操作标记区域
+                return;
+            }
+            if (isInPhotoRect(curPhotoRecord, downPoint)) {//再判断是否点击了当前图片
+                actionMode = ACTION_DRAG;
+                return;
+            }
+            selectPhoto(downPoint);//最后判断是否点击了其他图片
+        }
+    }
+
+    //judge click which photo，then can edit the photo
+    private void selectPhoto(float[] downPoint) {
+        DrawRecord clickRecord = null;
+        for (int i = photoRecordList.size() - 1; i >= 0; i--) {
+            DrawRecord record = photoRecordList.get(i);
+            if (isInPhotoRect(record, downPoint)) {
+                clickRecord = record;
+                break;
             }
         }
+        if (clickRecord != null) {
+            setCurPhotoRecord(clickRecord);
+            actionMode = ACTION_DRAG;
+        } else {
+            actionMode = ACTION_NONE;
+        }
+    }
 
+    private boolean isInMarkRect(float[] downPoint) {
+        if (markerRotateRect.contains(downPoint[0], (int) downPoint[1])) {//判断是否在区域内
+            actionMode = ACTION_ROTATE;
+            return true;
+        }
+        if (markerDeleteRect.contains(downPoint[0], (int) downPoint[1])) {//判断是否在区域内
+            photoRecordList.remove(curPhotoRecord);
+            setCurPhotoRecord(null);
+            return true;
+        }
+        if (markerCopyRect.contains(downPoint[0], (int) downPoint[1])) {//判断是否在区域内
+            DrawRecord newRecord = initPhotoRecord(curPhotoRecord.bitmap);
+            setCurPhotoRecord(newRecord);
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isInPhotoRect(DrawRecord record, float[] downPoint) {
+        if (record != null) {
+            float[] invertPoint = new float[2];
+            Matrix invertMatrix = new Matrix();
+            record.matrix.invert(invertMatrix);
+            invertMatrix.mapPoints(invertPoint, downPoint);
+            return record.photoRectSrc.contains(invertPoint[0], invertPoint[1]);
+        }
+        return false;
     }
 
 
@@ -421,10 +476,68 @@ public class SketchView extends ImageView implements OnTouchListener {
 
             }
         } else if (editMode == EDIT_PHOTO) {
-
+            if (actionMode == ACTION_DRAG) {
+                onDragAction(curX - preX, curY - preY);
+            } else if (actionMode == ACTION_ROTATE) {
+//                onRotateAction()
+            }
         }
         preX = x;
         preY = y;
+    }
+
+    //    private void onRotateAction() {
+//        //放大
+//        //目前触摸点与图片显示中心距离
+//        float a = (float) Math.sqrt(Math.pow(curP.x - photoCorners[8], 2) + Math.pow(curP.y - photoCorners[9], 2));
+//        //目前上次旋转图标与图片显示中心距离
+//        float b = (float) Math.sqrt(Math.pow(photoCorners[4] - photoCorners[0], 2) + Math.pow(photoCorners[5] - photoCorners[1], 2)) / 2;
+//
+//        //设置Matrix缩放参数
+//        if (a >= photoLen / 2 * SCALE_MIN && a <= photoLen / 2 * SCALE_MAX) {
+//            //这种计算方法可以保持旋转图标坐标与触摸点同步缩放
+//            float scale = a / b;
+//            mPhotoMatrix.postScale(scale, scale, photoCorners[8], photoCorners[9]);
+//        }
+//
+//        //旋转
+//        //根据移动坐标的变化构建两个向量，以便计算两个向量角度.
+//        preVector.set(preP.x - photoCorners[8], preP.y - photoCorners[9]);//旋转后向量
+//        curVector.set(curP.x - photoCorners[8], curP.y - photoCorners[9]);//旋转前向量
+//        //计算向量长度
+//        double preVectorLen = getVectorLength(preVector);
+//        double curVectorLen = getVectorLength(curVector);
+//        //计算两个向量的夹角.
+//        double cosAlpha = (preVector.x * curVector.x + preVector.y * curVector.y)
+//                / (preVectorLen * curVectorLen);
+//        //由于计算误差，可能会带来略大于1的cos，例如
+//        if (cosAlpha > 1.0f) {
+//            cosAlpha = 1.0f;
+//        }
+//        //本次的角度已经计算出来。
+//        double dAngle = Math.acos(cosAlpha) * 180.0 / Math.PI;
+//        // 判断顺时针和逆时针.
+//        //判断方法其实很简单，这里的v1v2其实相差角度很小的。
+//        //先转换成单位向量
+//        preVector.x /= preVectorLen;
+//        preVector.y /= preVectorLen;
+//        curVector.x /= curVectorLen;
+//        curVector.y /= curVectorLen;
+//        //作curVector的逆时针垂直向量。
+//        PointF verticalVec = new PointF(curVector.y, -curVector.x);
+//
+//        //判断这个垂直向量和v1的点积，点积>0表示俩向量夹角锐角。=0表示垂直，<0表示钝角
+//        float vDot = preVector.x * verticalVec.x + preVector.y * verticalVec.y;
+//        if (vDot > 0) {
+//            //v2的逆时针垂直向量和v1是锐角关系，说明v1在v2的逆时针方向。
+//        } else {
+//            dAngle = -dAngle;
+//        }
+//        mPhotoMatrix.postRotate((float) dAngle, photoCorners[8], photoCorners[9]);
+//        setImageMatrix(mPhotoMatrix);
+//    }
+    private void onDragAction(float distanceX, float distanceY) {
+        curPhotoRecord.matrix.postTranslate((int) distanceX, (int) distanceY);
     }
 
 
@@ -532,18 +645,24 @@ public class SketchView extends ImageView implements OnTouchListener {
             sampleBM = setAssetsPhoto(path);
         }
         if (sampleBM != null) {
-            DrawRecord newRecord = new DrawRecord(STROKE_TYPE_BITMAP);
-            newRecord.bitmap = sampleBM;
-            newRecord.photoRectSrc = new RectF(0, 0, newRecord.bitmap.getWidth(), newRecord.bitmap.getHeight());
-            newRecord.scaleMax = getMaxScale(newRecord.photoRectSrc);//放大倍数
-            newRecord.matrix = new Matrix();
-            newRecord.matrix.postTranslate(getWidth() / 2 - sampleBM.getWidth() / 2, getHeight() / 2 - sampleBM.getHeight() / 2);
-            newRecord.paint = new Paint();
-            newRecord.paint.setColor(Color.GRAY);
-            newRecord.paint.setStrokeWidth(BitmapUtils.dip2px(mContext, 0.8f));
-            newRecord.paint.setStyle(Paint.Style.STROKE);
+            DrawRecord newRecord = initPhotoRecord(sampleBM);
             setCurPhotoRecord(newRecord);
         }
+    }
+
+    @NonNull
+    private DrawRecord initPhotoRecord(Bitmap bitmap) {
+        DrawRecord newRecord = new DrawRecord(STROKE_TYPE_BITMAP);
+        newRecord.bitmap = bitmap;
+        newRecord.photoRectSrc = new RectF(0, 0, newRecord.bitmap.getWidth(), newRecord.bitmap.getHeight());
+        newRecord.scaleMax = getMaxScale(newRecord.photoRectSrc);//放大倍数
+        newRecord.matrix = new Matrix();
+        newRecord.matrix.postTranslate(getWidth() / 2 - bitmap.getWidth() / 2, getHeight() / 2 - bitmap.getHeight() / 2);
+        newRecord.paint = new Paint();
+        newRecord.paint.setColor(Color.GRAY);
+        newRecord.paint.setStrokeWidth(BitmapUtils.dip2px(mContext, 0.8f));
+        newRecord.paint.setStyle(Paint.Style.STROKE);
+        return newRecord;
     }
 
     private void setCurPhotoRecord(DrawRecord record) {
