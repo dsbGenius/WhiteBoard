@@ -102,6 +102,7 @@ public class SketchView extends ImageView implements OnTouchListener {
     private Path m_Path;
     private Paint m_Paint;
     private float downX, downY, preX, preY, curX, curY;
+    private float downDistance, curDistance;
     private int width, height;
 
     private List<DrawRecord> photoRecordList = new ArrayList<>();
@@ -241,12 +242,17 @@ public class SketchView extends ImageView implements OnTouchListener {
         curX = event.getX();
         curY = event.getY();
         switch (event.getAction()) {
+            case MotionEvent.ACTION_POINTER_DOWN:
+                downDistance = spacing(event);
+                if (downDistance > 10)//防止误触
+                    actionMode = ACTION_SCALE;
+                break;
             case MotionEvent.ACTION_DOWN:
-                touch_down(curX, curY);
+                touch_down(event);
                 invalidate();
                 break;
             case MotionEvent.ACTION_MOVE:
-                touch_move(curX, curY);
+                touch_move(event);
                 invalidate();
                 break;
             case MotionEvent.ACTION_UP:
@@ -254,9 +260,16 @@ public class SketchView extends ImageView implements OnTouchListener {
                 invalidate();
                 break;
         }
+        preX = curX;
+        preY = curY;
         return true;
     }
 
+    private float spacing(MotionEvent event) {
+        float x = event.getX(0) - event.getX(1);
+        float y = event.getY(0) - event.getY(1);
+        return (float) Math.sqrt(x * x + y * y);
+    }
 
     @Override
     protected void onDraw(Canvas canvas) {
@@ -363,9 +376,9 @@ public class SketchView extends ImageView implements OnTouchListener {
         invalidate();
     }
 
-    private void touch_down(float x, float y) {
-        preX = downX = x;
-        preY = downY = y;
+    private void touch_down(MotionEvent event) {
+        downX = event.getX();
+        downY = event.getY();
         if (editMode == EDIT_STROKE) {
             strokeRedoList.clear();
             curStrokeRecord = new DrawRecord(strokeType);
@@ -384,14 +397,14 @@ public class SketchView extends ImageView implements OnTouchListener {
                 m_Paint.setStrokeWidth(strokeSize);
                 curStrokeRecord.paint = new Paint(m_Paint); // Clones the mPaint object
             } else if (strokeType == STROKE_TYPE_CIRCLE || strokeType == STROKE_TYPE_RECTANGLE) {
-                RectF rect = new RectF(x, y, x, y);
+                RectF rect = new RectF(downX, downY, downX, downY);
                 curStrokeRecord.rect = rect;
                 m_Paint.setColor(strokeRealColor);
                 m_Paint.setStrokeWidth(strokeSize);
                 curStrokeRecord.paint = new Paint(m_Paint); // Clones the mPaint object
             } else if (strokeType == STROKE_TYPE_TEXT) {
-                curStrokeRecord.textOffX = (int) x;
-                curStrokeRecord.textOffY = (int) y;
+                curStrokeRecord.textOffX = (int) downX;
+                curStrokeRecord.textOffY = (int) downY;
                 TextPaint tp = new TextPaint();
                 tp.setColor(strokeRealColor);
                 curStrokeRecord.textPaint = tp; // Clones the mPaint object
@@ -442,6 +455,8 @@ public class SketchView extends ImageView implements OnTouchListener {
         }
         if (markerCopyRect.contains(downPoint[0], (int) downPoint[1])) {//判断是否在区域内
             DrawRecord newRecord = initPhotoRecord(curPhotoRecord.bitmap);
+            newRecord.matrix = new Matrix(curPhotoRecord.matrix);
+            newRecord.matrix.postTranslate(BitmapUtils.dip2px(mContext, 20), BitmapUtils.dip2px(mContext, 20));//偏移小段距离以分辨新复制的图片
             setCurPhotoRecord(newRecord);
             return true;
         }
@@ -460,18 +475,18 @@ public class SketchView extends ImageView implements OnTouchListener {
     }
 
 
-    private void touch_move(float x, float y) {
+    private void touch_move(MotionEvent event) {
         if (editMode == EDIT_STROKE) {
             if (strokeType == STROKE_TYPE_ERASER) {
-                m_Path.quadTo(preX, preY, (x + preX) / 2, (y + preY) / 2);
+                m_Path.quadTo(preX, preY, (curX + preX) / 2, (curY + preY) / 2);
             } else if (strokeType == STROKE_TYPE_DRAW) {
-                m_Path.quadTo(preX, preY, (x + preX) / 2, (y + preY) / 2);
+                m_Path.quadTo(preX, preY, (curX + preX) / 2, (curY + preY) / 2);
             } else if (strokeType == STROKE_TYPE_LINE) {
                 m_Path.reset();
                 m_Path.moveTo(downX, downY);
-                m_Path.lineTo(x, y);
+                m_Path.lineTo(curX, curY);
             } else if (strokeType == STROKE_TYPE_CIRCLE || strokeType == STROKE_TYPE_RECTANGLE) {
-                curStrokeRecord.rect.set(downX < x ? downX : x, downY < y ? downY : y, downX > x ? downX : x, downY > y ? downY : y);
+                curStrokeRecord.rect.set(downX < curX ? downX : curX, downY < curY ? downY : curY, downX > curX ? downX : curX, downY > curY ? downY : curY);
             } else if (strokeType == STROKE_TYPE_TEXT) {
 
             }
@@ -479,63 +494,81 @@ public class SketchView extends ImageView implements OnTouchListener {
             if (actionMode == ACTION_DRAG) {
                 onDragAction(curX - preX, curY - preY);
             } else if (actionMode == ACTION_ROTATE) {
-//                onRotateAction()
+                onRotateAction(curPhotoRecord);
+            } else if (actionMode == ACTION_SCALE) {
+                float[] photoCorners = calculateCorners(curPhotoRecord);
+                curDistance = spacing(event);
+                float scale = curDistance / downDistance;
+//                if ()
+                curPhotoRecord.matrix.postScale(scale, scale, photoCorners[8], photoCorners[9]);
             }
         }
-        preX = x;
-        preY = y;
+        preX = curX;
+        preY = curY;
     }
 
-    //    private void onRotateAction() {
-//        //放大
-//        //目前触摸点与图片显示中心距离
-//        float a = (float) Math.sqrt(Math.pow(curP.x - photoCorners[8], 2) + Math.pow(curP.y - photoCorners[9], 2));
-//        //目前上次旋转图标与图片显示中心距离
-//        float b = (float) Math.sqrt(Math.pow(photoCorners[4] - photoCorners[0], 2) + Math.pow(photoCorners[5] - photoCorners[1], 2)) / 2;
-//
-//        //设置Matrix缩放参数
-//        if (a >= photoLen / 2 * SCALE_MIN && a <= photoLen / 2 * SCALE_MAX) {
-//            //这种计算方法可以保持旋转图标坐标与触摸点同步缩放
-//            float scale = a / b;
-//            mPhotoMatrix.postScale(scale, scale, photoCorners[8], photoCorners[9]);
-//        }
-//
-//        //旋转
-//        //根据移动坐标的变化构建两个向量，以便计算两个向量角度.
-//        preVector.set(preP.x - photoCorners[8], preP.y - photoCorners[9]);//旋转后向量
-//        curVector.set(curP.x - photoCorners[8], curP.y - photoCorners[9]);//旋转前向量
-//        //计算向量长度
-//        double preVectorLen = getVectorLength(preVector);
-//        double curVectorLen = getVectorLength(curVector);
-//        //计算两个向量的夹角.
-//        double cosAlpha = (preVector.x * curVector.x + preVector.y * curVector.y)
-//                / (preVectorLen * curVectorLen);
-//        //由于计算误差，可能会带来略大于1的cos，例如
-//        if (cosAlpha > 1.0f) {
-//            cosAlpha = 1.0f;
-//        }
-//        //本次的角度已经计算出来。
-//        double dAngle = Math.acos(cosAlpha) * 180.0 / Math.PI;
-//        // 判断顺时针和逆时针.
-//        //判断方法其实很简单，这里的v1v2其实相差角度很小的。
-//        //先转换成单位向量
-//        preVector.x /= preVectorLen;
-//        preVector.y /= preVectorLen;
-//        curVector.x /= curVectorLen;
-//        curVector.y /= curVectorLen;
-//        //作curVector的逆时针垂直向量。
-//        PointF verticalVec = new PointF(curVector.y, -curVector.x);
-//
-//        //判断这个垂直向量和v1的点积，点积>0表示俩向量夹角锐角。=0表示垂直，<0表示钝角
-//        float vDot = preVector.x * verticalVec.x + preVector.y * verticalVec.y;
-//        if (vDot > 0) {
-//            //v2的逆时针垂直向量和v1是锐角关系，说明v1在v2的逆时针方向。
-//        } else {
-//            dAngle = -dAngle;
-//        }
-//        mPhotoMatrix.postRotate((float) dAngle, photoCorners[8], photoCorners[9]);
-//        setImageMatrix(mPhotoMatrix);
-//    }
+    private void onRotateAction(DrawRecord record) {
+        float[] photoCorners = calculateCorners(record);
+        //放大
+        //目前触摸点与图片显示中心距离
+        float a = (float) Math.sqrt(Math.pow(curX - photoCorners[8], 2) + Math.pow(curY - photoCorners[9], 2));
+        //目前上次旋转图标与图片显示中心距离
+        float b = (float) Math.sqrt(Math.pow(photoCorners[4] - photoCorners[0], 2) + Math.pow(photoCorners[5] - photoCorners[1], 2)) / 2;
+
+        //设置Matrix缩放参数
+        double photoLen = Math.sqrt(Math.pow(record.photoRectSrc.width(), 2) + Math.pow(record.photoRectSrc.height(), 2));
+        if (a >= photoLen / 2 * SCALE_MIN && a <= photoLen / 2 * SCALE_MAX) {
+            //这种计算方法可以保持旋转图标坐标与触摸点同步缩放
+            float scale = a / b;
+            record.matrix.postScale(scale, scale, photoCorners[8], photoCorners[9]);
+        }
+
+        //旋转
+        //根据移动坐标的变化构建两个向量，以便计算两个向量角度.
+        PointF preVector = new PointF();
+        PointF curVector = new PointF();
+        preVector.set(preX - photoCorners[8], preY - photoCorners[9]);//旋转后向量
+        curVector.set(curX - photoCorners[8], curY - photoCorners[9]);//旋转前向量
+        //计算向量长度
+        double preVectorLen = getVectorLength(preVector);
+        double curVectorLen = getVectorLength(curVector);
+        //计算两个向量的夹角.
+        double cosAlpha = (preVector.x * curVector.x + preVector.y * curVector.y)
+                / (preVectorLen * curVectorLen);
+        //由于计算误差，可能会带来略大于1的cos，例如
+        if (cosAlpha > 1.0f) {
+            cosAlpha = 1.0f;
+        }
+        //本次的角度已经计算出来。
+        double dAngle = Math.acos(cosAlpha) * 180.0 / Math.PI;
+        // 判断顺时针和逆时针.
+        //判断方法其实很简单，这里的v1v2其实相差角度很小的。
+        //先转换成单位向量
+        preVector.x /= preVectorLen;
+        preVector.y /= preVectorLen;
+        curVector.x /= curVectorLen;
+        curVector.y /= curVectorLen;
+        //作curVector的逆时针垂直向量。
+        PointF verticalVec = new PointF(curVector.y, -curVector.x);
+
+        //判断这个垂直向量和v1的点积，点积>0表示俩向量夹角锐角。=0表示垂直，<0表示钝角
+        float vDot = preVector.x * verticalVec.x + preVector.y * verticalVec.y;
+        if (vDot > 0) {
+            //v2的逆时针垂直向量和v1是锐角关系，说明v1在v2的逆时针方向。
+        } else {
+            dAngle = -dAngle;
+        }
+        record.matrix.postRotate((float) dAngle, photoCorners[8], photoCorners[9]);
+    }
+
+    /**
+     * 获取p1到p2的线段的长度
+     *
+     * @return
+     */
+    double getVectorLength(PointF vector) {
+        return Math.sqrt(vector.x * vector.x + vector.y * vector.y);
+    }
     private void onDragAction(float distanceX, float distanceY) {
         curPhotoRecord.matrix.postTranslate((int) distanceX, (int) distanceY);
     }
