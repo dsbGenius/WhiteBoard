@@ -233,7 +233,7 @@ public class SketchView extends ImageView implements OnTouchListener {
         float y = event.getY();
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                touch_start(x, y);
+                touch_down(x, y);
                 invalidate();
                 break;
             case MotionEvent.ACTION_MOVE:
@@ -352,7 +352,7 @@ public class SketchView extends ImageView implements OnTouchListener {
         invalidate();
     }
 
-    private void touch_start(float x, float y) {
+    private void touch_down(float x, float y) {
         preX = downX = x;
         preY = downY = y;
         if (editMode == EDIT_STROKE) {
@@ -389,7 +389,17 @@ public class SketchView extends ImageView implements OnTouchListener {
             }
             strokeRecordList.add(curStrokeRecord);
         } else if (editMode == EDIT_PHOTO) {
-
+            float[] downPoint = new float[]{downX, downY};
+            float[] invertPoint = new float[2];
+            Matrix invertMatrix = new Matrix();
+            for (DrawRecord record : photoRecordList) {
+                record.matrix.invert(invertMatrix);
+                invertMatrix.mapPoints(invertPoint, downPoint);
+                if (record.photoRectSrc.contains(invertPoint[0], invertPoint[1])) {
+                    setCurPhotoRecord(record);
+                    break;
+                }
+            }
         }
 
     }
@@ -532,12 +542,13 @@ public class SketchView extends ImageView implements OnTouchListener {
             newRecord.paint.setColor(Color.GRAY);
             newRecord.paint.setStrokeWidth(BitmapUtils.dip2px(mContext, 0.8f));
             newRecord.paint.setStyle(Paint.Style.STROKE);
-            photoRecordList.add(newRecord);
             setCurPhotoRecord(newRecord);
         }
     }
 
     private void setCurPhotoRecord(DrawRecord record) {
+        photoRecordList.remove(record);
+        photoRecordList.add(record);
         curPhotoRecord = record;
         invalidate();
     }
