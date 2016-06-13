@@ -1,7 +1,6 @@
 package com.yinghe.whiteboardlib.adapter;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,8 +9,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
+import com.yinghe.whiteboardlib.MultiImageSelectorFragment;
 import com.yinghe.whiteboardlib.R;
-import com.yinghe.whiteboardlib.Utils.BitmapUtils;
 import com.yinghe.whiteboardlib.bean.Folder;
 import com.yinghe.whiteboardlib.fragment.WhiteBoardFragment;
 
@@ -183,7 +182,7 @@ public class FolderAdapter extends BaseAdapter {
             }
             if (data.cover != null) {
                 // 显示图片
-                if (!data.path.equals("assets")) {
+                if (!data.path.contains("asset")) {
                     File file = new File(data.cover.path);
                     if (file != null) {
                         Picasso.with(mContext)
@@ -194,13 +193,20 @@ public class FolderAdapter extends BaseAdapter {
                                 .into(cover);
                     }
                 } else {
-                    Bitmap bitmap = null;
-                    bitmap = BitmapUtils.getBitmapFromAssets(mContext, data.cover.path);
-                    if (bitmap != null) {
-                        cover.setImageBitmap(bitmap);
-                    }else {
-                        cover.setImageResource(R.drawable.default_error);
-                    }
+                    Picasso.with(mContext)
+                            .load("file:///android_asset/"+data.cover.path)
+                            .placeholder(R.drawable.default_error)
+                            .tag(MultiImageSelectorFragment.TAG)
+                            .resizeDimen(R.dimen.folder_cover_size, R.dimen.folder_cover_size)
+                            .centerCrop()
+                            .into(cover);
+//                    Bitmap bitmap = null;
+//                    bitmap = BitmapUtils.getBitmapFromAssets(mContext, data.cover.path);
+//                    if (bitmap != null) {
+//                        cover.setImageBitmap(bitmap);
+//                    }else {
+//                        cover.setImageResource(R.drawable.default_error);
+//                    }
                 }
 
             } else {
