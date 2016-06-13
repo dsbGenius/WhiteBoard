@@ -99,10 +99,12 @@ public class SketchView extends ImageView implements OnTouchListener {
     Bitmap mirrorMarkBM = BitmapFactory.decodeResource(getResources(), R.drawable.mark_copy);
     Bitmap deleteMarkBM = BitmapFactory.decodeResource(getResources(), R.drawable.mark_delete);
     Bitmap rotateMarkBM = BitmapFactory.decodeResource(getResources(), R.drawable.mark_rotate);
+    Bitmap resetMarkBM = BitmapFactory.decodeResource(getResources(), R.drawable.mark_reset);
     //    Bitmap rotateMarkBM = BitmapFactory.decodeResource(getResources(), R.drawable.test);
     RectF markerCopyRect = new RectF(0, 0, mirrorMarkBM.getWidth(), mirrorMarkBM.getHeight());//镜像标记边界
     RectF markerDeleteRect = new RectF(0, 0, deleteMarkBM.getWidth(), deleteMarkBM.getHeight());//删除标记边界
     RectF markerRotateRect = new RectF(0, 0, rotateMarkBM.getWidth(), rotateMarkBM.getHeight());//旋转标记边界
+    RectF markerResetRect = new RectF(0, 0, resetMarkBM.getWidth(), resetMarkBM.getHeight());//旋转标记边界
 
     private Path m_Path;
     private Paint m_Paint;
@@ -352,6 +354,12 @@ public class SketchView extends ImageView implements OnTouchListener {
         markerRotateRect.offsetTo(x, y);
 //        canvas.drawRect(markerRotateRect, p);
         canvas.drawBitmap(rotateMarkBM, x, y, null);
+
+        x = photoCorners[6] - markerResetRect.width() / 2;
+        y = photoCorners[7] - markerResetRect.height() / 2;
+        markerResetRect.offsetTo(x, y);
+//        canvas.drawRect(markerRotateRect, p);
+        canvas.drawBitmap(resetMarkBM, x, y, null);
     }
 
     private float[] calculateCorners(DrawRecord record) {
@@ -470,6 +478,13 @@ public class SketchView extends ImageView implements OnTouchListener {
             newRecord.matrix = new Matrix(curPhotoRecord.matrix);
             newRecord.matrix.postTranslate(BitmapUtils.dip2px(mContext, 20), BitmapUtils.dip2px(mContext, 20));//偏移小段距离以分辨新复制的图片
             setCurPhotoRecord(newRecord);
+            actionMode = ACTION_NONE;
+            return true;
+        }
+        if (markerResetRect.contains(downPoint[0], (int) downPoint[1])) {//判断是否在区域内
+            curPhotoRecord.matrix.reset();
+            curPhotoRecord.matrix.setTranslate(getWidth() / 2 - curPhotoRecord.photoRectSrc.width() / 2,
+                    getHeight() / 2 - curPhotoRecord.photoRectSrc.height() / 2);
             actionMode = ACTION_NONE;
             return true;
         }

@@ -27,7 +27,7 @@
                 <ImageView
                     android:id="@+id/btn_stroke"
                     style="@style/control_btn"
-                    android:padding="8dp"
+                    android:padding="7dp"
                     android:src="@drawable/stroke_type_rbtn_draw_checked" />
 
                 <ImageView
@@ -61,6 +61,7 @@
                 <ImageView
                     android:id="@+id/btn_drag"
                     style="@style/control_btn"
+                    android:alpha="0.4"
                     android:src="@drawable/ic_drag" />
 
                 <ImageView
