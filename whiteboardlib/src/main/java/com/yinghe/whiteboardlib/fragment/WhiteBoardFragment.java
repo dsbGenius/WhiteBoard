@@ -65,13 +65,9 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     public static final int REQUEST_IMAGE = 2;
     public static final int REQUEST_BACKGROUND = 3;
 
-    public static int bitmapSize = 300;
-
-    View rootView;
-    ScaleView scaleView;
+    private static final float BTN_ALPHA = 0.4f;
 
     int keyboardHeight;
-    int isTextPopVisible;
     int textOffX;
     int textOffY;
 
@@ -79,13 +75,15 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     SketchView mSketchView;//画板
 
     View controlLayout;//控制布局
-    ImageView stroke;//画笔
-    ImageView eraser;//橡皮擦
-    ImageView undo;//撤销
-    ImageView redo;//取消撤销
-    ImageView erase;//清空
-    ImageView sketchSave;//保存
-    ImageView sketchPhoto;//加载图片
+    ImageView btn_stroke;//画笔
+    ImageView btn_eraser;//橡皮擦
+    ImageView btn_undo;//撤销
+    ImageView btn_redo;//取消撤销
+    ImageView btn_empty;//清空
+    ImageView btn_save;//保存
+    ImageView btn_photo;//加载图片
+    ImageView btn_background;//背景图片
+    ImageView btn_drag;//拖拽
 
 
     RadioGroup strokeTypeRG,strokeColorRG;
@@ -230,17 +228,23 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         strokeTypeRG.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
+                int resId = R.drawable.stroke_type_rbtn_draw_checked;
                 if (checkedId == R.id.stroke_type_rbtn_draw) {
                     strokeType = STROKE_TYPE_DRAW;
                 } else if (checkedId == R.id.stroke_type_rbtn_line) {
                     strokeType = STROKE_TYPE_LINE;
+                    resId = R.drawable.stroke_type_rbtn_line_checked;
                 } else if (checkedId == R.id.stroke_type_rbtn_circle) {
                     strokeType = STROKE_TYPE_CIRCLE;
+                    resId = R.drawable.stroke_type_rbtn_circle_checked;
                 } else if (checkedId == R.id.stroke_type_rbtn_rectangle) {
                     strokeType = STROKE_TYPE_RECTANGLE;
+                    resId = R.drawable.stroke_type_rbtn_rectangle_checked;
                 }else if (checkedId == R.id.stroke_type_rbtn_text) {
                     strokeType = STROKE_TYPE_TEXT;
+                    resId = R.drawable.stroke_type_rbtn_text_checked;
                 }
+                btn_stroke.setImageResource(resId);
                 mSketchView.setStrokeType(strokeType);
             }
         });

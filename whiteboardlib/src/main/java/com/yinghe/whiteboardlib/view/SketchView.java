@@ -302,7 +302,6 @@ public class SketchView extends ImageView implements OnTouchListener {
             float[] photoCorners = calculateCorners(curPhotoRecord);//计算图片四个角点和中心点
             drawBoard(canvas, photoCorners);//绘制图形边线
             drawMarks(canvas, photoCorners);//绘制边角图片
-
         }
         for (DrawRecord record : strokeRecordList) {
             int type = record.type;
@@ -668,15 +667,22 @@ public class SketchView extends ImageView implements OnTouchListener {
 
 
     public void erase() {
-        strokeRecordList.clear();
-        photoRecordList.clear();
-        strokeRedoList.clear();
         // 先判断是否已经回收
+        for (DrawRecord record : photoRecordList) {
+            if (record.bitmap != null && !record.bitmap.isRecycled()) {
+                record.bitmap.recycle();
+                record.bitmap = null;
+            }
+        }
         if (backgroundBM != null && !backgroundBM.isRecycled()) {
             // 回收并且置为null
             backgroundBM.recycle();
             backgroundBM = null;
         }
+        strokeRecordList.clear();
+        photoRecordList.clear();
+        strokeRedoList.clear();
+        curPhotoRecord = null;
         System.gc();
         invalidate();
     }

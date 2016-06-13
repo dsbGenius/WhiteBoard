@@ -13,7 +13,7 @@
 
         <FrameLayout
             android:id="@+id/controlLayout"
-            android:layout_width="55dp"
+            android:layout_width="50dp"
             android:layout_height="match_parent"
             android:layout_alignParentRight="true"
             android:background="@color/gray">
@@ -27,6 +27,7 @@
                 <ImageView
                     android:id="@+id/btn_stroke"
                     style="@style/control_btn"
+                    android:padding="8dp"
                     android:src="@drawable/stroke_type_rbtn_draw_checked" />
 
                 <ImageView
