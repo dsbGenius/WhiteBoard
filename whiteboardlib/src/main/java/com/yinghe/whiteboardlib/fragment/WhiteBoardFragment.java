@@ -440,7 +440,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     public void onClick(View v) {
         int id = v.getId();
         if (id == R.id.sketch_stroke) {
-//            sketchPhoto.setAlpha(0.4f);
+            mSketchView.setEditMode(SketchView.EDIT_STROKE);
             if (mSketchView.getStrokeType() != STROKE_TYPE_ERASER) {
                 showParamsPopupWindow(v, STROKE_TYPE_DRAW);
             } else {
@@ -461,6 +461,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                 setAlpha(stroke, 1f);
             }
         } else if (id == R.id.sketch_eraser) {
+            mSketchView.setEditMode(SketchView.EDIT_STROKE);
 //            sketchPhoto.setAlpha(0.4f);
             if (mSketchView.getStrokeType() == STROKE_TYPE_ERASER) {
                 showParamsPopupWindow(v, STROKE_TYPE_ERASER);
@@ -552,9 +553,9 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                 } else if (mSelectPath == null || mSelectPath.size() == 0) {
                     Toast.makeText(getActivity(), "图片加载失败,请重试!", Toast.LENGTH_LONG).show();
                 }
+                mSketchView.setBackgroundByPath(path);
                 Log.i("imgPath", path);
                 //加载图片设置画板背景
-
             }
         }
     }
@@ -652,7 +653,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
 
     @NonNull
     public Bitmap getResultBitmap() {
-        Bitmap bitmap1 = mSketchView.getBitmap();
+        Bitmap bitmap1 = mSketchView.getBackgroundBM();
         int bgWidth = mSketchView.getWidth();
         int bgHeight =mSketchView.getHeight();
         final Bitmap newBM = Bitmap.createBitmap(bgWidth, bgHeight, Bitmap.Config.RGB_565);

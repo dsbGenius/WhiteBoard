@@ -28,6 +28,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PointF;
 import android.graphics.RectF;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.text.Layout;
@@ -35,7 +36,9 @@ import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.widget.ImageView;
@@ -110,7 +113,7 @@ public class SketchView extends ImageView implements OnTouchListener {
     private List<DrawRecord> strokeRedoList = new ArrayList<>();
     private Context mContext;
 
-    private Bitmap bitmap;
+    private Bitmap backgroundBM;
     private Bitmap curPhotoBM;
     DrawRecord curStrokeRecord;
     DrawRecord curPhotoRecord;
@@ -122,7 +125,10 @@ public class SketchView extends ImageView implements OnTouchListener {
     private static float SCALE_MIN = 0.2f;
 
     float simpleScale = 0.5f;//图片载入的缩放倍数
-
+    /**
+     * 缩放手势
+     */
+    private ScaleGestureDetector mScaleGestureDetector = null;
     public void setStrokeType(int strokeType) {
         this.strokeType = strokeType;
     }
@@ -146,7 +152,24 @@ public class SketchView extends ImageView implements OnTouchListener {
         setBackgroundColor(Color.WHITE);
 
         this.setOnTouchListener(this);
+        mScaleGestureDetector = new ScaleGestureDetector(context, new ScaleGestureDetector.OnScaleGestureListener() {
+            @Override
+            public boolean onScale(ScaleGestureDetector detector) {
+                onScaleAction(detector);
+                return true;
+            }
 
+
+            @Override
+            public boolean onScaleBegin(ScaleGestureDetector detector) {
+                return true;
+            }
+
+            @Override
+            public void onScaleEnd(ScaleGestureDetector detector) {
+
+            }
+        });
         m_Paint = new Paint();
         m_Paint.setAntiAlias(true);
         m_Paint.setDither(true);
@@ -192,29 +215,6 @@ public class SketchView extends ImageView implements OnTouchListener {
     }
 
 
-//    public int getStrokeMode() {
-//        return this.strokeMode;
-//    }
-
-
-    /**
-     * Change canvass background and force redraw
-     */
-    public void setBackgroundBitmap(Activity mActivity, Bitmap bitmap) {
-        if (!bitmap.isMutable()) {
-            Bitmap.Config bitmapConfig = bitmap.getConfig();
-            // set default bitmap config if none
-            if (bitmapConfig == null) {
-                bitmapConfig = Bitmap.Config.ARGB_8888;
-            }
-            bitmap = bitmap.copy(bitmapConfig, true);
-        }
-        this.bitmap = bitmap;
-//		this.bitmap = getScaledBitmap(mActivity, bitmap);
-        invalidate();
-//		mCanvas = new Canvas(bitmap);
-    }
-
 
     private Bitmap getScaledBitmap(Activity mActivity, Bitmap bitmap) {
         DisplayMetrics display = new DisplayMetrics();
@@ -241,10 +241,10 @@ public class SketchView extends ImageView implements OnTouchListener {
     public boolean onTouch(View arg0, MotionEvent event) {
         curX = event.getX();
         curY = event.getY();
-        switch (event.getAction()) {
+        switch (event.getAction() & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_POINTER_DOWN:
                 downDistance = spacing(event);
-                if (downDistance > 10)//防止误触
+                if (actionMode == ACTION_DRAG && downDistance > 10)//防止误触
                     actionMode = ACTION_SCALE;
                 break;
             case MotionEvent.ACTION_DOWN:
@@ -273,8 +273,8 @@ public class SketchView extends ImageView implements OnTouchListener {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        if (bitmap != null) {
-            canvas.drawBitmap(bitmap, 0, 0, null);
+        if (backgroundBM != null) {
+            canvas.drawBitmap(backgroundBM, 0, 0, null);
         }
         drawRecord(canvas);
         if (onDrawChangedListener != null)
@@ -496,15 +496,24 @@ public class SketchView extends ImageView implements OnTouchListener {
             } else if (actionMode == ACTION_ROTATE) {
                 onRotateAction(curPhotoRecord);
             } else if (actionMode == ACTION_SCALE) {
-                float[] photoCorners = calculateCorners(curPhotoRecord);
-                curDistance = spacing(event);
-                float scale = curDistance / downDistance;
-//                if ()
-                curPhotoRecord.matrix.postScale(scale, scale, photoCorners[8], photoCorners[9]);
+                mScaleGestureDetector.onTouchEvent(event);
             }
         }
         preX = curX;
         preY = curY;
+    }
+
+    private void onScaleAction(ScaleGestureDetector detector) {
+        float[] photoCorners = calculateCorners(curPhotoRecord);
+        //目前图片对角线长度
+        float len = (float) Math.sqrt(Math.pow(photoCorners[0] - photoCorners[4], 2) + Math.pow(photoCorners[1] - photoCorners[5], 2));
+        double photoLen = Math.sqrt(Math.pow(curPhotoRecord.photoRectSrc.width(), 2) + Math.pow(curPhotoRecord.photoRectSrc.height(), 2));
+        float scaleFactor = detector.getScaleFactor();
+        //设置Matrix缩放参数
+        if ((scaleFactor < 1 && len >= photoLen * SCALE_MIN) || (scaleFactor > 1 && len <= photoLen * SCALE_MAX)) {
+            Log.e(scaleFactor + "", scaleFactor + "");
+            curPhotoRecord.matrix.postScale(scaleFactor, scaleFactor, photoCorners[8], photoCorners[9]);
+        }
     }
 
     private void onRotateAction(DrawRecord record) {
@@ -579,19 +588,19 @@ public class SketchView extends ImageView implements OnTouchListener {
 
 
     /**
-     * Returns a new bitmap associated with drawed canvas
+     * Returns a new backgroundBM associated with drawed canvas
      */
-    public Bitmap getBitmap() {
+    public Bitmap getBackgroundBM() {
         if (strokeRecordList.size() == 0)
             return null;
 
-        if (bitmap == null) {
-            bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
-            bitmap.eraseColor(background);
+        if (backgroundBM == null) {
+            backgroundBM = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
+            backgroundBM.eraseColor(background);
         }
-        Canvas canvas = new Canvas(bitmap);
+        Canvas canvas = new Canvas(backgroundBM);
         drawRecord(canvas);
-        return bitmap;
+        return backgroundBM;
     }
 
 
@@ -651,10 +660,10 @@ public class SketchView extends ImageView implements OnTouchListener {
         strokeRecordList.clear();
         strokeRedoList.clear();
         // 先判断是否已经回收
-        if (bitmap != null && !bitmap.isRecycled()) {
+        if (backgroundBM != null && !backgroundBM.isRecycled()) {
             // 回收并且置为null
-            bitmap.recycle();
-            bitmap = null;
+            backgroundBM.recycle();
+            backgroundBM = null;
         }
         System.gc();
         invalidate();
@@ -671,16 +680,30 @@ public class SketchView extends ImageView implements OnTouchListener {
     }
 
     public void addPhotoByPath(String path) {
-        Bitmap sampleBM = null;
-        if (path.contains(Environment.getExternalStorageDirectory().toString())) {
-            sampleBM = setSDCardPhoto(path);
-        } else {
-            sampleBM = setAssetsPhoto(path);
-        }
+        Bitmap sampleBM = getSampleBitMap(path);
         if (sampleBM != null) {
             DrawRecord newRecord = initPhotoRecord(sampleBM);
             setCurPhotoRecord(newRecord);
         }
+    }
+
+    public void setBackgroundByPath(String path) {
+        Bitmap sampleBM = getSampleBitMap(path);
+        if (sampleBM != null) {
+            BitmapDrawable drawable = new BitmapDrawable(mContext.getResources(), sampleBM);
+            setBackground(drawable);
+            invalidate();
+        }
+    }
+
+    public Bitmap getSampleBitMap(String path) {
+        Bitmap sampleBM = null;
+        if (path.contains(Environment.getExternalStorageDirectory().toString())) {
+            sampleBM = getSDCardPhoto(path);
+        } else {
+            sampleBM = getAssetsPhoto(path);
+        }
+        return sampleBM;
     }
 
     @NonNull
@@ -705,7 +728,7 @@ public class SketchView extends ImageView implements OnTouchListener {
         invalidate();
     }
 
-    public Bitmap setSDCardPhoto(String path) {
+    public Bitmap getSDCardPhoto(String path) {
         File file = new File(path);
         if (file.exists()) {
             return BitmapUtils.decodeSampleBitMapFromFile(mContext, path, simpleScale);
@@ -714,7 +737,7 @@ public class SketchView extends ImageView implements OnTouchListener {
         }
     }
 
-    public Bitmap setAssetsPhoto(String path) {
+    public Bitmap getAssetsPhoto(String path) {
         return BitmapUtils.getBitmapFromAssets(mContext, path);
     }
 

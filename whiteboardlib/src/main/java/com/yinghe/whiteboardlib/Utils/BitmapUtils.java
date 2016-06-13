@@ -101,11 +101,12 @@ public class BitmapUtils {
         try {
             String temp =  path;
             open = context.getAssets().open(temp);
-            bitmap= BitmapFactory.decodeStream(open);
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options = sampleBitmapOptions(context, options, 10, 10);
+            bitmap = BitmapFactory.decodeStream(open, null, options);
             return bitmap;
         } catch (Exception e) {e.printStackTrace();
             return null;
         }
     }
-
 }
