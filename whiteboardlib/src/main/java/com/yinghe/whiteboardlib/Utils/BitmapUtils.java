@@ -7,6 +7,8 @@ import android.graphics.BitmapFactory;
 import android.util.Log;
 import android.view.WindowManager;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 
 /**
@@ -102,7 +104,21 @@ public class BitmapUtils {
             String temp =  path;
             open = context.getAssets().open(temp);
             bitmap= BitmapFactory.decodeStream(open);
-            return bitmap;
+            ByteArrayOutputStream baos = null ;
+            try{
+                baos = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 90, baos);
+                return bitmap ;
+            }finally{
+                try {
+                    if(baos != null)
+                        baos.close() ;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            }
+
         } catch (Exception e) {e.printStackTrace();
             return null;
         }

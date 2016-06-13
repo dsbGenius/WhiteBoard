@@ -1,7 +1,6 @@
 package com.yinghe.whiteboardlib.adapter;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.os.Build;
 import android.view.LayoutInflater;
@@ -14,7 +13,6 @@ import android.widget.ImageView;
 import com.squareup.picasso.Picasso;
 import com.yinghe.whiteboardlib.MultiImageSelectorFragment;
 import com.yinghe.whiteboardlib.R;
-import com.yinghe.whiteboardlib.Utils.BitmapUtils;
 import com.yinghe.whiteboardlib.bean.Image;
 import com.yinghe.whiteboardlib.fragment.WhiteBoardFragment;
 
@@ -250,13 +248,13 @@ public class ImageGridAdapter extends BaseAdapter {
                             .into(image);
                 }
             } else {
-                Bitmap bitmap = null;
-                bitmap = BitmapUtils.getBitmapFromAssets(mContext, data.path);
-                if (bitmap != null) {
-                    image.setImageBitmap(bitmap);
-                } else {
-                    image.setImageResource(R.drawable.default_error);
-                }
+                Picasso.with(mContext)
+                        .load("file:///android_asset/"+data.path)
+                        .placeholder(R.drawable.default_error)
+                        .tag(MultiImageSelectorFragment.TAG)
+                        .resize(mGridWidth, mGridWidth)
+                        .centerCrop()
+                        .into(image);
             }
         }
     }
