@@ -30,7 +30,6 @@ import android.graphics.Path;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.text.Layout;
@@ -44,6 +43,7 @@ import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.yinghe.whiteboardlib.R;
 import com.yinghe.whiteboardlib.Utils.BitmapUtils;
@@ -108,7 +108,7 @@ public class SketchView extends ImageView implements OnTouchListener {
     private Paint m_Paint;
     private float downX, downY, preX, preY, curX, curY;
     private float downDistance, curDistance;
-    private int width, height;
+    private int mWidth, mHeight;
 
     private List<DrawRecord> photoRecordList = new ArrayList<>();
     private List<DrawRecord> strokeRecordList = new ArrayList<>();
@@ -116,6 +116,8 @@ public class SketchView extends ImageView implements OnTouchListener {
     private Context mContext;
 
     private Bitmap backgroundBM;
+    Rect backgroundSrcRect = new Rect();
+    Rect backgroundDstRect = new Rect();
     DrawRecord curStrokeRecord;
     DrawRecord curPhotoRecord;
 
@@ -171,6 +173,11 @@ public class SketchView extends ImageView implements OnTouchListener {
 
             }
         });
+        initPaint();
+        invalidate();
+    }
+
+    private void initPaint() {
         m_Paint = new Paint();
         m_Paint.setAntiAlias(true);
         m_Paint.setDither(true);
@@ -179,7 +186,6 @@ public class SketchView extends ImageView implements OnTouchListener {
         m_Paint.setStrokeJoin(Paint.Join.ROUND);
         m_Paint.setStrokeCap(Paint.Cap.ROUND);
         m_Paint.setStrokeWidth(strokeSize);
-        invalidate();
     }
 
 
@@ -232,9 +238,9 @@ public class SketchView extends ImageView implements OnTouchListener {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        width = MeasureSpec.getSize(widthMeasureSpec);
-        height = MeasureSpec.getSize(heightMeasureSpec);
-        setMeasuredDimension(width, height);
+        mWidth = MeasureSpec.getSize(widthMeasureSpec);
+        mHeight = MeasureSpec.getSize(heightMeasureSpec);
+        setMeasuredDimension(mWidth, mHeight);
     }
 
 
@@ -274,12 +280,16 @@ public class SketchView extends ImageView implements OnTouchListener {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        if (backgroundBM != null) {
-            canvas.drawBitmap(backgroundBM, 0, 0, null);
-        }
+        drawBackground(canvas);
         drawRecord(canvas);
         if (onDrawChangedListener != null)
             onDrawChangedListener.onDrawChanged();
+    }
+
+    private void drawBackground(Canvas canvas) {
+        if (backgroundBM != null) {
+            canvas.drawBitmap(backgroundBM, backgroundSrcRect, backgroundDstRect, null);
+        }
     }
 
     private void drawRecord(Canvas canvas) {
@@ -591,28 +601,14 @@ public class SketchView extends ImageView implements OnTouchListener {
     }
 
 
-    /**
-     * Returns a new backgroundBM associated with drawed canvas
-     */
-    public Bitmap getBackgroundBM() {
-        BitmapDrawable drawable = (BitmapDrawable) getBackground();
-        return drawable != null ? drawable.getBitmap() : null;
-    }
 
     @NonNull
     public Bitmap getResultBitmap() {
-        int bgWidth = getWidth();
-        int bgHeight = getHeight();
-        final Bitmap newBM = Bitmap.createBitmap(bgWidth, bgHeight, Bitmap.Config.RGB_565);
+        final Bitmap newBM = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.RGB_565);
         Canvas canvas = new Canvas(newBM);
         canvas.setDrawFilter(new PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG));//抗锯齿
         //绘制背景
-        Bitmap backgroundBM = getBackgroundBM();
-        if (backgroundBM != null) {
-            Rect srcRect = new Rect(0, 0, backgroundBM.getWidth(), backgroundBM.getHeight());
-            Rect dstRect = new Rect(0, 0, bgWidth, bgHeight);
-            canvas.drawBitmap(backgroundBM, srcRect, dstRect, null);
-        }
+        drawBackground(canvas);
         drawRecord(canvas);
         canvas.save(Canvas.ALL_SAVE_FLAG);
         canvas.restore();
@@ -707,9 +703,11 @@ public class SketchView extends ImageView implements OnTouchListener {
         Bitmap sampleBM = getSampleBitMap(path);
         if (sampleBM != null) {
             backgroundBM = sampleBM;
-            BitmapDrawable drawable = new BitmapDrawable(mContext.getResources(), sampleBM);
-            setBackground(drawable);
+            backgroundSrcRect = new Rect(0, 0, backgroundBM.getWidth(), backgroundBM.getHeight());
+            backgroundDstRect = new Rect(0, 0, mWidth, mHeight);
             invalidate();
+        } else {
+            Toast.makeText(mContext, "图片文件路径有误！", Toast.LENGTH_SHORT).show();
         }
     }
 

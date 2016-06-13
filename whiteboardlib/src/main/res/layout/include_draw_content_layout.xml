@@ -23,10 +23,4 @@
             android:layout_height="match_parent"
             android:layout_gravity="center" />
 
-
-        <com.yinghe.whiteboardlib.view.ScaleView
-            android:id="@+id/scale_view"
-            android:layout_width="match_parent"
-            android:visibility="gone"
-            android:layout_height="match_parent" />
 </FrameLayout>

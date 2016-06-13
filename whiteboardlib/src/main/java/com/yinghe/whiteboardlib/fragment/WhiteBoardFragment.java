@@ -64,7 +64,6 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     public static final int REQUEST_BACKGROUND = 3;
 
     private static final float BTN_ALPHA = 0.4f;
-    ScaleView scaleView;
 
     int keyboardHeight;
     int textOffX;
@@ -302,7 +301,6 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
 
 
     private void findView(View view) {
-        scaleView = (ScaleView) view.findViewById(R.id.scale_view);
         //画板整体布局
         whiteBoardLayout = (RelativeLayout) view.findViewById(R.id.white_board);
         mSketchView = (SketchView) view.findViewById(R.id.sketch_view);
@@ -497,6 +495,21 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
             showBtn(btn_drag);
         }
     }
+
+    public void setBackgroundByPath(String path) {
+        mSketchView.setBackgroundByPath(path);
+    }
+
+    public void addPhotoByPath(String path) {
+        mSketchView.addPhotoByPath(path);
+    }
+
+    public Bitmap getResultBitmap() {
+        return mSketchView.getResultBitmap();
+    }
+//    public String getResultPhotoPath() {
+//        return mSketchView.getResultBitmap();
+//    }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
