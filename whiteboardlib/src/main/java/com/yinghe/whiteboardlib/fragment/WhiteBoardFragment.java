@@ -412,7 +412,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     @Override
     public void onDrawChanged() {
         // Undo
-        if (mSketchView.getRecordCount() > 0)
+        if (mSketchView.getStrokeRecordCount() > 0)
             btn_undo.setAlpha(1f);
         else
             btn_undo.setAlpha(0.4f);

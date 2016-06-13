@@ -662,6 +662,10 @@ public class SketchView extends ImageView implements OnTouchListener {
         return strokeRecordList.size() + photoRecordList.size();
     }
 
+    public int getStrokeRecordCount() {
+        return strokeRecordList.size();
+    }
+
 
     public int getStrokeSize() {
         return Math.round(this.strokeSize);
