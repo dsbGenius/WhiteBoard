@@ -10,6 +10,7 @@ import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PaintFlagsDrawFilter;
 import android.graphics.Rect;
@@ -46,6 +47,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 
+import static com.yinghe.whiteboardlib.bean.DrawRecord.STROKE_TYPE_BITMAP;
 import static com.yinghe.whiteboardlib.bean.DrawRecord.STROKE_TYPE_CIRCLE;
 import static com.yinghe.whiteboardlib.bean.DrawRecord.STROKE_TYPE_DRAW;
 import static com.yinghe.whiteboardlib.bean.DrawRecord.STROKE_TYPE_ERASER;
@@ -63,9 +65,13 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     public static final int REQUEST_IMAGE = 2;
     public static final int REQUEST_BACKGROUND = 3;
 
-    private static final float BTN_ALPHA = 0.4f;
+    public static int bitmapSize = 300;
+
+    View rootView;
+    ScaleView scaleView;
 
     int keyboardHeight;
+    int isTextPopVisible;
     int textOffX;
     int textOffY;
 
@@ -73,15 +79,13 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     SketchView mSketchView;//画板
 
     View controlLayout;//控制布局
-    ImageView btn_stroke;//画笔
-    ImageView btn_eraser;//橡皮擦
-    ImageView btn_undo;//撤销
-    ImageView btn_redo;//取消撤销
-    ImageView btn_empty;//清空
-    ImageView btn_save;//保存
-    ImageView btn_photo;//加载图片
-    ImageView btn_background;//背景图片
-    ImageView btn_drag;//拖拽
+    ImageView stroke;//画笔
+    ImageView eraser;//橡皮擦
+    ImageView undo;//撤销
+    ImageView redo;//取消撤销
+    ImageView erase;//清空
+    ImageView sketchSave;//保存
+    ImageView sketchPhoto;//加载图片
 
 
     RadioGroup strokeTypeRG,strokeColorRG;
@@ -106,6 +110,9 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     private ArrayList<String> mSelectPath;
     public static int sketchViewHeight;
     public static int sketchViewWidth;
+    private ImageView sketchBackground;
+    public static int decorHight;
+    public static int decorWidth;
 
     public static WhiteBoardFragment newInstance() {
         return new WhiteBoardFragment();
@@ -115,7 +122,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         activity = getActivity();//初始化上下文
-    }
+     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -306,6 +313,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         mSketchView = (SketchView) view.findViewById(R.id.sketch_view);
 
         controlLayout = view.findViewById(R.id.controlLayout);
+
         btn_stroke = (ImageView) view.findViewById(R.id.btn_stroke);
         btn_eraser = (ImageView) view.findViewById(R.id.btn_eraser);
         btn_undo = (ImageView) view.findViewById(R.id.btn_undo);
@@ -315,7 +323,6 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         btn_photo = (ImageView) view.findViewById(R.id.btn_photo);
         btn_background = (ImageView) view.findViewById(R.id.btn_background);
         btn_drag = (ImageView) view.findViewById(R.id.btn_drag);
-
         //设置点击监听
         mSketchView.setOnDrawChangedListener(this);//设置撤销动作监听器
         btn_stroke.setOnClickListener(this);
@@ -377,6 +384,12 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                     sketchViewHeight = height;
                     sketchViewWidth = width;
                     Log.i("onPreDraw", sketchViewHeight + "  " + sketchViewWidth);
+                    decorHight =getActivity().getWindow().getDecorView().getMeasuredHeight();
+                    decorWidth =getActivity().getWindow().getDecorView().getMeasuredWidth();
+                    Log.i("onPreDraw", "decor hight:"+decorHight + "   width:" + decorHight);
+                    int height3 = controlLayout.getMeasuredHeight();
+                    int width3 = controlLayout.getMeasuredWidth();
+                    Log.i("onPreDraw", "controlLayout  hight:"+height3 + "   width:" + width3);
                 }
                 return true;
             }
@@ -460,7 +473,6 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
             et.setText("新文件名");
             et.setHint("新文件名");
             et.setGravity(Gravity.CENTER);
-            et.setFocusable(true);
             et.setSelectAllOnFocus(true);
             AlertDialog dialog = new AlertDialog.Builder(getActivity())
                     .setTitle("请输入保存文件名")
@@ -544,6 +556,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                 mSketchView.setBackgroundByPath(path);
                 Log.i("imgPath", path);
                 //加载图片设置画板背景
+
             }
         }
     }
