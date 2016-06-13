@@ -625,7 +625,7 @@ public class MultiImageSelectorFragment extends Fragment {
                             Folder folder = new Folder();
                             for (int i = 0; i < files.length; i++) {
                                 Image image = new Image();
-                                image.path =assestPath+"/" +files[i];
+                                image.path = assestPath + "/" + files[i];
                                 image.name = "assets/"+files[i];
                                 AssetImages.add(image);
                             }

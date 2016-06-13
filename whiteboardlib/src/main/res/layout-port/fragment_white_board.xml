@@ -4,11 +4,6 @@
     android:clipToPadding="false"
     android:fitsSystemWindows="false">
 
-    <!--<ScrollView-->
-    <!--android:layout_width="match_parent"-->
-    <!--android:layout_height="match_parent"-->
-    <!--android:fillViewport="true">-->
-
     <RelativeLayout
         android:id="@+id/white_board"
         android:layout_width="match_parent"
@@ -39,78 +34,57 @@
                 android:background="@color/gray">
 
                 <ImageView
-                    android:id="@+id/sketch_stroke"
+                    android:id="@+id/btn_stroke"
                     style="@style/control_btn"
                     android:src="@drawable/ic_brush_grey600_24dp" />
 
                 <ImageView
-                    android:id="@+id/sketch_eraser"
+                    android:id="@+id/btn_eraser"
                     style="@style/control_btn"
                     android:alpha="0.4"
                     android:src="@drawable/ic_eraser" />
 
                 <ImageView
-                    android:id="@+id/sketch_undo"
+                    android:id="@+id/btn_undo"
                     style="@style/control_btn"
                     android:alpha="0.4"
                     android:src="@drawable/ic_undo_grey600_24dp" />
 
                 <ImageView
-                    android:id="@+id/sketch_redo"
+                    android:id="@+id/btn_redo"
                     style="@style/control_btn"
                     android:alpha="0.4"
                     android:src="@drawable/ic_redo_grey600_24dp" />
 
                 <ImageView
-                    android:id="@+id/sketch_photo"
+                    android:id="@+id/btn_photo"
                     style="@style/control_btn"
                     android:src="@drawable/ic_photo_dark" />
 
                 <ImageView
-                    android:id="@+id/sketch_backgroud"
+                    android:id="@+id/btn_backgroud"
                     style="@style/control_btn"
                     android:alpha="0.5"
                     android:padding="8dp"
                     android:src="@drawable/ic_backgroud" />
 
                 <ImageView
-                    android:id="@+id/sketch_drag"
+                    android:id="@+id/btn_drag"
                     style="@style/control_btn"
                     android:alpha="0.5"
                     android:src="@drawable/ic_drag" />
 
                 <ImageView
-                    android:id="@+id/sketch_save"
+                    android:id="@+id/btn_save"
                     style="@style/control_btn"
                     android:src="@drawable/ic_file" />
 
                 <ImageView
-                    android:id="@+id/sketch_erase"
+                    android:id="@+id/btn_erase"
                     style="@style/control_btn"
                     android:src="@drawable/ic_delete_grey600_48dp" />
             </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/sure_action_layout"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@color/gray"
-                android:orientation="horizontal"
-                android:visibility="gone">
-
-                <ImageView
-                    android:id="@+id/cancel_action"
-                    style="@style/control_btn.action"
-                    android:src="@drawable/ic_cancel" />
-
-                <ImageView
-                    android:id="@+id/sure_action"
-                    style="@style/control_btn.action"
-                    android:src="@drawable/ic_sure" />
-            </LinearLayout>
         </FrameLayout>
 
-
     </RelativeLayout>
-    <!--</ScrollView>-->
 </FrameLayout>

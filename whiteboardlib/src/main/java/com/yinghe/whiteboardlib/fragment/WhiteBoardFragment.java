@@ -65,8 +65,8 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     public static final int REQUEST_IMAGE = 2;
     public static final int REQUEST_BACKGROUND = 3;
 
-    public static int bitmapSize = 300;
-
+    //    public static int bitmapSize = 300;
+    private static final float BTN_ALPHA = 0.4f;
     View rootView;
     ScaleView scaleView;
 
@@ -77,17 +77,17 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
 
     RelativeLayout whiteBoardLayout;//画板布局
     SketchView mSketchView;//画板
-    ImageView ivBg;//画板背景图片
-    ImageView ivBgColor;//画板背景颜色
 
     View controlLayout;//控制布局
-    ImageView stroke;//画笔
-    ImageView eraser;//橡皮擦
-    ImageView undo;//撤销
-    ImageView redo;//取消撤销
-    ImageView erase;//清空
-    ImageView sketchSave;//保存
-    ImageView sketchPhoto;//加载图片
+    ImageView btn_stroke;//画笔
+    ImageView btn_eraser;//橡皮擦
+    ImageView btn_undo;//撤销
+    ImageView btn_redo;//取消撤销
+    ImageView btn_erase;//清空
+    ImageView btn_save;//保存
+    ImageView btn_photo;//加载图片
+    ImageView btn_background;//背景图片
+    ImageView btn_drag;//拖拽
 
     View sureActionLayout;//确认布局
     ImageView sureAction;
@@ -115,7 +115,6 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     private ArrayList<String> mSelectPath;
     public static int sketchViewHeight;
     public static int sketchViewWidth;
-    private ImageView sketchBackground;
 
     public static WhiteBoardFragment newInstance() {
         return new WhiteBoardFragment();
@@ -125,7 +124,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         activity = getActivity();//初始化上下文
-        bitmapSize = Math.min(activity.getWindowManager().getDefaultDisplay().getWidth(), activity.getWindowManager().getDefaultDisplay().getHeight()) ;
+//        bitmapSize = Math.min(activity.getWindowManager().getDefaultDisplay().getWidth(), activity.getWindowManager().getDefaultDisplay().getHeight()) ;
 
         Log.i("xxx", "WhiteBoardFragment onCreate()");
     }
@@ -317,33 +316,29 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         scaleView = (ScaleView) view.findViewById(R.id.scale_view);
         //画板整体布局
         whiteBoardLayout = (RelativeLayout) view.findViewById(R.id.white_board);
-        mSketchView = (SketchView) view.findViewById(R.id.drawing);
-        ivBg = (ImageView) view.findViewById(R.id.iv_bg);
-        ivBgColor = (ImageView) view.findViewById(R.id.iv_bg_color);
-        stroke = (ImageView) view.findViewById(R.id.sketch_stroke);
-        eraser = (ImageView) view.findViewById(R.id.sketch_eraser);
-        undo = (ImageView) view.findViewById(R.id.sketch_undo);
-        redo = (ImageView) view.findViewById(R.id.sketch_redo);
-        erase = (ImageView) view.findViewById(R.id.sketch_erase);
-        sketchSave = (ImageView) view.findViewById(R.id.sketch_save);
-        sketchPhoto = (ImageView) view.findViewById(R.id.sketch_photo);
-        sketchBackground = (ImageView) view.findViewById(R.id.sketch_backgroud);
-//        sketchPhoto.setAlpha(0.4f);
+        mSketchView = (SketchView) view.findViewById(R.id.sketch_view);
+
         controlLayout = view.findViewById(R.id.controlLayout);
-        sureActionLayout = view.findViewById(R.id.sure_action_layout);
-        sureAction = (ImageView) view.findViewById(R.id.sure_action);
-        cancelAction = (ImageView) view.findViewById(R.id.cancel_action);
+        btn_stroke = (ImageView) view.findViewById(R.id.btn_stroke);
+        btn_eraser = (ImageView) view.findViewById(R.id.btn_eraser);
+        btn_undo = (ImageView) view.findViewById(R.id.btn_undo);
+        btn_redo = (ImageView) view.findViewById(R.id.btn_redo);
+        btn_erase = (ImageView) view.findViewById(R.id.btn_erase);
+        btn_save = (ImageView) view.findViewById(R.id.btn_save);
+        btn_photo = (ImageView) view.findViewById(R.id.btn_photo);
+        btn_background = (ImageView) view.findViewById(R.id.btn_backgroud);
+        btn_drag = (ImageView) view.findViewById(R.id.btn_drag);
 
         //设置点击监听
         mSketchView.setOnDrawChangedListener(this);//设置撤销动作监听器
-        stroke.setOnClickListener(this);
-        eraser.setOnClickListener(this);
-        undo.setOnClickListener(this);
-        redo.setOnClickListener(this);
-        erase.setOnClickListener(this);
-        sketchSave.setOnClickListener(this);
-        sketchPhoto.setOnClickListener(this);
-        sketchBackground.setOnClickListener(this);
+        btn_stroke.setOnClickListener(this);
+        btn_eraser.setOnClickListener(this);
+        btn_undo.setOnClickListener(this);
+        btn_redo.setOnClickListener(this);
+        btn_erase.setOnClickListener(this);
+        btn_save.setOnClickListener(this);
+        btn_photo.setOnClickListener(this);
+        btn_background.setOnClickListener(this);
         sureAction.setOnClickListener(this);
         cancelAction.setOnClickListener(this);
         mSketchView.setTextWindowCallback(new SketchView.TextWindowCallback() {
@@ -422,14 +417,14 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     public void onDrawChanged() {
         // Undo
         if (mSketchView.getRecordCount() > 0)
-            setAlpha(undo, 1f);
+            setAlpha(btn_undo, 1f);
         else
-            setAlpha(undo, 0.4f);
+            setAlpha(btn_undo, 0.4f);
         // Redo
         if (mSketchView.getRedoCount() > 0)
-            setAlpha(redo, 1f);
+            setAlpha(btn_redo, 1f);
         else
-            setAlpha(redo, 0.4f);
+            setAlpha(btn_redo, 0.4f);
     }
 
     void setAlpha(View v, float alpha) {
@@ -439,7 +434,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     @Override
     public void onClick(View v) {
         int id = v.getId();
-        if (id == R.id.sketch_stroke) {
+        if (id == R.id.btn_stroke) {
             mSketchView.setEditMode(SketchView.EDIT_STROKE);
             if (mSketchView.getStrokeType() != STROKE_TYPE_ERASER) {
                 showParamsPopupWindow(v, STROKE_TYPE_DRAW);
@@ -457,26 +452,26 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                     strokeType = STROKE_TYPE_TEXT;
                 }
                 mSketchView.setStrokeType(strokeType);
-                setAlpha(eraser, 0.4f);
-                setAlpha(stroke, 1f);
+                setAlpha(btn_eraser, 0.4f);
+                setAlpha(btn_stroke, 1f);
             }
-        } else if (id == R.id.sketch_eraser) {
+        } else if (id == R.id.btn_eraser) {
             mSketchView.setEditMode(SketchView.EDIT_STROKE);
-//            sketchPhoto.setAlpha(0.4f);
+//            btn_photo.setAlpha(0.4f);
             if (mSketchView.getStrokeType() == STROKE_TYPE_ERASER) {
                 showParamsPopupWindow(v, STROKE_TYPE_ERASER);
             } else {
                 mSketchView.setStrokeType(STROKE_TYPE_ERASER);
-                setAlpha(stroke, 0.4f);
-                setAlpha(eraser, 1f);
+                setAlpha(btn_stroke, 0.4f);
+                setAlpha(btn_eraser, 1f);
             }
-        } else if (id == R.id.sketch_undo) {
+        } else if (id == R.id.btn_undo) {
             mSketchView.undo();
-        } else if (id == R.id.sketch_redo) {
+        } else if (id == R.id.btn_redo) {
             mSketchView.redo();
-        } else if (id == R.id.sketch_erase) {
+        } else if (id == R.id.btn_erase) {
             askForErase();
-        } else if (id == R.id.sketch_save) {
+        } else if (id == R.id.btn_save) {
             if (mSketchView.getRecordCount() == 0) {
                 Toast.makeText(getActivity(), "您还没有绘图", Toast.LENGTH_SHORT).show();
                 return;
@@ -499,15 +494,14 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                         }
                     })
                     .show();
-        } else if (id == R.id.sketch_photo) {
+        } else if (id == R.id.btn_photo) {
             MultiImageSelector selector = MultiImageSelector.create(getActivity());
             selector.showCamera(true);
             selector.count(9);
             selector.single();
             selector.origin(mSelectPath);
             selector.start(this, REQUEST_IMAGE);
-        }
-        else if (id == R.id.sketch_backgroud) {
+        } else if (id == R.id.btn_backgroud) {
             MultiImageSelector selector = MultiImageSelector.create(getActivity());
             selector.showCamera(true);
             selector.count(9);

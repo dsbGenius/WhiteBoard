@@ -60,7 +60,7 @@ public class ScaleView extends ImageView implements
 
     RectF photoRectSrc = null;
     Bitmap photoSampleBM = null;
-    Bitmap mirrorMarkBM = BitmapFactory.decodeResource(getResources(), R.drawable.mark_mirror);
+    Bitmap mirrorMarkBM = BitmapFactory.decodeResource(getResources(), R.drawable.mark_copy);
     Bitmap deleteMarkBM = BitmapFactory.decodeResource(getResources(), R.drawable.mark_delete);
     Bitmap rotateMarkBM = BitmapFactory.decodeResource(getResources(), R.drawable.mark_rotate);
     //    Bitmap rotateMarkBM = BitmapFactory.decodeResource(getResources(), R.drawable.test);

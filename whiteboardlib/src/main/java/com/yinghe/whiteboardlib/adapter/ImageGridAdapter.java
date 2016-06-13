@@ -249,7 +249,7 @@ public class ImageGridAdapter extends BaseAdapter {
                 }
             } else {
                 Picasso.with(mContext)
-                        .load("file:///android_asset/"+data.path)
+                        .load("file:///android_asset/" + data.path)
                         .placeholder(R.drawable.default_error)
                         .tag(MultiImageSelectorFragment.TAG)
                         .resize(mGridWidth, mGridWidth)

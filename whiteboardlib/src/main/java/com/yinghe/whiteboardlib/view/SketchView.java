@@ -94,7 +94,7 @@ public class SketchView extends ImageView implements OnTouchListener {
     private float eraserSize = DEFAULT_ERASER_SIZE;
     private int background = Color.WHITE;
 
-    Bitmap mirrorMarkBM = BitmapFactory.decodeResource(getResources(), R.drawable.mark_mirror);
+    Bitmap mirrorMarkBM = BitmapFactory.decodeResource(getResources(), R.drawable.mark_copy);
     Bitmap deleteMarkBM = BitmapFactory.decodeResource(getResources(), R.drawable.mark_delete);
     Bitmap rotateMarkBM = BitmapFactory.decodeResource(getResources(), R.drawable.mark_rotate);
     //    Bitmap rotateMarkBM = BitmapFactory.decodeResource(getResources(), R.drawable.test);
@@ -415,6 +415,7 @@ public class SketchView extends ImageView implements OnTouchListener {
         } else if (editMode == EDIT_PHOTO) {
             float[] downPoint = new float[]{downX, downY};
             if (isInMarkRect(downPoint)) {// 先判操作标记区域
+                actionMode = ACTION_ROTATE;
                 return;
             }
             if (isInPhotoRect(curPhotoRecord, downPoint)) {//再判断是否点击了当前图片
@@ -445,7 +446,6 @@ public class SketchView extends ImageView implements OnTouchListener {
 
     private boolean isInMarkRect(float[] downPoint) {
         if (markerRotateRect.contains(downPoint[0], (int) downPoint[1])) {//判断是否在区域内
-            actionMode = ACTION_ROTATE;
             return true;
         }
         if (markerDeleteRect.contains(downPoint[0], (int) downPoint[1])) {//判断是否在区域内
@@ -579,7 +579,9 @@ public class SketchView extends ImageView implements OnTouchListener {
         return Math.sqrt(vector.x * vector.x + vector.y * vector.y);
     }
     private void onDragAction(float distanceX, float distanceY) {
-        curPhotoRecord.matrix.postTranslate((int) distanceX, (int) distanceY);
+        if (curPhotoRecord != null) {
+            curPhotoRecord.matrix.postTranslate((int) distanceX, (int) distanceY);
+        }
     }
 
 

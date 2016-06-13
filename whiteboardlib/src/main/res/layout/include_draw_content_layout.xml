@@ -18,11 +18,10 @@
             android:layout_gravity="center" />
 
         <com.yinghe.whiteboardlib.view.SketchView
-            android:id="@+id/drawing"
+            android:id="@+id/sketch_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_gravity="center"
-            android:background="@drawable/stroke_color_rbtn_green" />
+            android:layout_gravity="center" />
 
 
         <com.yinghe.whiteboardlib.view.ScaleView
@@ -30,5 +29,4 @@
             android:layout_width="match_parent"
             android:visibility="gone"
             android:layout_height="match_parent" />
-        <!--android:src="@drawable/ic_action_draw"-->
 </FrameLayout>

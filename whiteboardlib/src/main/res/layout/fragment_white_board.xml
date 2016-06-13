@@ -1,14 +1,13 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:tool="http://schemas.android.com/tools"
     android:clipToPadding="false"
     android:fitsSystemWindows="false">
 
     <RelativeLayout
         android:id="@+id/white_board"
         android:layout_width="match_parent"
-            android:layout_height="match_parent"
+        android:layout_height="match_parent"
         android:background="#FFFFFF"
         android:orientation="horizontal">
 
@@ -26,76 +25,57 @@
                 android:orientation="vertical">
 
                 <ImageView
-                    android:id="@+id/sketch_stroke"
+                    android:id="@+id/btn_stroke"
                     style="@style/control_btn"
                     android:src="@drawable/ic_brush_grey600_24dp" />
 
                 <ImageView
-                    android:id="@+id/sketch_eraser"
+                    android:id="@+id/btn_eraser"
                     style="@style/control_btn"
                     android:alpha="0.4"
                     android:src="@drawable/ic_eraser" />
 
                 <ImageView
-                    android:id="@+id/sketch_undo"
+                    android:id="@+id/btn_undo"
                     style="@style/control_btn"
                     android:alpha="0.4"
                     android:src="@drawable/ic_undo_grey600_24dp" />
 
                 <ImageView
-                    android:id="@+id/sketch_redo"
+                    android:id="@+id/btn_redo"
                     style="@style/control_btn"
                     android:alpha="0.4"
                     android:src="@drawable/ic_redo_grey600_24dp" />
 
                 <ImageView
-                    android:id="@+id/sketch_photo"
+                    android:id="@+id/btn_photo"
                     style="@style/control_btn"
                     android:src="@drawable/ic_photo_dark" />
 
                 <ImageView
-                    android:id="@+id/sketch_backgroud"
+                    android:id="@+id/btn_backgroud"
                     style="@style/control_btn"
-                    android:padding="8dp"
                     android:alpha="0.6"
+                    android:padding="8dp"
                     android:src="@drawable/ic_backgroud" />
 
                 <ImageView
-                    android:id="@+id/sketch_drag"
+                    android:id="@+id/btn_drag"
                     style="@style/control_btn"
                     android:alpha="0.6"
                     android:src="@drawable/ic_drag" />
 
                 <ImageView
-                    android:id="@+id/sketch_save"
+                    android:id="@+id/btn_save"
                     style="@style/control_btn"
                     android:src="@drawable/ic_file" />
 
                 <ImageView
-                    android:id="@+id/sketch_erase"
+                    android:id="@+id/btn_erase"
                     style="@style/control_btn"
                     android:src="@drawable/ic_delete_grey600_48dp" />
             </LinearLayout>
 
-            <LinearLayout
-                android:id="@+id/sure_action_layout"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@color/gray"
-                android:clickable="true"
-                android:orientation="vertical"
-                android:visibility="gone">
-
-                <ImageView
-                    android:id="@+id/cancel_action"
-                    style="@style/control_btn.action"
-                    android:src="@drawable/ic_cancel" />
-
-                <ImageView
-                    android:id="@+id/sure_action"
-                    style="@style/control_btn.action"
-                    android:src="@drawable/ic_sure" />
-            </LinearLayout>
         </FrameLayout>
 
         <FrameLayout
@@ -107,21 +87,6 @@
             <include layout="@layout/include_draw_content_layout" />
 
         </FrameLayout>
-        <!--<EditText xmlns:android="http://schemas.android.com/apk/res/android"-->
-        <!--android:id="@+id/stroke_text_et"-->
-        <!--android:visibility="gone"-->
-        <!--tool:visibility="visible"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:hint="请输入文字"-->
-        <!--android:layout_alignTop="@id/drawing"-->
-        <!--android:layout_alignLeft="@id/drawing"-->
-        <!--android:imeOptions="actionDone"-->
-        <!--android:maxWidth="200dp"-->
-        <!--android:minWidth="100dp"-->
-        <!--android:background="@color/gray"-->
-        <!--android:selectAllOnFocus="true"-->
-        <!--android:textSize="22dp" />-->
 
     </RelativeLayout>
 

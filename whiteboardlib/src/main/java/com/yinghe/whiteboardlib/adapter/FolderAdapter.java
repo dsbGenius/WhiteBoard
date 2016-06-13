@@ -194,7 +194,7 @@ public class FolderAdapter extends BaseAdapter {
                     }
                 } else {
                     Picasso.with(mContext)
-                            .load("file:///android_asset/"+data.cover.path)
+                            .load("file:///android_asset/" + data.cover.path)
                             .placeholder(R.drawable.default_error)
                             .tag(MultiImageSelectorFragment.TAG)
                             .resizeDimen(R.dimen.folder_cover_size, R.dimen.folder_cover_size)
