@@ -116,6 +116,8 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     public static int sketchViewHeight;
     public static int sketchViewWidth;
     private ImageView sketchBackground;
+    public static int decorHight;
+    public static int decorWidth;
 
     public static WhiteBoardFragment newInstance() {
         return new WhiteBoardFragment();
@@ -376,6 +378,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         popupTextLayout = inflater.inflate(R.layout.popup_sketch_text, null);
         editText = (EditText) popupTextLayout.findViewById(R.id.text_pupwindow_et);
         getSketchSize();//计算选择图片弹窗的高宽
+
     }
 
     @Override
@@ -396,6 +399,12 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                     sketchViewHeight = height;
                     sketchViewWidth = width;
                     Log.i("onPreDraw", sketchViewHeight + "  " + sketchViewWidth);
+                    decorHight =getActivity().getWindow().getDecorView().getMeasuredHeight();
+                    decorWidth =getActivity().getWindow().getDecorView().getMeasuredWidth();
+                    Log.i("onPreDraw", "decor hight:"+decorHight + "   width:" + decorHight);
+                    int height3 = controlLayout.getMeasuredHeight();
+                    int width3 = controlLayout.getMeasuredWidth();
+                    Log.i("onPreDraw", "controlLayout  hight:"+height3 + "   width:" + width3);
                 }
                 return true;
             }
