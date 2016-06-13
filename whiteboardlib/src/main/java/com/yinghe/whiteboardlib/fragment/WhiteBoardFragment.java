@@ -470,7 +470,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             String input = et.getText().toString();
-                            save(input + ".png");
+                            save(input + ".png", true);
                         }
                     })
                     .show();
@@ -507,9 +507,14 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     public Bitmap getResultBitmap() {
         return mSketchView.getResultBitmap();
     }
-//    public String getResultPhotoPath() {
-//        return mSketchView.getResultBitmap();
-//    }
+
+    public void saveResultPhotoByPath(String path) {
+        save(path, false);
+    }
+
+    public void saveResultPhotoByName(String name) {
+        save(name, false);
+    }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -579,7 +584,8 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         });
     }
 
-    public void save(final String imgName) {
+
+    public void save(final String imgName, boolean isToast) {
         dialog = new AlertDialog.Builder(activity)
                 .setTitle("保存手绘")
                 .setMessage("保存中...")
