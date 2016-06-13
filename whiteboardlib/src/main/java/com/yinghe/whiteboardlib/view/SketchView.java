@@ -25,8 +25,10 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.PaintFlagsDrawFilter;
 import android.graphics.Path;
 import android.graphics.PointF;
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Environment;
@@ -114,7 +116,6 @@ public class SketchView extends ImageView implements OnTouchListener {
     private Context mContext;
 
     private Bitmap backgroundBM;
-    private Bitmap curPhotoBM;
     DrawRecord curStrokeRecord;
     DrawRecord curPhotoRecord;
 
@@ -291,6 +292,7 @@ public class SketchView extends ImageView implements OnTouchListener {
             float[] photoCorners = calculateCorners(curPhotoRecord);//计算图片四个角点和中心点
             drawBoard(canvas, photoCorners);//绘制图形边线
             drawMarks(canvas, photoCorners);//绘制边角图片
+
         }
         for (DrawRecord record : strokeRecordList) {
             int type = record.type;
@@ -415,7 +417,6 @@ public class SketchView extends ImageView implements OnTouchListener {
         } else if (editMode == EDIT_PHOTO) {
             float[] downPoint = new float[]{downX, downY};
             if (isInMarkRect(downPoint)) {// 先判操作标记区域
-                actionMode = ACTION_ROTATE;
                 return;
             }
             if (isInPhotoRect(curPhotoRecord, downPoint)) {//再判断是否点击了当前图片
@@ -446,11 +447,13 @@ public class SketchView extends ImageView implements OnTouchListener {
 
     private boolean isInMarkRect(float[] downPoint) {
         if (markerRotateRect.contains(downPoint[0], (int) downPoint[1])) {//判断是否在区域内
+            actionMode = ACTION_ROTATE;
             return true;
         }
         if (markerDeleteRect.contains(downPoint[0], (int) downPoint[1])) {//判断是否在区域内
             photoRecordList.remove(curPhotoRecord);
             setCurPhotoRecord(null);
+            actionMode = ACTION_NONE;
             return true;
         }
         if (markerCopyRect.contains(downPoint[0], (int) downPoint[1])) {//判断是否在区域内
@@ -458,6 +461,7 @@ public class SketchView extends ImageView implements OnTouchListener {
             newRecord.matrix = new Matrix(curPhotoRecord.matrix);
             newRecord.matrix.postTranslate(BitmapUtils.dip2px(mContext, 20), BitmapUtils.dip2px(mContext, 20));//偏移小段距离以分辨新复制的图片
             setCurPhotoRecord(newRecord);
+            actionMode = ACTION_NONE;
             return true;
         }
         return false;
@@ -490,7 +494,7 @@ public class SketchView extends ImageView implements OnTouchListener {
             } else if (strokeType == STROKE_TYPE_TEXT) {
 
             }
-        } else if (editMode == EDIT_PHOTO) {
+        } else if (editMode == EDIT_PHOTO && curPhotoRecord != null) {
             if (actionMode == ACTION_DRAG) {
                 onDragAction(curX - preX, curY - preY);
             } else if (actionMode == ACTION_ROTATE) {
@@ -579,9 +583,7 @@ public class SketchView extends ImageView implements OnTouchListener {
         return Math.sqrt(vector.x * vector.x + vector.y * vector.y);
     }
     private void onDragAction(float distanceX, float distanceY) {
-        if (curPhotoRecord != null) {
             curPhotoRecord.matrix.postTranslate((int) distanceX, (int) distanceY);
-        }
     }
 
 
@@ -593,19 +595,30 @@ public class SketchView extends ImageView implements OnTouchListener {
      * Returns a new backgroundBM associated with drawed canvas
      */
     public Bitmap getBackgroundBM() {
-        if (strokeRecordList.size() == 0)
-            return null;
-
-        if (backgroundBM == null) {
-            backgroundBM = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
-            backgroundBM.eraseColor(background);
-        }
-        Canvas canvas = new Canvas(backgroundBM);
-        drawRecord(canvas);
-        return backgroundBM;
+        BitmapDrawable drawable = (BitmapDrawable) getBackground();
+        return drawable != null ? drawable.getBitmap() : null;
     }
 
-
+    @NonNull
+    public Bitmap getResultBitmap() {
+        int bgWidth = getWidth();
+        int bgHeight = getHeight();
+        final Bitmap newBM = Bitmap.createBitmap(bgWidth, bgHeight, Bitmap.Config.RGB_565);
+        Canvas canvas = new Canvas(newBM);
+        canvas.setDrawFilter(new PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG));//抗锯齿
+        //绘制背景
+        Bitmap backgroundBM = getBackgroundBM();
+        if (backgroundBM != null) {
+            Rect srcRect = new Rect(0, 0, backgroundBM.getWidth(), backgroundBM.getHeight());
+            Rect dstRect = new Rect(0, 0, bgWidth, bgHeight);
+            canvas.drawBitmap(backgroundBM, srcRect, dstRect, null);
+        }
+        drawRecord(canvas);
+        canvas.save(Canvas.ALL_SAVE_FLAG);
+        canvas.restore();
+//        newBM.compress(Bitmap.CompressFormat.PNG,80)
+        return newBM;
+    }
     /*
      * 删除一笔
      */
@@ -636,7 +649,7 @@ public class SketchView extends ImageView implements OnTouchListener {
 
 
     public int getRecordCount() {
-        return strokeRecordList.size();
+        return strokeRecordList.size() + photoRecordList.size();
     }
 
 
@@ -660,6 +673,7 @@ public class SketchView extends ImageView implements OnTouchListener {
 
     public void erase() {
         strokeRecordList.clear();
+        photoRecordList.clear();
         strokeRedoList.clear();
         // 先判断是否已经回收
         if (backgroundBM != null && !backgroundBM.isRecycled()) {
@@ -692,6 +706,7 @@ public class SketchView extends ImageView implements OnTouchListener {
     public void setBackgroundByPath(String path) {
         Bitmap sampleBM = getSampleBitMap(path);
         if (sampleBM != null) {
+            backgroundBM = sampleBM;
             BitmapDrawable drawable = new BitmapDrawable(mContext.getResources(), sampleBM);
             setBackground(drawable);
             invalidate();
@@ -745,5 +760,10 @@ public class SketchView extends ImageView implements OnTouchListener {
 
     public void setEditMode(int editMode) {
         this.editMode = editMode;
+        invalidate();
+    }
+
+    public int getEditMode() {
+        return editMode;
     }
 }

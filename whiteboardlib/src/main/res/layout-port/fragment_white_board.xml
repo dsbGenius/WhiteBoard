@@ -23,7 +23,7 @@
         <FrameLayout
             android:id="@+id/controlLayout"
             android:layout_width="match_parent"
-            android:layout_height="45dp"
+            android:layout_height="55dp"
             android:layout_alignParentBottom="true"
             android:background="@color/gray"
             android:orientation="horizontal">
@@ -36,7 +36,7 @@
                 <ImageView
                     android:id="@+id/btn_stroke"
                     style="@style/control_btn"
-                    android:src="@drawable/ic_brush_grey600_24dp" />
+                    android:src="@drawable/stroke_type_rbtn_draw_checked" />
 
                 <ImageView
                     android:id="@+id/btn_eraser"
@@ -48,30 +48,27 @@
                     android:id="@+id/btn_undo"
                     style="@style/control_btn"
                     android:alpha="0.4"
-                    android:src="@drawable/ic_undo_grey600_24dp" />
+                    android:src="@drawable/ic_undo" />
 
                 <ImageView
                     android:id="@+id/btn_redo"
                     style="@style/control_btn"
                     android:alpha="0.4"
-                    android:src="@drawable/ic_redo_grey600_24dp" />
+                    android:src="@drawable/ic_redo" />
 
                 <ImageView
                     android:id="@+id/btn_photo"
                     style="@style/control_btn"
-                    android:src="@drawable/ic_photo_dark" />
+                    android:src="@drawable/ic_photo" />
 
                 <ImageView
-                    android:id="@+id/btn_backgroud"
+                    android:id="@+id/btn_background"
                     style="@style/control_btn"
-                    android:alpha="0.5"
-                    android:padding="8dp"
-                    android:src="@drawable/ic_backgroud" />
+                    android:src="@drawable/ic_background" />
 
                 <ImageView
                     android:id="@+id/btn_drag"
                     style="@style/control_btn"
-                    android:alpha="0.5"
                     android:src="@drawable/ic_drag" />
 
                 <ImageView
@@ -80,9 +77,9 @@
                     android:src="@drawable/ic_file" />
 
                 <ImageView
-                    android:id="@+id/btn_erase"
+                    android:id="@+id/btn_empty"
                     style="@style/control_btn"
-                    android:src="@drawable/ic_delete_grey600_48dp" />
+                    android:src="@drawable/ic_empty" />
             </LinearLayout>
         </FrameLayout>
 
