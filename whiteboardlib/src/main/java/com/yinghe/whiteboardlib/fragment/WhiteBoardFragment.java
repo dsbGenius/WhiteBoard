@@ -536,12 +536,13 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         selector.single();
         selector.origin(mSelectPath);
         Bundle boundsBundle = new Bundle();
-        boundsBundle.putInt("width", mSketchView.getWidth());
-        boundsBundle.putInt("height", mSketchView.getHeight());
-        int left = mSketchView.getLeft();
-        boundsBundle.putInt("left", mSketchView.getLeft());
-        boundsBundle.putInt("top", mSketchView.getTop());
-        selector.start(this, boundsBundle, request);
+        Rect rect = new Rect();
+        mSketchView.getLocalVisibleRect(rect);
+        int[] boundsInts = new int[4];
+        mSketchView.getLocationInWindow(boundsInts);
+        boundsInts[2] = mSketchView.getWidth();
+        boundsInts[3] = mSketchView.getHeight();
+        selector.start(this, boundsInts, request);
     }
 
     private void showSaveDialog() {

@@ -165,26 +165,16 @@ public class MultiImageSelectorActivity extends AppCompatActivity
     private void setActivitySize(int orientation) {
         WindowManager.LayoutParams attr = getWindow().getAttributes();
         statusBarHeight = ScreenUtils.getStatusBarHeight(this);
+        Intent intent = getIntent();
+        int[] bounds = intent.getIntArrayExtra(EXTRA_BOUNDS);
         if (orientation == Configuration.ORIENTATION_LANDSCAPE) {//横屏
-            screenWidth = Math.max(WhiteBoardFragment.sketchViewHeight, WhiteBoardFragment.sketchViewWidth);
-            screenHeight = Math.min(WhiteBoardFragment.sketchViewHeight, WhiteBoardFragment.sketchViewWidth);
 
-            float paddingRightValue = WhiteBoardFragment.decorWidth-WhiteBoardFragment.sketchViewWidth;
-            getWindow().getDecorView().setPadding(0, 0, (int) paddingRightValue, 0);
-
-            WindowManager m = getWindowManager();
-            Display d = m.getDefaultDisplay();  //为获取屏幕宽、高
             WindowManager.LayoutParams p = getWindow().getAttributes();  //获取对话框当前的参数值
-            Point point = new Point();
-            d.getSize(point);
-
-            p.height = (int) (WhiteBoardFragment.sketchViewHeight);   //高度设置为屏幕的1.0
-            p.width = (int) (WhiteBoardFragment.sketchViewWidth / 2);
-            Log.i("orientaion", "横屏 hight:" + p.height + "  width:" + p.width);
-            p.x = WhiteBoardFragment.sketchViewRight / 2;
+            p.x = bounds[0];
+            p.y = bounds[1];
+            p.width = bounds[2];
+            p.height = bounds[3];
             getWindow().setAttributes(p);
-//            getWindow().setGravity(Gravity.LEFT | Gravity.TOP);
-            getWindow().setGravity(Gravity.NO_GRAVITY);
         } else if (orientation == Configuration.ORIENTATION_PORTRAIT) {//竖屏
             screenWidth = Math.min(WhiteBoardFragment.sketchViewHeight, WhiteBoardFragment.sketchViewWidth);
             screenHeight = Math.max(WhiteBoardFragment.sketchViewHeight, WhiteBoardFragment.sketchViewWidth);
