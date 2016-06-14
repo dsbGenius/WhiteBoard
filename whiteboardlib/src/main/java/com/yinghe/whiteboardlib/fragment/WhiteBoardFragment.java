@@ -540,6 +540,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         mSketchView.getLocalVisibleRect(rect);
         int[] boundsInts = new int[4];
         mSketchView.getLocationInWindow(boundsInts);
+        boundsInts[1] -= ScreenUtils.getStatusBarHeight(activity);
         boundsInts[2] = mSketchView.getWidth();
         boundsInts[3] = mSketchView.getHeight();
         selector.start(this, boundsInts, request);

@@ -3,7 +3,6 @@ package com.yinghe.whiteboardlib;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Color;
-import android.graphics.Point;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -11,8 +10,6 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
-import android.view.Display;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -68,11 +65,6 @@ public class MultiImageSelectorActivity extends AppCompatActivity
     private ArrayList<String> resultList = new ArrayList<>();
     private Button mSubmitButton;
     private int mDefaultCount = DEFAULT_IMAGE_SIZE;
-    private int statusBarHeight;//状态高度
-    private LinearLayout layout;
-    private int screenHeight;
-    private int screenWidth;
-    private int mRequestType;
 
 
     @Override
@@ -80,9 +72,8 @@ public class MultiImageSelectorActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setTheme(R.style.dialogActivity);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-        screenHeight = WhiteBoardFragment.sketchViewHeight;
-        screenWidth = WhiteBoardFragment.sketchViewWidth;
         int orientation = this.getResources().getConfiguration().orientation;
+        setContentView(R.layout.activity_image_selector);
         setActivitySize(orientation);
         getWindow().getDecorView().setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -91,7 +82,6 @@ public class MultiImageSelectorActivity extends AppCompatActivity
                 return true;
             }
         });
-        setContentView(R.layout.activity_image_selector);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             getWindow().setStatusBarColor(Color.BLACK);
         }
@@ -100,7 +90,7 @@ public class MultiImageSelectorActivity extends AppCompatActivity
         //获取各种配置信息
         final Intent intent = getIntent();
         mDefaultCount = intent.getIntExtra(EXTRA_SELECT_COUNT, DEFAULT_IMAGE_SIZE);
-        mRequestType = intent.getIntExtra(EXTRA_REQUEST_TYPE, WhiteBoardFragment.REQUEST_IMAGE);
+        int mRequestType = intent.getIntExtra(EXTRA_REQUEST_TYPE, WhiteBoardFragment.REQUEST_IMAGE);
         final int mode = intent.getIntExtra(EXTRA_SELECT_MODE, MODE_MULTI);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         if (mRequestType == WhiteBoardFragment.REQUEST_BACKGROUND) {
@@ -149,7 +139,7 @@ public class MultiImageSelectorActivity extends AppCompatActivity
             bundle.putInt(MultiImageSelectorFragment.EXTRA_SELECT_MODE, mode);
             bundle.putBoolean(MultiImageSelectorFragment.EXTRA_SHOW_CAMERA, isShow);
             bundle.putStringArrayList(MultiImageSelectorFragment.EXTRA_DEFAULT_SELECTED_LIST, resultList);
-            bundle.putInt(EXTRA_REQUEST_TYPE,mRequestType);
+            bundle.putInt(EXTRA_REQUEST_TYPE, mRequestType);
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.image_grid, Fragment.instantiate(this, MultiImageSelectorFragment.class.getName(), bundle))
                     .commit();
@@ -163,36 +153,22 @@ public class MultiImageSelectorActivity extends AppCompatActivity
      * @param orientation
      */
     private void setActivitySize(int orientation) {
-        WindowManager.LayoutParams attr = getWindow().getAttributes();
-        statusBarHeight = ScreenUtils.getStatusBarHeight(this);
         Intent intent = getIntent();
         int[] bounds = intent.getIntArrayExtra(EXTRA_BOUNDS);
+        WindowManager.LayoutParams p = getWindow().getAttributes();  //获取对话框当前的参数值
         if (orientation == Configuration.ORIENTATION_LANDSCAPE) {//横屏
-
-            WindowManager.LayoutParams p = getWindow().getAttributes();  //获取对话框当前的参数值
-            p.x = bounds[0];
+            p.x = bounds[0] + bounds[2] / 2;
             p.y = bounds[1];
-            p.width = bounds[2];
+            p.width = bounds[2] / 2;
             p.height = bounds[3];
-            getWindow().setAttributes(p);
         } else if (orientation == Configuration.ORIENTATION_PORTRAIT) {//竖屏
-            screenWidth = Math.min(WhiteBoardFragment.sketchViewHeight, WhiteBoardFragment.sketchViewWidth);
-            screenHeight = Math.max(WhiteBoardFragment.sketchViewHeight, WhiteBoardFragment.sketchViewWidth);
-            attr.gravity = Gravity.BOTTOM;
-            float paddingButtomValue = WhiteBoardFragment.decorHeight - WhiteBoardFragment.sketchViewHeight - statusBarHeight;
-            getWindow().getDecorView().setPadding(0, 0, 0, (int) paddingButtomValue);
-            WindowManager m = getWindowManager();
-            Display d = m.getDefaultDisplay();  //为获取屏幕宽、高
-            WindowManager.LayoutParams p = getWindow().getAttributes();  //获取对话框当前的参数值
-            Point point = new Point();
-            d.getSize(point);
-
-            p.height = (int) (screenHeight * 2 / 3);   //高度设置为屏幕的1.0
-            p.width = (int) (getWindowManager().getDefaultDisplay().getWidth());
-            p.y = WhiteBoardFragment.sketchViewBottom / 2;
-            Log.i("orientaion", "竖屏 hight:" + p.height + "  width:" + p.width);
-            getWindow().setAttributes(p);
+            p.x = bounds[1];
+            p.y = bounds[1] + bounds[3] / 2;
+            p.width = bounds[2];
+            p.height = bounds[3] / 2;
         }
+        getWindow().setGravity(Gravity.LEFT | Gravity.TOP);
+        getWindow().setAttributes(p);
     }
 
     /**
@@ -204,7 +180,7 @@ public class MultiImageSelectorActivity extends AppCompatActivity
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         int orientation = newConfig.orientation;
-        setActivitySize(orientation);
+//        setActivitySize(orientation);
     }
 
 
