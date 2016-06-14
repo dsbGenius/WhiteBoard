@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.widget.Toast;
 
@@ -69,10 +70,10 @@ public class MultiImageSelector {
         }
     }
 
-    public void start(android.app.Fragment fragment, int requestCode){
+    public void start(android.app.Fragment fragment, Bundle boundsBundle, int requestCode) {
         if(hasPermission()) {
             mRequstType = requestCode;
-            fragment.startActivityForResult(createIntent(), requestCode);
+            fragment.startActivityForResult(createIntent(boundsBundle), requestCode);
         }else{
             Toast.makeText(mContext, R.string.error_no_permission, Toast.LENGTH_SHORT).show();
         }
@@ -88,7 +89,14 @@ public class MultiImageSelector {
     }
 
     private Intent createIntent(){
+        return createIntent(null);
+    }
+
+    private Intent createIntent(Bundle boundsBundle) {
         Intent intent = new Intent(mContext, MultiImageSelectorActivity.class);
+        if (boundsBundle != null) {
+            intent.putExtra(MultiImageSelectorActivity.EXTRA_BOUNDS, boundsBundle);
+        }
         intent.putExtra(MultiImageSelectorActivity.EXTRA_SHOW_CAMERA, mIsShowCarema);
         intent.putExtra(MultiImageSelectorActivity.EXTRA_SELECT_COUNT, mMaxCount);
         if(mOriginData != null){

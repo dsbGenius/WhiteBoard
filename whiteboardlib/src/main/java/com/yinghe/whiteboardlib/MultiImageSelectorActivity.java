@@ -54,6 +54,10 @@ public class MultiImageSelectorActivity extends AppCompatActivity
      */
     public static final String EXTRA_RESULT = "select_result";
     /**
+     * View bounds;
+     */
+    public static final String EXTRA_BOUNDS = "activity_bounds";
+    /**
      * Original data set
      */
     public static final String EXTRA_DEFAULT_SELECTED_LIST = "default_list";
@@ -66,7 +70,7 @@ public class MultiImageSelectorActivity extends AppCompatActivity
     private int mDefaultCount = DEFAULT_IMAGE_SIZE;
     private int statusBarHeight;//状态高度
     private LinearLayout layout;
-    private int screenHight;
+    private int screenHeight;
     private int screenWidth;
     private int mRequestType;
 
@@ -76,7 +80,7 @@ public class MultiImageSelectorActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setTheme(R.style.dialogActivity);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
-        screenHight = WhiteBoardFragment.sketchViewHeight;
+        screenHeight = WhiteBoardFragment.sketchViewHeight;
         screenWidth = WhiteBoardFragment.sketchViewWidth;
         int orientation = this.getResources().getConfiguration().orientation;
         setActivitySize(orientation);
@@ -163,7 +167,7 @@ public class MultiImageSelectorActivity extends AppCompatActivity
         statusBarHeight = ScreenUtils.getStatusBarHeight(this);
         if (orientation == Configuration.ORIENTATION_LANDSCAPE) {//横屏
             screenWidth = Math.max(WhiteBoardFragment.sketchViewHeight, WhiteBoardFragment.sketchViewWidth);
-            screenHight = Math.min(WhiteBoardFragment.sketchViewHeight, WhiteBoardFragment.sketchViewWidth);
+            screenHeight = Math.min(WhiteBoardFragment.sketchViewHeight, WhiteBoardFragment.sketchViewWidth);
 
             float paddingRightValue = WhiteBoardFragment.decorWidth-WhiteBoardFragment.sketchViewWidth;
             getWindow().getDecorView().setPadding(0, 0, (int) paddingRightValue, 0);
@@ -174,15 +178,16 @@ public class MultiImageSelectorActivity extends AppCompatActivity
             Point point = new Point();
             d.getSize(point);
 
-            p.height = (int) (screenHight);   //高度设置为屏幕的1.0
-            p.width = (int) (screenWidth / 2);
+            p.height = (int) (WhiteBoardFragment.sketchViewHeight);   //高度设置为屏幕的1.0
+            p.width = (int) (WhiteBoardFragment.sketchViewWidth / 2);
             Log.i("orientaion", "横屏 hight:" + p.height + "  width:" + p.width);
-
+            p.x = WhiteBoardFragment.sketchViewRight / 2;
             getWindow().setAttributes(p);
-            getWindow().setGravity(Gravity.RIGHT | Gravity.BOTTOM);
+//            getWindow().setGravity(Gravity.LEFT | Gravity.TOP);
+            getWindow().setGravity(Gravity.NO_GRAVITY);
         } else if (orientation == Configuration.ORIENTATION_PORTRAIT) {//竖屏
             screenWidth = Math.min(WhiteBoardFragment.sketchViewHeight, WhiteBoardFragment.sketchViewWidth);
-            screenHight = Math.max(WhiteBoardFragment.sketchViewHeight, WhiteBoardFragment.sketchViewWidth);
+            screenHeight = Math.max(WhiteBoardFragment.sketchViewHeight, WhiteBoardFragment.sketchViewWidth);
             attr.gravity = Gravity.BOTTOM;
             float paddingButtomValue = WhiteBoardFragment.decorHeight - WhiteBoardFragment.sketchViewHeight - statusBarHeight;
             getWindow().getDecorView().setPadding(0, 0, 0, (int) paddingButtomValue);
@@ -192,8 +197,9 @@ public class MultiImageSelectorActivity extends AppCompatActivity
             Point point = new Point();
             d.getSize(point);
 
-            p.height = (int) (screenHight * 2 / 3);   //高度设置为屏幕的1.0
+            p.height = (int) (screenHeight * 2 / 3);   //高度设置为屏幕的1.0
             p.width = (int) (getWindowManager().getDefaultDisplay().getWidth());
+            p.y = WhiteBoardFragment.sketchViewBottom / 2;
             Log.i("orientaion", "竖屏 hight:" + p.height + "  width:" + p.width);
             getWindow().setAttributes(p);
         }

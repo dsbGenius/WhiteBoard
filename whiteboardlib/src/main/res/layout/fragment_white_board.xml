@@ -1,15 +1,7 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:clipToPadding="false"
-    android:fitsSystemWindows="false">
-
-    <RelativeLayout
-        android:id="@+id/white_board"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="#FFFFFF"
-        android:orientation="horizontal">
+    android:background="#FFFFFF">
 
         <FrameLayout
             android:id="@+id/controlLayout"
@@ -88,5 +80,3 @@
         </FrameLayout>
 
     </RelativeLayout>
-
-</FrameLayout>

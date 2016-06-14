@@ -61,7 +61,6 @@ public class ScreenUtils {
         inputManager.hideSoftInputFromWindow(v.getWindowToken(), 0);
 
     }
-
     public static void showInput(View v) {
         InputMethodManager inputManager = (InputMethodManager) v
                 .getContext().getSystemService(Context.INPUT_METHOD_SERVICE);

@@ -44,7 +44,6 @@ import com.yinghe.whiteboardlib.view.SketchView;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 import static com.yinghe.whiteboardlib.bean.DrawRecord.STROKE_TYPE_CIRCLE;
@@ -70,7 +69,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     int textOffX;
     int textOffY;
 
-    RelativeLayout whiteBoardLayout;//画板布局
+    //    RelativeLayout whiteBoardLayout;//画板布局
     SketchView mSketchView;//画板
 
     View controlLayout;//控制布局
@@ -109,6 +108,8 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     private ArrayList<String> mSelectPath;
     public static int sketchViewHeight;
     public static int sketchViewWidth;
+    public static int sketchViewRight;
+    public static int sketchViewBottom;
     public static int decorHeight;
     public static int decorWidth;
 
@@ -356,7 +357,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
 
     private void findView(View view) {
         //画板整体布局
-        whiteBoardLayout = (RelativeLayout) view.findViewById(R.id.white_board);
+//        whiteBoardLayout = (RelativeLayout) view.findViewById(R.id.white_board);
         mSketchView = (SketchView) view.findViewById(R.id.sketch_view);
 
         controlLayout = view.findViewById(R.id.controlLayout);
@@ -430,6 +431,8 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                     int width = mSketchView.getMeasuredWidth();
                     sketchViewHeight = height;
                     sketchViewWidth = width;
+                    sketchViewRight = mSketchView.getRight();
+                    sketchViewBottom = mSketchView.getBottom();
                     Log.i("onPreDraw", sketchViewHeight + "  " + sketchViewWidth);
                     decorHeight = getActivity().getWindow().getDecorView().getMeasuredHeight();
                     decorWidth =getActivity().getWindow().getDecorView().getMeasuredWidth();
@@ -532,7 +535,13 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         selector.count(9);
         selector.single();
         selector.origin(mSelectPath);
-        selector.start(this, request);
+        Bundle boundsBundle = new Bundle();
+        boundsBundle.putInt("width", mSketchView.getWidth());
+        boundsBundle.putInt("height", mSketchView.getHeight());
+        int left = mSketchView.getLeft();
+        boundsBundle.putInt("left", mSketchView.getLeft());
+        boundsBundle.putInt("top", mSketchView.getTop());
+        selector.start(this, boundsBundle, request);
     }
 
     private void showSaveDialog() {
