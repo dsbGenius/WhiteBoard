@@ -28,4 +28,9 @@ public class TimeUtils {
         }
         return "1970-01-01";
     }
+
+    public static String getNowTimeString() {
+        SimpleDateFormat sDateFormat = new SimpleDateFormat("yyyy-MM-dd_hh:mm:ss");
+        return sDateFormat.format(new java.util.Date());
+    }
 }

@@ -184,7 +184,7 @@ public class MultiImageSelectorActivity extends AppCompatActivity
             screenWidth = Math.min(WhiteBoardFragment.sketchViewHeight, WhiteBoardFragment.sketchViewWidth);
             screenHight = Math.max(WhiteBoardFragment.sketchViewHeight, WhiteBoardFragment.sketchViewWidth);
             attr.gravity = Gravity.BOTTOM;
-            float paddingButtomValue = WhiteBoardFragment.decorHight - WhiteBoardFragment.sketchViewHeight-statusBarHeight;
+            float paddingButtomValue = WhiteBoardFragment.decorHeight - WhiteBoardFragment.sketchViewHeight - statusBarHeight;
             getWindow().getDecorView().setPadding(0, 0, 0, (int) paddingButtomValue);
             WindowManager m = getWindowManager();
             Display d = m.getDefaultDisplay();  //为获取屏幕宽、高

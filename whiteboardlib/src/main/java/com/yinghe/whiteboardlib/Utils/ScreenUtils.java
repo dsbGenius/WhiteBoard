@@ -5,7 +5,9 @@ import android.graphics.Point;
 import android.os.Build;
 import android.util.Log;
 import android.view.Display;
+import android.view.View;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 
 import java.lang.reflect.Field;
 
@@ -50,6 +52,27 @@ public class ScreenUtils {
         int statusBarHeight = sbar;
         Log.i("onPreDraw", "statusBarHeight: "+statusBarHeight);
         return statusBarHeight;
+    }
+
+    public static void hideInput(View v) {
+        InputMethodManager inputManager = (InputMethodManager) v
+                .getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+        //调用系统输入法
+        inputManager.hideSoftInputFromWindow(v.getWindowToken(), 0);
+
+    }
+
+    public static void showInput(View v) {
+        InputMethodManager inputManager = (InputMethodManager) v
+                .getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+        //调用系统输入法
+        inputManager.showSoftInput(v, InputMethodManager.SHOW_FORCED);
+    }
+
+    public static void toggleInput(Context context) {
+        InputMethodManager inputMethodManager =
+                (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+        inputMethodManager.toggleSoftInput(0, InputMethodManager.HIDE_NOT_ALWAYS);
     }
 
 }

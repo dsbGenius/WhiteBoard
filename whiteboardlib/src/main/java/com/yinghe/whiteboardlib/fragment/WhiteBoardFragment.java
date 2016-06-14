@@ -16,11 +16,13 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -29,16 +31,20 @@ import android.widget.PopupWindow;
 import android.widget.RadioGroup;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.yinghe.whiteboardlib.MultiImageSelector;
 import com.yinghe.whiteboardlib.R;
 import com.yinghe.whiteboardlib.Utils.BitmapUtils;
+import com.yinghe.whiteboardlib.Utils.ScreenUtils;
+import com.yinghe.whiteboardlib.Utils.TimeUtils;
 import com.yinghe.whiteboardlib.bean.DrawRecord;
 import com.yinghe.whiteboardlib.view.SketchView;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 import static com.yinghe.whiteboardlib.bean.DrawRecord.STROKE_TYPE_CIRCLE;
@@ -86,6 +92,8 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     int strokeMode;//模式
     int strokeType;//模式
 
+    EditText saveET;
+    AlertDialog saveDialog;
 
     int pupWindowsDPWidth = 300;//弹窗宽度，单位DP
     int strokePupWindowsDPHeight = 275;//画笔弹窗高度，单位DP
@@ -95,14 +103,13 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     private View popupStrokeLayout, popupEraserLayout, popupTextLayout;//画笔、橡皮擦弹窗布局
     private SeekBar strokeSeekBar, strokeAlphaSeekBar, eraserSeekBar;
     private ImageView strokeImageView, strokeAlphaImage, eraserImageView;//画笔宽度，画笔不透明度，橡皮擦宽度IV
-    private EditText editText;//绘制文字的内容
+    private EditText strokeET;//绘制文字的内容
     private int size;
     private AlertDialog dialog;
     private ArrayList<String> mSelectPath;
     public static int sketchViewHeight;
     public static int sketchViewWidth;
-    private ImageView sketchBackground;
-    public static int decorHight;
+    public static int decorHeight;
     public static int decorWidth;
 
     public static WhiteBoardFragment newInstance() {
@@ -140,8 +147,51 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         findView(rootView);//载入所有的按钮实例
         initDrawParams();//初始化绘画参数
         initPopupWindows();//初始化弹框
+        initSaveDialog();
         return rootView;
     }
+
+    private void initSaveDialog() {
+        saveET = new EditText(activity);
+        saveET.setHint("新文件名");
+        saveET.setGravity(Gravity.CENTER);
+        saveET.setSingleLine();
+        saveET.setInputType(EditorInfo.TYPE_CLASS_TEXT);
+        saveET.setImeOptions(EditorInfo.IME_ACTION_DONE);
+        saveET.setSelectAllOnFocus(true);
+        saveET.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    ScreenUtils.hideInput(saveDialog.getCurrentFocus());
+                    saveDialog.dismiss();
+                    String input = saveET.getText().toString();
+                    save(input + ".png", true);
+                }
+                return true;
+            }
+        });
+        saveDialog = new AlertDialog.Builder(getActivity())
+                .setTitle("请输入保存文件名")
+                .setMessage("")
+                .setView(saveET)
+                .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        ScreenUtils.hideInput(saveDialog.getCurrentFocus());
+                        String input = saveET.getText().toString();
+                        save(input + ".png", true);
+                    }
+                }).setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        ScreenUtils.hideInput(saveDialog.getCurrentFocus());
+                    }
+                })
+                .setCancelable(false)
+                .create();
+    }
+
 
     private void initDrawParams() {
         //默认为画笔模式
@@ -169,9 +219,9 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         textPopupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
             @Override
             public void onDismiss() {
-                if (!editText.getText().toString().equals("")) {
+                if (!strokeET.getText().toString().equals("")) {
                     DrawRecord record = new DrawRecord(strokeType);
-                    record.text = editText.getText().toString();
+                    record.text = strokeET.getText().toString();
                 }
             }
         });
@@ -359,7 +409,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         eraserSeekBar = (SeekBar) (popupEraserLayout.findViewById(R.id.stroke_seekbar));
         //文本录入弹窗布局
         popupTextLayout = inflater.inflate(R.layout.popup_sketch_text, null);
-        editText = (EditText) popupTextLayout.findViewById(R.id.text_pupwindow_et);
+        strokeET = (EditText) popupTextLayout.findViewById(R.id.text_pupwindow_et);
         getSketchSize();//计算选择图片弹窗的高宽
     }
 
@@ -381,12 +431,12 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                     sketchViewHeight = height;
                     sketchViewWidth = width;
                     Log.i("onPreDraw", sketchViewHeight + "  " + sketchViewWidth);
-                    decorHight =getActivity().getWindow().getDecorView().getMeasuredHeight();
+                    decorHeight = getActivity().getWindow().getDecorView().getMeasuredHeight();
                     decorWidth =getActivity().getWindow().getDecorView().getMeasuredWidth();
-                    Log.i("onPreDraw", "decor hight:"+decorHight + "   width:" + decorHight);
+                    Log.i("onPreDraw", "decor height:" + decorHeight + "   width:" + decorHeight);
                     int height3 = controlLayout.getMeasuredHeight();
                     int width3 = controlLayout.getMeasuredWidth();
-                    Log.i("onPreDraw", "controlLayout  hight:"+height3 + "   width:" + width3);
+                    Log.i("onPreDraw", "controlLayout  height:" + height3 + "   width:" + width3);
                 }
                 return true;
             }
@@ -447,12 +497,12 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
             mSketchView.setEditMode(SketchView.EDIT_STROKE);
             showBtn(btn_stroke);
         } else if (id == R.id.btn_eraser) {
-            mSketchView.setEditMode(SketchView.EDIT_STROKE);
-            if (mSketchView.getStrokeType() == STROKE_TYPE_ERASER) {
+            if (mSketchView.getEditMode() == SketchView.EDIT_STROKE && mSketchView.getStrokeType() == STROKE_TYPE_ERASER) {
                 showParamsPopupWindow(v, STROKE_TYPE_ERASER);
             } else {
                 mSketchView.setStrokeType(STROKE_TYPE_ERASER);
             }
+            mSketchView.setEditMode(SketchView.EDIT_STROKE);
             showBtn(btn_eraser);
         } else if (id == R.id.btn_undo) {
             mSketchView.undo();
@@ -463,46 +513,33 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         } else if (id == R.id.btn_save) {
             if (mSketchView.getRecordCount() == 0) {
                 Toast.makeText(getActivity(), "您还没有绘图", Toast.LENGTH_SHORT).show();
-                return;
+            } else {
+                showSaveDialog();
             }
-            //保存
-            final EditText et = new EditText(activity);
-            et.setText("新文件名");
-            et.setHint("新文件名");
-            et.setGravity(Gravity.CENTER);
-            et.setSelectAllOnFocus(true);
-            AlertDialog dialog = new AlertDialog.Builder(getActivity())
-                    .setTitle("请输入保存文件名")
-                    .setMessage("")
-                    .setView(et)
-                    .setPositiveButton("确定", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            String input = et.getText().toString();
-                            save(input + ".png", true);
-                        }
-                    })
-                    .show();
-            dialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
-            dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
         } else if (id == R.id.btn_photo) {
-            MultiImageSelector selector = MultiImageSelector.create(getActivity());
-            selector.showCamera(true);
-            selector.count(9);
-            selector.single();
-            selector.origin(mSelectPath);
-            selector.start(this, REQUEST_IMAGE);
+            startMultiImageSelector(REQUEST_IMAGE);
         } else if (id == R.id.btn_background) {
-            MultiImageSelector selector = MultiImageSelector.create(getActivity());
-            selector.showCamera(true);
-            selector.count(9);
-            selector.single();
-            selector.origin(mSelectPath);
-            selector.start(this, REQUEST_BACKGROUND);
+            startMultiImageSelector(REQUEST_BACKGROUND);
         } else if (id == R.id.btn_drag) {
             mSketchView.setEditMode(SketchView.EDIT_PHOTO);
             showBtn(btn_drag);
         }
+    }
+
+    private void startMultiImageSelector(int request) {
+        MultiImageSelector selector = MultiImageSelector.create(getActivity());
+        selector.showCamera(true);
+        selector.count(9);
+        selector.single();
+        selector.origin(mSelectPath);
+        selector.start(this, request);
+    }
+
+    private void showSaveDialog() {
+        saveDialog.show();
+        saveET.setText(TimeUtils.getNowTimeString());
+        saveET.selectAll();
+        ScreenUtils.showInput(mSketchView);
     }
 
     public void setBackgroundByPath(String path) {
@@ -575,7 +612,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     }
 
     private void showTextPopupWindow(View anchor, final DrawRecord record) {
-        editText.requestFocus();
+        strokeET.requestFocus();
         textPopupWindow.showAsDropDown(anchor, record.textOffX, record.textOffY - mSketchView.getHeight());
         textPopupWindow.setSoftInputMode(PopupWindow.INPUT_METHOD_NEEDED);
         InputMethodManager imm = (InputMethodManager) activity
@@ -584,10 +621,10 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         textPopupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
             @Override
             public void onDismiss() {
-                if (!editText.getText().toString().equals("")) {
-                    record.text = editText.getText().toString();
-                    record.textPaint.setTextSize(editText.getTextSize());
-                    record.textWidth = editText.getMaxWidth();
+                if (!strokeET.getText().toString().equals("")) {
+                    record.text = strokeET.getText().toString();
+                    record.textPaint.setTextSize(strokeET.getTextSize());
+                    record.textWidth = strokeET.getMaxWidth();
                     mSketchView.addStrokeRecord(record);
                 }
             }
