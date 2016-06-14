@@ -538,6 +538,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         Rect rect = new Rect();
         mSketchView.getLocalVisibleRect(rect);
         int[] boundsInts = new int[4];
+        //noinspection Range
         mSketchView.getLocationInWindow(boundsInts);
         boundsInts[1] -= ScreenUtils.getStatusBarHeight(activity);
         boundsInts[2] = mSketchView.getWidth();
@@ -564,12 +565,8 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         return mSketchView.getResultBitmap();
     }
 
-    public void saveResultPhotoByPath(String path) {
-        save(path, false);
-    }
-
     public void saveResultPhotoByName(String name) {
-        save(name, false);
+        save(name + ".png", false);
     }
 
     @Override
