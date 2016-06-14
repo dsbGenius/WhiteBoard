@@ -69,7 +69,6 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     int textOffX;
     int textOffY;
 
-    //    RelativeLayout whiteBoardLayout;//画板布局
     SketchView mSketchView;//画板
 
     View controlLayout;//控制布局
