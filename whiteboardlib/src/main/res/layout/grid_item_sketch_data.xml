@@ -22,6 +22,7 @@
         android:layout_height="30dp" />
 
     <ImageView
+        android:id="@+id/grid_delete"
         android:layout_alignRight="@id/grid_image"
         android:layout_alignTop="@id/grid_image"
         android:src="@drawable/grid_delete"
@@ -30,6 +31,7 @@
         android:layout_height="20dp" />
 
     <TextView
+        android:id="@+id/grid_number"
         android:layout_alignRight="@id/grid_image"
         android:layout_alignBottom="@id/grid_image"
         tools:text="3"

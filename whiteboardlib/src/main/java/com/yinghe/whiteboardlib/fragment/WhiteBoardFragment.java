@@ -25,6 +25,7 @@ import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
@@ -93,6 +94,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
 
     EditText saveET;
     AlertDialog saveDialog;
+    GridView sketchGV;
 
     int pupWindowsDPWidth = 300;//弹窗宽度，单位DP
     int strokePupWindowsDPHeight = 275;//画笔弹窗高度，单位DP
@@ -360,8 +362,10 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
 
 
     private void findView(View view) {
+
+        sketchGV = (GridView) view.findViewById(R.id.sketch_data_gv);
+
         //画板整体布局
-//        whiteBoardLayout = (RelativeLayout) view.findViewById(R.id.white_board);
         mSketchView = (SketchView) view.findViewById(R.id.sketch_view);
 
         controlLayout = view.findViewById(R.id.controlLayout);
