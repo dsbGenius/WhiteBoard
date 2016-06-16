@@ -47,6 +47,7 @@ import android.widget.Toast;
 
 import com.yinghe.whiteboardlib.R;
 import com.yinghe.whiteboardlib.Utils.BitmapUtils;
+import com.yinghe.whiteboardlib.Utils.ScreenUtils;
 import com.yinghe.whiteboardlib.bean.DrawRecord;
 
 import java.io.File;
@@ -109,7 +110,6 @@ public class SketchView extends ImageView implements OnTouchListener {
     private Path m_Path;
     private Paint m_Paint;
     private float downX, downY, preX, preY, curX, curY;
-    private float downDistance, curDistance;
     private int mWidth, mHeight;
 
     private List<DrawRecord> photoRecordList = new ArrayList<>();
@@ -128,6 +128,7 @@ public class SketchView extends ImageView implements OnTouchListener {
     private int editMode = EDIT_STROKE;
     private static float SCALE_MAX = 4.0f;
     private static float SCALE_MIN = 0.2f;
+    private static float SCALE_MIN_LEN;
 
     float simpleScale = 0.5f;//图片载入的缩放倍数
     /**
@@ -177,6 +178,7 @@ public class SketchView extends ImageView implements OnTouchListener {
         });
         initPaint();
         invalidate();
+        SCALE_MIN_LEN = ScreenUtils.dip2px(context, 20);
     }
 
     private void initPaint() {
@@ -252,7 +254,7 @@ public class SketchView extends ImageView implements OnTouchListener {
         curY = event.getY();
         switch (event.getAction() & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_POINTER_DOWN:
-                downDistance = spacing(event);
+                float downDistance = spacing(event);
                 if (actionMode == ACTION_DRAG && downDistance > 10)//防止误触
                     actionMode = ACTION_SCALE;
                 break;
@@ -295,11 +297,15 @@ public class SketchView extends ImageView implements OnTouchListener {
     }
 
     private void drawRecord(Canvas canvas) {
+        drawRecord(canvas, true);
+    }
+
+    private void drawRecord(Canvas canvas, boolean isDrawBoard) {
         for (DrawRecord record : photoRecordList) {
             if (record != null)
                 canvas.drawBitmap(record.bitmap, record.matrix, null);
         }
-        if (editMode == EDIT_PHOTO && curPhotoRecord != null) {
+        if (isDrawBoard && editMode == EDIT_PHOTO && curPhotoRecord != null) {
             SCALE_MAX = curPhotoRecord.scaleMax;
             float[] photoCorners = calculateCorners(curPhotoRecord);//计算图片四个角点和中心点
             drawBoard(canvas, photoCorners);//绘制图形边线
@@ -476,7 +482,7 @@ public class SketchView extends ImageView implements OnTouchListener {
         if (markerCopyRect.contains(downPoint[0], (int) downPoint[1])) {//判断是否在区域内
             DrawRecord newRecord = initPhotoRecord(curPhotoRecord.bitmap);
             newRecord.matrix = new Matrix(curPhotoRecord.matrix);
-            newRecord.matrix.postTranslate(BitmapUtils.dip2px(mContext, 20), BitmapUtils.dip2px(mContext, 20));//偏移小段距离以分辨新复制的图片
+            newRecord.matrix.postTranslate(ScreenUtils.dip2px(mContext, 20), ScreenUtils.dip2px(mContext, 20));//偏移小段距离以分辨新复制的图片
             setCurPhotoRecord(newRecord);
             actionMode = ACTION_NONE;
             return true;
@@ -538,7 +544,7 @@ public class SketchView extends ImageView implements OnTouchListener {
         double photoLen = Math.sqrt(Math.pow(curPhotoRecord.photoRectSrc.width(), 2) + Math.pow(curPhotoRecord.photoRectSrc.height(), 2));
         float scaleFactor = detector.getScaleFactor();
         //设置Matrix缩放参数
-        if ((scaleFactor < 1 && len >= photoLen * SCALE_MIN) || (scaleFactor > 1 && len <= photoLen * SCALE_MAX)) {
+        if ((scaleFactor < 1 && len >= photoLen * SCALE_MIN && len >= SCALE_MIN_LEN) || (scaleFactor > 1 && len <= photoLen * SCALE_MAX)) {
             Log.e(scaleFactor + "", scaleFactor + "");
             curPhotoRecord.matrix.postScale(scaleFactor, scaleFactor, photoCorners[8], photoCorners[9]);
         }
@@ -554,7 +560,7 @@ public class SketchView extends ImageView implements OnTouchListener {
 
         //设置Matrix缩放参数
         double photoLen = Math.sqrt(Math.pow(record.photoRectSrc.width(), 2) + Math.pow(record.photoRectSrc.height(), 2));
-        if (a >= photoLen / 2 * SCALE_MIN && a <= photoLen / 2 * SCALE_MAX) {
+        if (a >= photoLen / 2 * SCALE_MIN && a >= SCALE_MIN_LEN && a <= photoLen / 2 * SCALE_MAX) {
             //这种计算方法可以保持旋转图标坐标与触摸点同步缩放
             float scale = a / b;
             record.matrix.postScale(scale, scale, photoCorners[8], photoCorners[9]);
@@ -623,7 +629,7 @@ public class SketchView extends ImageView implements OnTouchListener {
         canvas.setDrawFilter(new PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG));//抗锯齿
         //绘制背景
         drawBackground(canvas);
-        drawRecord(canvas);
+        drawRecord(canvas, false);
         canvas.save(Canvas.ALL_SAVE_FLAG);
         canvas.restore();
 //        newBM.compress(Bitmap.CompressFormat.PNG,80)
@@ -756,7 +762,7 @@ public class SketchView extends ImageView implements OnTouchListener {
         newRecord.matrix.postTranslate(getWidth() / 2 - bitmap.getWidth() / 2, getHeight() / 2 - bitmap.getHeight() / 2);
         newRecord.paint = new Paint();
         newRecord.paint.setColor(Color.GRAY);
-        newRecord.paint.setStrokeWidth(BitmapUtils.dip2px(mContext, 0.8f));
+        newRecord.paint.setStrokeWidth(ScreenUtils.dip2px(mContext, 0.8f));
         newRecord.paint.setStyle(Paint.Style.STROKE);
         return newRecord;
     }
