@@ -7,7 +7,7 @@
         <item name="android:layout_gravity">center</item>
         <item name="android:layout_weight">1</item>
         <item name="android:clickable">true</item>
-        <item name="android:padding">5dp</item>
+        <item name="android:padding">@dimen/control_btn_padding</item>
         <item name="android:background">@drawable/control_btn_bg</item>
     </style>
 

@@ -5,7 +5,8 @@
 
         <FrameLayout
             android:id="@+id/controlLayout"
-            android:layout_width="50dp"
+            android:layout_width="wrap_content"
+
             android:layout_height="match_parent"
             android:layout_alignParentRight="true"
             android:background="@color/gray">
@@ -16,10 +17,13 @@
                 android:background="@color/gray"
                 android:orientation="vertical">
 
+
+                <ImageView style="@style/control_btn" />
+
                 <ImageView
                     android:id="@+id/btn_stroke"
                     style="@style/control_btn"
-                    android:padding="7dp"
+                    android:padding="@dimen/control_btn_padding"
                     android:src="@drawable/stroke_type_rbtn_draw_checked" />
 
                 <ImageView
@@ -40,6 +44,8 @@
                     android:alpha="0.4"
                     android:src="@drawable/ic_redo" />
 
+                <ImageView style="@style/control_btn" />
+
                 <ImageView
                     android:id="@+id/btn_photo"
                     style="@style/control_btn"
@@ -56,6 +62,8 @@
                     android:alpha="0.4"
                     android:src="@drawable/ic_drag" />
 
+                <ImageView style="@style/control_btn" />
+
                 <ImageView
                     android:id="@+id/btn_save"
                     style="@style/control_btn"
@@ -65,6 +73,8 @@
                     android:id="@+id/btn_empty"
                     style="@style/control_btn"
                     android:src="@drawable/ic_empty" />
+
+                <ImageView style="@style/control_btn" />
             </LinearLayout>
 
         </FrameLayout>
