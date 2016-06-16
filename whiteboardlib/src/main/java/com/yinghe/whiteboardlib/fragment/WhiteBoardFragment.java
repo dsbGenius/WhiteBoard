@@ -29,7 +29,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.RadioGroup;
-import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -39,19 +38,19 @@ import com.yinghe.whiteboardlib.R;
 import com.yinghe.whiteboardlib.Utils.BitmapUtils;
 import com.yinghe.whiteboardlib.Utils.ScreenUtils;
 import com.yinghe.whiteboardlib.Utils.TimeUtils;
-import com.yinghe.whiteboardlib.bean.DrawRecord;
+import com.yinghe.whiteboardlib.bean.StrokeRecord;
 import com.yinghe.whiteboardlib.view.SketchView;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 
-import static com.yinghe.whiteboardlib.bean.DrawRecord.STROKE_TYPE_CIRCLE;
-import static com.yinghe.whiteboardlib.bean.DrawRecord.STROKE_TYPE_DRAW;
-import static com.yinghe.whiteboardlib.bean.DrawRecord.STROKE_TYPE_ERASER;
-import static com.yinghe.whiteboardlib.bean.DrawRecord.STROKE_TYPE_LINE;
-import static com.yinghe.whiteboardlib.bean.DrawRecord.STROKE_TYPE_RECTANGLE;
-import static com.yinghe.whiteboardlib.bean.DrawRecord.STROKE_TYPE_TEXT;
+import static com.yinghe.whiteboardlib.bean.StrokeRecord.STROKE_TYPE_CIRCLE;
+import static com.yinghe.whiteboardlib.bean.StrokeRecord.STROKE_TYPE_DRAW;
+import static com.yinghe.whiteboardlib.bean.StrokeRecord.STROKE_TYPE_ERASER;
+import static com.yinghe.whiteboardlib.bean.StrokeRecord.STROKE_TYPE_LINE;
+import static com.yinghe.whiteboardlib.bean.StrokeRecord.STROKE_TYPE_RECTANGLE;
+import static com.yinghe.whiteboardlib.bean.StrokeRecord.STROKE_TYPE_TEXT;
 
 public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawChangedListener, View.OnClickListener {
 
@@ -220,7 +219,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
             @Override
             public void onDismiss() {
                 if (!strokeET.getText().toString().equals("")) {
-                    DrawRecord record = new DrawRecord(strokeType);
+                    StrokeRecord record = new StrokeRecord(strokeType);
                     record.text = strokeET.getText().toString();
                 }
             }
@@ -383,7 +382,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         btn_drag.setOnClickListener(this);
         mSketchView.setTextWindowCallback(new SketchView.TextWindowCallback() {
             @Override
-            public void onText(View anchor, DrawRecord record) {
+            public void onText(View anchor, StrokeRecord record) {
                 textOffX = record.textOffX;
                 textOffY = record.textOffY;
                 showTextPopupWindow(anchor, record);
@@ -618,7 +617,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         }
     }
 
-    private void showTextPopupWindow(View anchor, final DrawRecord record) {
+    private void showTextPopupWindow(View anchor, final StrokeRecord record) {
         strokeET.requestFocus();
         textPopupWindow.showAsDropDown(anchor, record.textOffX, record.textOffY - mSketchView.getHeight());
         textPopupWindow.setSoftInputMode(PopupWindow.INPUT_METHOD_NEEDED);
