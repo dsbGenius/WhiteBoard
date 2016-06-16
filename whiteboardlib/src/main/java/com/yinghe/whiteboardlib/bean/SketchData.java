@@ -14,7 +14,7 @@ public class SketchData {
     public List<StrokeRecord> strokeRedoList;
     public Bitmap backgroundBM;
 
-    SketchData() {
+    public SketchData() {
         strokeRecordList = new ArrayList<>();
         photoRecordList = new ArrayList<>();
         strokeRedoList = new ArrayList<>();

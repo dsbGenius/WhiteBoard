@@ -38,12 +38,14 @@ import com.yinghe.whiteboardlib.R;
 import com.yinghe.whiteboardlib.Utils.BitmapUtils;
 import com.yinghe.whiteboardlib.Utils.ScreenUtils;
 import com.yinghe.whiteboardlib.Utils.TimeUtils;
+import com.yinghe.whiteboardlib.bean.SketchData;
 import com.yinghe.whiteboardlib.bean.StrokeRecord;
 import com.yinghe.whiteboardlib.view.SketchView;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
+import java.util.List;
 
 import static com.yinghe.whiteboardlib.bean.StrokeRecord.STROKE_TYPE_CIRCLE;
 import static com.yinghe.whiteboardlib.bean.StrokeRecord.STROKE_TYPE_DRAW;
@@ -104,6 +106,9 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     private int size;
     private AlertDialog dialog;
     private ArrayList<String> mSelectPath;
+
+    private List<SketchData> sketchDataList = new ArrayList<>();
+
     public static int sketchViewHeight;
     public static int sketchViewWidth;
     public static int sketchViewRight;
@@ -119,7 +124,8 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         activity = getActivity();//初始化上下文
-     }
+
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,

@@ -40,17 +40,17 @@ import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.view.View.OnTouchListener;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.yinghe.whiteboardlib.R;
 import com.yinghe.whiteboardlib.Utils.BitmapUtils;
 import com.yinghe.whiteboardlib.Utils.ScreenUtils;
+import com.yinghe.whiteboardlib.bean.PhotoRecord;
 import com.yinghe.whiteboardlib.bean.SketchData;
 import com.yinghe.whiteboardlib.bean.StrokeRecord;
-import com.yinghe.whiteboardlib.bean.PhotoRecord;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.yinghe.whiteboardlib.bean.StrokeRecord.STROKE_TYPE_CIRCLE;
@@ -61,7 +61,7 @@ import static com.yinghe.whiteboardlib.bean.StrokeRecord.STROKE_TYPE_RECTANGLE;
 import static com.yinghe.whiteboardlib.bean.StrokeRecord.STROKE_TYPE_TEXT;
 
 
-public class SketchView extends ImageView implements OnTouchListener {
+public class SketchView extends View implements OnTouchListener {
 
     public interface TextWindowCallback {
         void onText(View view, StrokeRecord record);
@@ -152,18 +152,17 @@ public class SketchView extends ImageView implements OnTouchListener {
         this.curSketchData = sketchData;
         curPhotoRecordList = sketchData.photoRecordList;
         curStrokeRecordList = sketchData.strokeRecordList;
+        curStrokeRedoList = sketchData.strokeRedoList;
         curBackgroundBM = sketchData.backgroundBM;
         curPhotoRecord = null;
     }
 
     public SketchView(Context context, AttributeSet attr) {
         super(context, attr);
-
         this.mContext = context;
+        setSketchData(new SketchData());
 
-        setFocusable(true);
-        setFocusableInTouchMode(true);
-        setBackgroundColor(Color.WHITE);
+
 
         this.setOnTouchListener(this);
         mScaleGestureDetector = new ScaleGestureDetector(context, new ScaleGestureDetector.OnScaleGestureListener() {
@@ -189,6 +188,11 @@ public class SketchView extends ImageView implements OnTouchListener {
     }
 
     private void initParams(Context context) {
+
+        setFocusable(true);
+        setFocusableInTouchMode(true);
+        setBackgroundColor(Color.WHITE);
+
         strokePaint = new Paint();
         strokePaint.setAntiAlias(true);
         strokePaint.setDither(true);
@@ -300,33 +304,36 @@ public class SketchView extends ImageView implements OnTouchListener {
     }
 
     private void drawRecord(Canvas canvas, boolean isDrawBoard) {
-        for (PhotoRecord record : curPhotoRecordList) {
-            if (record != null)
-                canvas.drawBitmap(record.bitmap, record.matrix, null);
-        }
-        if (isDrawBoard && editMode == EDIT_PHOTO && curPhotoRecord != null) {
-            SCALE_MAX = curPhotoRecord.scaleMax;
-            float[] photoCorners = calculateCorners(curPhotoRecord);//计算图片四个角点和中心点
-            drawBoard(canvas, photoCorners);//绘制图形边线
-            drawMarks(canvas, photoCorners);//绘制边角图片
-        }
-        for (StrokeRecord record : curStrokeRecordList) {
-            int type = record.type;
-            if (type == StrokeRecord.STROKE_TYPE_ERASER || type == StrokeRecord.STROKE_TYPE_DRAW || type == StrokeRecord.STROKE_TYPE_LINE) {
-                canvas.drawPath(record.path, record.paint);
-            } else if (type == STROKE_TYPE_CIRCLE) {
-                canvas.drawOval(record.rect, record.paint);
-            } else if (type == STROKE_TYPE_RECTANGLE) {
-                canvas.drawRect(record.rect, record.paint);
-            } else if (type == STROKE_TYPE_TEXT) {
-                if (record.text != null) {
-                    StaticLayout layout = new StaticLayout(record.text, record.textPaint, record.textWidth, Layout.Alignment.ALIGN_NORMAL, 1.0F, 0.0F, true);
-                    canvas.translate(record.textOffX, record.textOffY);
-                    layout.draw(canvas);
-                    canvas.translate(-record.textOffX, -record.textOffY);
+        if (curSketchData != null) {
+            for (PhotoRecord record : curPhotoRecordList) {
+                if (record != null)
+                    canvas.drawBitmap(record.bitmap, record.matrix, null);
+            }
+            if (isDrawBoard && editMode == EDIT_PHOTO && curPhotoRecord != null) {
+                SCALE_MAX = curPhotoRecord.scaleMax;
+                float[] photoCorners = calculateCorners(curPhotoRecord);//计算图片四个角点和中心点
+                drawBoard(canvas, photoCorners);//绘制图形边线
+                drawMarks(canvas, photoCorners);//绘制边角图片
+            }
+            for (StrokeRecord record : curStrokeRecordList) {
+                int type = record.type;
+                if (type == StrokeRecord.STROKE_TYPE_ERASER || type == StrokeRecord.STROKE_TYPE_DRAW || type == StrokeRecord.STROKE_TYPE_LINE) {
+                    canvas.drawPath(record.path, record.paint);
+                } else if (type == STROKE_TYPE_CIRCLE) {
+                    canvas.drawOval(record.rect, record.paint);
+                } else if (type == STROKE_TYPE_RECTANGLE) {
+                    canvas.drawRect(record.rect, record.paint);
+                } else if (type == STROKE_TYPE_TEXT) {
+                    if (record.text != null) {
+                        StaticLayout layout = new StaticLayout(record.text, record.textPaint, record.textWidth, Layout.Alignment.ALIGN_NORMAL, 1.0F, 0.0F, true);
+                        canvas.translate(record.textOffX, record.textOffY);
+                        layout.draw(canvas);
+                        canvas.translate(-record.textOffX, -record.textOffY);
+                    }
                 }
             }
         }
+
     }
 
     private void drawBoard(Canvas canvas, float[] photoCorners) {
@@ -654,16 +661,16 @@ public class SketchView extends ImageView implements OnTouchListener {
 
 
     public int getRedoCount() {
-        return curStrokeRedoList.size();
+        return curStrokeRedoList != null ? curStrokeRedoList.size() : 0;
     }
 
 
     public int getRecordCount() {
-        return curStrokeRecordList.size() + curPhotoRecordList.size();
+        return (curStrokeRecordList != null && curPhotoRecordList != null) ? curStrokeRecordList.size() + curPhotoRecordList.size() : 0;
     }
 
     public int getStrokeRecordCount() {
-        return curStrokeRecordList.size();
+        return curStrokeRecordList != null ? curStrokeRecordList.size() : 0;
     }
 
 
