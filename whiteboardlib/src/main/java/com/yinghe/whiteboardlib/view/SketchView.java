@@ -633,7 +633,6 @@ public class SketchView extends View implements OnTouchListener {
         drawRecord(canvas, false);
         canvas.save(Canvas.ALL_SAVE_FLAG);
         canvas.restore();
-//        newBM.compress(Bitmap.CompressFormat.PNG,80)
         return newBM;
     }
     /*

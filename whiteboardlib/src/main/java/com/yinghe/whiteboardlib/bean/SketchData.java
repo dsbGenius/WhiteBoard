@@ -20,4 +20,5 @@ public class SketchData {
         strokeRedoList = new ArrayList<>();
         backgroundBM = null;
     }
+
 }

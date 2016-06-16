@@ -681,6 +681,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
 
                         dialog.dismiss();
                         return "保存手绘成功" + filePath;
+
                     } catch (Exception e) {
 
                         dialog.dismiss();
