@@ -73,8 +73,8 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     private static final float BTN_ALPHA = 0.4f;
 
     //文件保存目录
-    private static final String TEMP_FILE_PATH = Environment.getExternalStorageDirectory().toString() + "/YingHe/photo";
-    private static final String FILE_PATH = Environment.getExternalStorageDirectory().toString() + "/YingHe/temp";
+    private static final String TEMP_FILE_PATH = Environment.getExternalStorageDirectory().toString() + "/YingHe/temp";
+    private static final String FILE_PATH = Environment.getExternalStorageDirectory().toString() + "/YingHe/sketchPhoto";
     private static final String TEMP_FILE_NAME = "temp_";
 
     int keyboardHeight;
@@ -99,8 +99,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     ImageView btn_send_space;//推送按钮间隔
 
 
-
-    RadioGroup strokeTypeRG,strokeColorRG;
+    RadioGroup strokeTypeRG, strokeColorRG;
 
     Activity activity;//上下文
 
@@ -210,7 +209,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                     ScreenUtils.hideInput(saveDialog.getCurrentFocus());
                     saveDialog.dismiss();
                     String input = saveET.getText().toString();
-                    save(input + ".png", true);
+                    saveInUI(input + ".png", true);
                 }
                 return true;
             }
@@ -224,7 +223,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                     public void onClick(DialogInterface dialog, int which) {
                         ScreenUtils.hideInput(saveDialog.getCurrentFocus());
                         String input = saveET.getText().toString();
-                        save(input + ".png", true);
+                        saveInUI(input + ".png", true);
                     }
                 }).setNegativeButton("取消", new DialogInterface.OnClickListener() {
                     @Override
@@ -246,6 +245,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         assert circleDrawable != null;
         size = circleDrawable.getIntrinsicWidth();
     }
+
     private void initPopupWindows() {
         initStrokePop();
         initEraserPop();
@@ -327,7 +327,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                 } else if (checkedId == R.id.stroke_type_rbtn_rectangle) {
                     strokeType = STROKE_TYPE_RECTANGLE;
                     resId = R.drawable.stroke_type_rbtn_rectangle_checked;
-                }else if (checkedId == R.id.stroke_type_rbtn_text) {
+                } else if (checkedId == R.id.stroke_type_rbtn_text) {
                     strokeType = STROKE_TYPE_TEXT;
                     resId = R.drawable.stroke_type_rbtn_text_checked;
                 }
@@ -473,10 +473,12 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     public void onResume() {
         super.onResume();
     }
+
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
-       getSketchSize();
+        getSketchSize();
     }
+
     private void getSketchSize() {
         ViewTreeObserver vto = mSketchView.getViewTreeObserver();
         vto.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
@@ -490,7 +492,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                     sketchViewBottom = mSketchView.getBottom();
                     Log.i("onPreDraw", sketchViewHeight + "  " + sketchViewWidth);
                     decorHeight = getActivity().getWindow().getDecorView().getMeasuredHeight();
-                    decorWidth =getActivity().getWindow().getDecorView().getMeasuredWidth();
+                    decorWidth = getActivity().getWindow().getDecorView().getMeasuredWidth();
                     Log.i("onPreDraw", "decor height:" + decorHeight + "   width:" + decorHeight);
                     int height3 = controlLayout.getMeasuredHeight();
                     int width3 = controlLayout.getMeasuredWidth();
@@ -583,9 +585,13 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
             showBtn(btn_drag);
         } else if (id == R.id.btn_send) {
             if (sendBtnCallback != null) {
-                String fileName = TEMP_FILE_PATH + TEMP_FILE_NAME + dataPosition;
-                save(fileName, false);
-//                sendBtnCallback.onSendBtnClick();
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        String photoName = TEMP_FILE_NAME + dataPosition + ".png";
+                        sendBtnCallback.onSendBtnClick(saveInOI(TEMP_FILE_PATH, photoName));
+                    }
+                }).start();
             }
         }
     }
@@ -627,10 +633,6 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         return mSketchView.getResultBitmap();
     }
 
-    public void saveResultPhotoByName(String name) {
-        save(name + ".png", false);
-    }
-
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_IMAGE) {
@@ -647,7 +649,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                 mSketchView.setEditMode(SketchView.EDIT_PHOTO);
                 showBtn(btn_drag);
             }
-        }else if (requestCode ==REQUEST_BACKGROUND){//设置背景成功
+        } else if (requestCode == REQUEST_BACKGROUND) {//设置背景成功
             if (resultCode == getActivity().RESULT_OK) {
                 mSelectPath = data.getStringArrayListExtra(MultiImageSelector.EXTRA_RESULT);
                 String path = "";
@@ -659,7 +661,6 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                 mSketchView.setBackgroundByPath(path);
                 Log.i("imgPath", path);
                 //加载图片设置画板背景
-
             }
         }
     }
@@ -701,61 +702,68 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     }
 
 
-    public void save(final String imgName, boolean isToast) {
-        save(FILE_PATH, imgName, isToast);
-    }
-
-    public void save(final String filePath, final String imgName, boolean isToast) {
-        dialog = new AlertDialog.Builder(activity)
-                .setTitle("保存手绘")
-                .setMessage("保存中...")
-                .show();
-        final Bitmap newBM = mSketchView.getResultBitmap();
-
+    private void saveInUI(final String imgName, final boolean isToast) {
         new AsyncTask() {
 
             @Override
+            protected void onPreExecute() {
+                super.onPreExecute();
+                dialog = new AlertDialog.Builder(activity)
+                        .setTitle("保存画板")
+                        .setMessage("保存中...")
+                        .show();
+            }
+
+            @Override
             protected Object doInBackground(Object[] params) {
-
-                if (newBM != null) {
-                    try {
-                        File dir = new File(filePath);
-                        if (!dir.exists()) {
-                            dir.mkdirs();
-                        }
-                        File f = new File(filePath, imgName);
-                        if (!f.exists()) {
-                            f.createNewFile();
-                        } else {
-                            f.delete();
-                        }
-                        FileOutputStream out = new FileOutputStream(f);
-                        newBM.compress(Bitmap.CompressFormat.PNG, 90, out);
-                        out.close();
-
-                        dialog.dismiss();
-                        return "保存手绘成功" + filePath;
-
-                    } catch (Exception e) {
-
-                        dialog.dismiss();
-                        Log.i("AAA", e.getMessage());
-                        return "保存手绘失败" + e.getMessage();
-                    }
-                }
-
-                return null;
-                }
+                return saveInOI(FILE_PATH, imgName);
+            }
 
             @Override
             protected void onPostExecute(Object o) {
                 super.onPostExecute(o);
-
-                Toast.makeText(getActivity(), (String) o, Toast.LENGTH_SHORT).show();
-
+                if (isToast) {
+                    if (o != null)
+                        Toast.makeText(getActivity(), (String) o, Toast.LENGTH_SHORT).show();
+                    else
+                        Toast.makeText(getActivity(), "保存失败！", Toast.LENGTH_SHORT).show();
+                }
+                dialog.dismiss();
             }
         }.execute("");
+    }
 
+    /**
+     * @param filePath 文件保存路径
+     * @param imgName  文件名
+     * @return 返回保存的图片路径
+     * @author TangentLu
+     * create at 16/6/17 上午11:18
+     * @summary 保存图片到本地文件，耗时操作
+     */
+    public String saveInOI(final String filePath, String imgName) {
+        if (!imgName.contains(".png")) {
+            imgName += ".png";
+        }
+        final Bitmap newBM = mSketchView.getResultBitmap();
+        try {
+            File dir = new File(filePath);
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
+            File f = new File(filePath, imgName);
+            if (!f.exists()) {
+                f.createNewFile();
+            } else {
+                f.delete();
+            }
+            FileOutputStream out = new FileOutputStream(f);
+            newBM.compress(Bitmap.CompressFormat.PNG, 90, out);
+            out.close();
+            return f.getAbsolutePath().toString();
+        } catch (Exception e) {
+            return null;
+        }
     }
 
 

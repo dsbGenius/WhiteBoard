@@ -3,7 +3,9 @@ package com.yinghe.testwb;
 import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -39,7 +41,10 @@ public class MainActivity extends AppCompatActivity {
         ts.add(R.id.fl_main, WhiteBoardFragment.newInstance(new WhiteBoardFragment.SendBtnCallback() {
             @Override
             public void onSendBtnClick(String filePath) {
-
+                Log.e("11", "onSendBtnClick: " + filePath);
+                Looper.prepare();
+                Toast.makeText(MainActivity.this, filePath, Toast.LENGTH_SHORT).show();
+                Looper.loop();
             }
         }), "wb").commit();
     }

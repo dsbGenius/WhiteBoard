@@ -30,7 +30,7 @@ public class TimeUtils {
     }
 
     public static String getNowTimeString() {
-        SimpleDateFormat sDateFormat = new SimpleDateFormat("yyyy-MM-dd_hh:mm:ss");
+        SimpleDateFormat sDateFormat = new SimpleDateFormat("yyyy-MM-dd_hhmmss");
         return sDateFormat.format(new java.util.Date());
     }
 }
