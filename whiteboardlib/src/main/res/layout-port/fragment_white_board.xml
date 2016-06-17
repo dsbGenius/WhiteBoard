@@ -1,6 +1,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
     android:background="#FFFFFF">
 
         <FrameLayout
@@ -21,6 +22,10 @@
             android:layout_height="50dp"
             android:layout_alignParentBottom="true"
             android:background="@color/gray"
+            android:paddingLeft="@dimen/control_layout_padding"
+            android:paddingRight="@dimen/control_layout_padding"
+            android:paddingTop="@dimen/control_btn_padding"
+            android:paddingBottom="@dimen/control_btn_padding"
             android:orientation="horizontal">
 
             <LinearLayout
@@ -29,9 +34,18 @@
                 android:background="@color/gray">
 
                 <ImageView
+                    android:id="@+id/btn_add"
+                    tools:visibility="visible"
+                    android:visibility="gone"
+                    style="@style/control_btn"
+                    android:src="@drawable/ic_add" />
+
+                <ImageView style="@style/control_btn" />
+
+                <ImageView
                     android:id="@+id/btn_stroke"
                     style="@style/control_btn"
-                    android:padding="7dp"
+                    android:padding="@dimen/control_btn_padding"
                     android:src="@drawable/stroke_type_rbtn_draw_checked" />
 
                 <ImageView
@@ -52,6 +66,8 @@
                     android:alpha="0.4"
                     android:src="@drawable/ic_redo" />
 
+                <ImageView style="@style/control_btn" />
+
                 <ImageView
                     android:id="@+id/btn_photo"
                     style="@style/control_btn"
@@ -68,6 +84,8 @@
                     android:alpha="0.4"
                     android:src="@drawable/ic_drag" />
 
+                <ImageView style="@style/control_btn" />
+
                 <ImageView
                     android:id="@+id/btn_save"
                     style="@style/control_btn"
@@ -77,6 +95,18 @@
                     android:id="@+id/btn_empty"
                     style="@style/control_btn"
                     android:src="@drawable/ic_empty" />
+
+                <ImageView
+                    android:id="@id/btn_teacher_space"
+                    style="@style/control_btn" />
+
+                <ImageView
+                    android:id="@+id/btn_teacher"
+                    tools:visibility="visible"
+                    android:visibility="gone"
+                    style="@style/control_btn"
+                    android:layout_weight="1"
+                    android:src="@drawable/ic_teacher" />
             </LinearLayout>
         </FrameLayout>
 

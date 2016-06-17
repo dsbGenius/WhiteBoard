@@ -83,7 +83,9 @@
                     style="@style/control_btn"
                     android:src="@drawable/ic_empty" />
 
-                <ImageView style="@style/control_btn" />
+                <ImageView
+                    android:id="@id/btn_teacher_space"
+                    style="@style/control_btn" />
 
                 <ImageView
                     android:id="@+id/btn_teacher"
