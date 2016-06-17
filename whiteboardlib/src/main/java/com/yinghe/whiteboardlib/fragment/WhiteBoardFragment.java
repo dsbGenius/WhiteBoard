@@ -40,6 +40,7 @@ import com.yinghe.whiteboardlib.R;
 import com.yinghe.whiteboardlib.Utils.BitmapUtils;
 import com.yinghe.whiteboardlib.Utils.ScreenUtils;
 import com.yinghe.whiteboardlib.Utils.TimeUtils;
+import com.yinghe.whiteboardlib.adapter.SketchDataGridAdapter;
 import com.yinghe.whiteboardlib.bean.SketchData;
 import com.yinghe.whiteboardlib.bean.StrokeRecord;
 import com.yinghe.whiteboardlib.view.SketchView;
@@ -58,6 +59,8 @@ import static com.yinghe.whiteboardlib.bean.StrokeRecord.STROKE_TYPE_TEXT;
 
 public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawChangedListener, View.OnClickListener {
 
+    public final String TAG = getClass().getSimpleName();
+
     public interface SendBtnCallback {
         void onSendBtnClick(String filePath);
     }
@@ -73,9 +76,9 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     private static final float BTN_ALPHA = 0.4f;
 
     //文件保存目录
-    private static final String TEMP_FILE_PATH = Environment.getExternalStorageDirectory().toString() + "/YingHe/temp";
-    private static final String FILE_PATH = Environment.getExternalStorageDirectory().toString() + "/YingHe/sketchPhoto";
-    private static final String TEMP_FILE_NAME = "temp_";
+    public static final String TEMP_FILE_PATH = Environment.getExternalStorageDirectory().toString() + "/YingHe/temp/";
+    public static final String FILE_PATH = Environment.getExternalStorageDirectory().toString() + "/YingHe/sketchPhoto/";
+    public static final String TEMP_FILE_NAME = "temp_";
 
     int keyboardHeight;
     int textOffX;
@@ -109,6 +112,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     EditText saveET;
     AlertDialog saveDialog;
     GridView sketchGV;
+    SketchDataGridAdapter sketchGVAdapter;
 
     int pupWindowsDPWidth = 300;//弹窗宽度，单位DP
     int strokePupWindowsDPHeight = 275;//画笔弹窗高度，单位DP
@@ -127,6 +131,8 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     private ArrayList<String> mSelectPath;
 
     private List<SketchData> sketchDataList = new ArrayList<>();
+    private SketchData curSketchData;
+    private List<String> sketchPathList = new ArrayList<>();
     private int dataPosition;
 
 
@@ -191,7 +197,26 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         initDrawParams();//初始化绘画参数
         initPopupWindows();//初始化弹框
         initSaveDialog();
+        initData();
+        initSketchGV();
         return rootView;
+    }
+
+    private void initData() {
+        curSketchData = new SketchData();
+        sketchDataList.add(curSketchData);
+        mSketchView.setSketchData(curSketchData);
+    }
+
+    private void initSketchGV() {
+        sketchGVAdapter = new SketchDataGridAdapter(activity, sketchDataList, new SketchDataGridAdapter.OnDeleteCallback() {
+            @Override
+            public void onDeleteCallback(int position) {
+                sketchDataList.remove(position);
+                sketchGVAdapter.notifyDataSetChanged();
+            }
+        });
+        sketchGV.setAdapter(sketchGVAdapter);
     }
 
     private void initSaveDialog() {
@@ -533,10 +558,28 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
             btn_redo.setAlpha(0.4f);
     }
 
+    private void updateGV() {
+        sketchGVAdapter.notifyDataSetChanged();
+    }
     @Override
     public void onClick(View v) {
         int id = v.getId();
-        if (id == R.id.btn_stroke) {
+        if (id == R.id.btn_add) {
+            if (mSketchView.getVisibility() == View.VISIBLE) {
+                mSketchView.setVisibility(View.GONE);
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        String photoName = TEMP_FILE_NAME + dataPosition + "666.png";
+                        String photoAbsName = saveInOI(TEMP_FILE_PATH, photoName);
+                        curSketchData.filePath = photoAbsName;
+                    }
+                }).start();
+            } else {
+                mSketchView.setVisibility(View.VISIBLE);
+            }
+            updateGV();
+        } else if (id == R.id.btn_stroke) {
             if (mSketchView.getEditMode() == SketchView.EDIT_STROKE && mSketchView.getStrokeType() != STROKE_TYPE_ERASER) {
                 showParamsPopupWindow(v, STROKE_TYPE_DRAW);
             } else {

@@ -7,7 +7,7 @@
 
     <ImageView
         android:layout_centerVertical="true"
-        android:id="@+id/grid_image"
+        android:id="@+id/grid_sketch"
         tools:src="@android:color/holo_blue_light"
         android:layout_gravity="center_vertical"
         android:scaleType="centerInside"
@@ -15,16 +15,16 @@
         android:layout_height="@dimen/grid_width" />
 
     <ImageView
-        android:layout_alignRight="@id/grid_image"
-        android:layout_alignBottom="@id/grid_image"
+        android:layout_alignRight="@id/grid_sketch"
+        android:layout_alignBottom="@id/grid_sketch"
         android:src="@drawable/grid_corner"
         android:layout_width="30dp"
         android:layout_height="30dp" />
 
     <ImageView
         android:id="@+id/grid_delete"
-        android:layout_alignRight="@id/grid_image"
-        android:layout_alignTop="@id/grid_image"
+        android:layout_alignRight="@id/grid_sketch"
+        android:layout_alignTop="@id/grid_sketch"
         android:src="@drawable/grid_delete"
         android:padding="2dp"
         android:layout_width="20dp"
@@ -32,8 +32,8 @@
 
     <TextView
         android:id="@+id/grid_number"
-        android:layout_alignRight="@id/grid_image"
-        android:layout_alignBottom="@id/grid_image"
+        android:layout_alignRight="@id/grid_sketch"
+        android:layout_alignBottom="@id/grid_sketch"
         tools:text="3"
         android:gravity="center"
         android:textColor="@android:color/white"

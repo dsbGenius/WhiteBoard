@@ -4,11 +4,18 @@
         android:layout_height="match_parent"
         android:background="#efeded">
 
+
+        <GridView
+            android:id="@+id/sketch_data_gv"
+            android:visibility="visible"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:numColumns="4"
+            android:background="#000000" />
         <com.yinghe.whiteboardlib.view.SketchView
             android:id="@+id/sketch_view"
             android:layout_marginLeft="0dp"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="center" />
-
 </FrameLayout>

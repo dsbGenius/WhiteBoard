@@ -108,7 +108,7 @@
 
             <include layout="@layout/include_draw_content_layout" />
 
-            <include layout="@layout/include_grid_view_layout" />
+            <!--<include layout="@layout/include_grid_view_layout" />-->
         </FrameLayout>
 
     </RelativeLayout>

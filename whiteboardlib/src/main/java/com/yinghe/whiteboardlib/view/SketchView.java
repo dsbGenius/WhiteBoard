@@ -161,9 +161,6 @@ public class SketchView extends View implements OnTouchListener {
         super(context, attr);
         this.mContext = context;
         setSketchData(new SketchData());
-
-
-
         this.setOnTouchListener(this);
         mScaleGestureDetector = new ScaleGestureDetector(context, new ScaleGestureDetector.OnScaleGestureListener() {
             @Override
