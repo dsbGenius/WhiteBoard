@@ -23,8 +23,6 @@
 
                 <ImageView
                     android:id="@+id/btn_add"
-                    tools:visibility="visible"
-                    android:visibility="gone"
                     style="@style/control_btn"
                     android:src="@drawable/ic_add" />
                 <ImageView style="@style/control_btn" />
@@ -84,7 +82,9 @@
                     android:src="@drawable/ic_empty" />
 
                 <ImageView
-                    android:id="@id/btn_teacher_space"
+                    android:id="@+id/btn_teacher_space"
+                    android:visibility="gone"
+                    tools:visibility="visible"
                     style="@style/control_btn" />
 
                 <ImageView

@@ -1,113 +1,113 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:tools="http://schemas.android.com/tools"
     android:background="#FFFFFF">
 
-        <FrameLayout
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/controlLayout"
+        android:background="#efeded">
+
+        <include layout="@layout/include_draw_content_layout" />
+
+        <include layout="@layout/include_grid_view_layout" />
+
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/controlLayout"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_alignParentBottom="true"
+        android:background="@color/gray">
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_above="@id/controlLayout"
-            android:background="#efeded">
-
-            <include layout="@layout/include_draw_content_layout" />
-
-            <include layout="@layout/include_grid_view_layout" />
-
-        </FrameLayout>
-
-        <FrameLayout
-            android:id="@+id/controlLayout"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:layout_alignParentBottom="true"
             android:background="@color/gray"
+            android:paddingBottom="@dimen/control_btn_padding"
+            android:orientation="horizontal"
             android:paddingLeft="@dimen/control_layout_padding"
             android:paddingRight="@dimen/control_layout_padding"
-            android:paddingTop="@dimen/control_btn_padding"
-            android:paddingBottom="@dimen/control_btn_padding"
-            android:orientation="horizontal">
+            android:paddingTop="@dimen/control_btn_padding">
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@color/gray">
+            <ImageView
+                android:id="@+id/btn_add"
+                style="@style/control_btn"
+                android:src="@drawable/ic_add" />
 
-                <ImageView
-                    android:id="@+id/btn_add"
-                    tools:visibility="visible"
-                    android:visibility="gone"
-                    style="@style/control_btn"
-                    android:src="@drawable/ic_add" />
+            <ImageView style="@style/control_btn.space" />
 
-                <ImageView style="@style/control_btn" />
+            <ImageView
+                android:id="@+id/btn_stroke"
+                style="@style/control_btn"
+                android:padding="@dimen/control_btn_padding"
+                android:src="@drawable/stroke_type_rbtn_draw_checked" />
 
-                <ImageView
-                    android:id="@+id/btn_stroke"
-                    style="@style/control_btn"
-                    android:padding="@dimen/control_btn_padding"
-                    android:src="@drawable/stroke_type_rbtn_draw_checked" />
+            <ImageView
+                android:id="@+id/btn_eraser"
+                style="@style/control_btn"
+                android:alpha="0.4"
+                android:src="@drawable/ic_eraser" />
 
-                <ImageView
-                    android:id="@+id/btn_eraser"
-                    style="@style/control_btn"
-                    android:alpha="0.4"
-                    android:src="@drawable/ic_eraser" />
+            <ImageView
+                android:id="@+id/btn_undo"
+                style="@style/control_btn"
+                android:alpha="0.4"
+                android:src="@drawable/ic_undo" />
 
-                <ImageView
-                    android:id="@+id/btn_undo"
-                    style="@style/control_btn"
-                    android:alpha="0.4"
-                    android:src="@drawable/ic_undo" />
+            <ImageView
+                android:id="@+id/btn_redo"
+                style="@style/control_btn"
+                android:alpha="0.4"
+                android:src="@drawable/ic_redo" />
 
-                <ImageView
-                    android:id="@+id/btn_redo"
-                    style="@style/control_btn"
-                    android:alpha="0.4"
-                    android:src="@drawable/ic_redo" />
+            <ImageView style="@style/control_btn.space" />
 
-                <ImageView style="@style/control_btn" />
+            <ImageView
+                android:id="@+id/btn_photo"
+                style="@style/control_btn"
+                android:src="@drawable/ic_photo" />
 
-                <ImageView
-                    android:id="@+id/btn_photo"
-                    style="@style/control_btn"
-                    android:src="@drawable/ic_photo" />
+            <ImageView
+                android:id="@+id/btn_background"
+                style="@style/control_btn"
+                android:src="@drawable/ic_background" />
 
-                <ImageView
-                    android:id="@+id/btn_background"
-                    style="@style/control_btn"
-                    android:src="@drawable/ic_background" />
+            <ImageView
+                android:id="@+id/btn_drag"
+                style="@style/control_btn"
+                android:alpha="0.4"
+                android:src="@drawable/ic_drag" />
 
-                <ImageView
-                    android:id="@+id/btn_drag"
-                    style="@style/control_btn"
-                    android:alpha="0.4"
-                    android:src="@drawable/ic_drag" />
+            <ImageView style="@style/control_btn.space" />
 
-                <ImageView style="@style/control_btn" />
+            <ImageView
+                android:id="@+id/btn_save"
+                style="@style/control_btn"
+                android:src="@drawable/ic_file" />
 
-                <ImageView
-                    android:id="@+id/btn_save"
-                    style="@style/control_btn"
-                    android:src="@drawable/ic_file" />
+            <ImageView
+                android:id="@+id/btn_empty"
+                style="@style/control_btn"
+                android:src="@drawable/ic_empty" />
 
-                <ImageView
-                    android:id="@+id/btn_empty"
-                    style="@style/control_btn"
-                    android:src="@drawable/ic_empty" />
+            <ImageView
+                android:id="@+id/btn_teacher_space"
+                style="@style/control_btn.space"
+                android:visibility="gone"
+                tools:visibility="visible" />
 
-                <ImageView
-                    android:id="@id/btn_teacher_space"
-                    style="@style/control_btn" />
+            <ImageView
+                android:id="@+id/btn_teacher"
+                style="@style/control_btn"
+                android:layout_weight="1"
+                android:src="@drawable/ic_teacher"
+                android:visibility="gone"
+                tools:visibility="visible" />
+        </LinearLayout>
+    </FrameLayout>
 
-                <ImageView
-                    android:id="@+id/btn_teacher"
-                    tools:visibility="visible"
-                    android:visibility="gone"
-                    style="@style/control_btn"
-                    android:layout_weight="1"
-                    android:src="@drawable/ic_teacher" />
-            </LinearLayout>
-        </FrameLayout>
-
-    </RelativeLayout>
+</RelativeLayout>

@@ -11,6 +11,10 @@
         <item name="android:background">@drawable/control_btn_bg</item>
     </style>
 
+    <style name="control_btn.space">
+        <item name="android:clickable">false</item>
+    </style>
+
     <style name="control_btn.action" >
         <item name="android:padding">10dp</item>
     </style>
