@@ -43,7 +43,7 @@
             <ImageView
                 android:id="@+id/btn_stroke"
                 style="@style/control_btn"
-                android:padding="@dimen/control_btn_padding"
+                android:padding="@dimen/control_draw_padding"
                 android:src="@drawable/stroke_type_rbtn_draw_checked" />
 
             <ImageView
