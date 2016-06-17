@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.yinghe.whiteboardlib.fragment.WhiteBoardFragment;
 
@@ -35,7 +36,12 @@ public class MainActivity extends AppCompatActivity {
 
 
         FragmentTransaction ts = getFragmentManager().beginTransaction();
-        ts.add(R.id.fl_main, WhiteBoardFragment.newInstance(), "wb").commit();
+        ts.add(R.id.fl_main, WhiteBoardFragment.newInstance(new WhiteBoardFragment.SendBtnCallback() {
+            @Override
+            public void onSendBtnClick(String filePath) {
+
+            }
+        }), "wb").commit();
     }
 
     @Override

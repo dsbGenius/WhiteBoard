@@ -83,13 +83,13 @@
                     android:src="@drawable/ic_empty" />
 
                 <ImageView
-                    android:id="@+id/btn_teacher_space"
+                    android:id="@+id/btn_send_space"
                     android:visibility="gone"
                     tools:visibility="visible"
                     style="@style/control_btn.space" />
 
                 <ImageView
-                    android:id="@+id/btn_teacher"
+                    android:id="@+id/btn_send"
                     tools:visibility="visible"
                     android:visibility="gone"
                     style="@style/control_btn"
