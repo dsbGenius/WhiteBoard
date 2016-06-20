@@ -9,7 +9,7 @@
         android:layout_centerVertical="true"
         android:id="@+id/grid_sketch"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/grid_width" />
+        android:layout_height="match_parent" />
 
     <ImageView
         android:layout_alignRight="@id/grid_sketch"

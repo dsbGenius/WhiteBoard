@@ -4,20 +4,18 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
 import android.widget.BaseAdapter;
+import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.squareup.picasso.Picasso;
 import com.yinghe.whiteboardlib.R;
 import com.yinghe.whiteboardlib.Utils.ScreenUtils;
-import com.yinghe.whiteboardlib.bean.Image;
 import com.yinghe.whiteboardlib.bean.SketchData;
-import com.yinghe.whiteboardlib.view.SketchView;
 
 import java.util.List;
 
@@ -26,11 +24,12 @@ import java.util.List;
  */
 public class SketchDataGridAdapter extends BaseAdapter {
 
+
     public interface OnDeleteCallback {
         void onDeleteCallback(int position);
     }
 
-    int itemHeight;
+    float ratio;
 
 
     List<SketchData> sketchDataList;
@@ -41,7 +40,7 @@ public class SketchDataGridAdapter extends BaseAdapter {
 
     public SketchDataGridAdapter(Context context, List<SketchData> sketchDataList, OnDeleteCallback onDeleteCallback) {
         this.mContext = context;
-        itemHeight = ScreenUtils.getScreenSize(context).y / 4;
+        ratio = (float) ScreenUtils.getScreenSize(context).x / ScreenUtils.getScreenSize(context).y;
         mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         this.onDeleteCallback = onDeleteCallback;
         this.sketchDataList = sketchDataList;
@@ -54,7 +53,6 @@ public class SketchDataGridAdapter extends BaseAdapter {
 
     @Override
     public Bitmap getItem(int position) {
-//        return sketchDataList.get(position);
         return sketchDataList.get(position).thumbnailBM;
     }
 
@@ -81,32 +79,25 @@ public class SketchDataGridAdapter extends BaseAdapter {
             convertView = view;
         } else {
             holder = (ViewHolder) convertView.getTag();
+            ViewGroup.LayoutParams layoutParams = convertView.getLayoutParams();
+            layoutParams.height = (int) (layoutParams.width * ratio);
         }
         showData(holder, position);
         return convertView;
     }
 
     private void showData(ViewHolder holder, int position) {
-//        Picasso.with(mContext)
-//                .load(getItem(position).thumbnailFile)
-//                .placeholder(R.drawable.default_error)
-//                .tag("aa")
-////                .resize(holder.sketchIV.getWidth(), holder.sketchIV.getHeight())
-//                .resize(200, 200)
-//                .centerCrop()
-//                .into(holder.sketchIV);
-//        holder.sketchIV.setSketchData(getItem(position));
         if (getItem(position) != null) {
             Drawable drawable = new BitmapDrawable(mContext.getResources(), getItem(position));
             holder.sketchIV.setImageDrawable(drawable);
         }
+        Log.d("", "getView: w=" + holder.sketchIV.getWidth() + "h=" + holder.sketchIV.getHeight());
+
         holder.numberTV.setText(position + 1 + "");
     }
 
     private void bindView(View view, ViewHolder holder) {
-
         holder.sketchIV = (ImageView) view.findViewById(R.id.grid_sketch);
-        holder.sketchIV.setMinimumHeight(itemHeight);
         holder.deleteIV = (ImageView) view.findViewById(R.id.grid_delete);
         holder.numberTV = (TextView) view.findViewById(R.id.grid_number);
     }

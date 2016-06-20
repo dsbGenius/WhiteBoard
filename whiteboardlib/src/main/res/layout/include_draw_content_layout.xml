@@ -8,9 +8,10 @@
             android:id="@+id/sketch_data_gv"
             android:visibility="visible"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:padding="@dimen/sketch_gv_padding"
-            android:columnWidth="80dp"
+            android:horizontalSpacing="@dimen/sketch_gv_padding"
+            android:verticalSpacing="@dimen/sketch_gv_padding"
             android:numColumns="4" />
 
         <com.yinghe.whiteboardlib.view.SketchView
