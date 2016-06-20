@@ -5,11 +5,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.yinghe.whiteboardlib.view.SketchView
+    <ImageView
         android:layout_centerVertical="true"
         android:id="@+id/grid_sketch"
-        android:focusable="false"
-        android:focusableInTouchMode="false"
         android:layout_width="match_parent"
         android:layout_height="@dimen/grid_width" />
 

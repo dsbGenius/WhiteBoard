@@ -568,9 +568,8 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         if (id == R.id.btn_add) {
             if (mSketchView.getVisibility() == View.VISIBLE) {
                 mSketchView.setVisibility(View.GONE);
-                curSketchData.thumbnailFile = null;//重置缩略图
-                String photoName = TEMP_FILE_NAME + TimeUtils.getNowTimeString() + ".png";
-                new UpdateSketchGVTask().execute(photoName);
+                curSketchData.thumbnailBM = mSketchView.getResultBitmap();
+//                new UpdateSketchGVTask().execute(photoName);
             } else {
                 mSketchView.setVisibility(View.VISIBLE);
             }
@@ -847,7 +846,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
 
         @Override
         protected Void doInBackground(String... photoName) {
-            curSketchData.thumbnailFile = saveInOI(TEMP_FILE_PATH, photoName[0], 20);
+//            curSketchData.thumbnailBM = mSketchView.getResultBitmap();
             return null;
         }
 

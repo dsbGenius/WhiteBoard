@@ -13,7 +13,7 @@ public class SketchData {
     public List<PhotoRecord> photoRecordList;
     public List<StrokeRecord> strokeRecordList;
     public List<StrokeRecord> strokeRedoList;
-    public File thumbnailFile;//缩略图文件
+    public Bitmap thumbnailBM;//缩略图文件
     public Bitmap backgroundBM;
 
     public SketchData() {
@@ -21,7 +21,7 @@ public class SketchData {
         photoRecordList = new ArrayList<>();
         strokeRedoList = new ArrayList<>();
         backgroundBM = null;
-        thumbnailFile = null;
+        thumbnailBM = null;
     }
 
 }

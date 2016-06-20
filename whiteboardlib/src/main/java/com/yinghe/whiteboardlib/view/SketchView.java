@@ -609,10 +609,9 @@ public class SketchView extends View implements OnTouchListener {
     }
 
 
-
     @NonNull
     public Bitmap getResultBitmap() {
-        final Bitmap newBM = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.RGB_565);
+        Bitmap newBM = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.RGB_565);
         Canvas canvas = new Canvas(newBM);
         canvas.setDrawFilter(new PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG));//抗锯齿
         //绘制背景
