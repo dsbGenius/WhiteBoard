@@ -292,6 +292,8 @@ public class SketchView extends View implements OnTouchListener {
     private void drawBackground(Canvas canvas) {
         if (curBackgroundBM != null) {
             canvas.drawBitmap(curBackgroundBM, backgroundSrcRect, backgroundDstRect, null);
+        } else {
+            canvas.drawColor(Color.WHITE);
         }
     }
 

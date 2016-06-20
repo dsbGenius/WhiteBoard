@@ -62,7 +62,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     public final String TAG = getClass().getSimpleName();
 
     public interface SendBtnCallback {
-        void onSendBtnClick(String filePath);
+        void onSendBtnClick(File filePath);
     }
 
     public static final int COLOR_BLACK = Color.parseColor("#ff000000");
@@ -567,14 +567,9 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         if (id == R.id.btn_add) {
             if (mSketchView.getVisibility() == View.VISIBLE) {
                 mSketchView.setVisibility(View.GONE);
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        String photoName = TEMP_FILE_NAME + dataPosition + "666.png";
-                        String photoAbsName = saveInOI(TEMP_FILE_PATH, photoName);
-                        curSketchData.filePath = photoAbsName;
-                    }
-                }).start();
+                curSketchData.thumbnailFile = null;//重置缩略图
+                String photoName = TEMP_FILE_NAME + dataPosition + ".png";
+                new UpdateSketchGVTask().execute(photoName);
             } else {
                 mSketchView.setVisibility(View.VISIBLE);
             }
@@ -632,7 +627,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                     @Override
                     public void run() {
                         String photoName = TEMP_FILE_NAME + dataPosition + ".png";
-                        sendBtnCallback.onSendBtnClick(saveInOI(TEMP_FILE_PATH, photoName));
+                        sendBtnCallback.onSendBtnClick(saveInOI(TEMP_FILE_PATH, photoName, 50));
                     }
                 }).start();
             }
@@ -776,19 +771,23 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         }.execute("");
     }
 
+    public File saveInOI(String filePath, String imgName) {
+        return saveInOI(filePath, imgName, 90);
+    }
     /**
      * @param filePath 文件保存路径
      * @param imgName  文件名
-     * @return 返回保存的图片路径
+     * @param compress  压缩百分比1-100
+     * @return 返回保存的图片文件
      * @author TangentLu
      * create at 16/6/17 上午11:18
      * @summary 保存图片到本地文件，耗时操作
      */
-    public String saveInOI(final String filePath, String imgName) {
+    public File saveInOI(String filePath, String imgName, int compress) {
         if (!imgName.contains(".png")) {
             imgName += ".png";
         }
-        final Bitmap newBM = mSketchView.getResultBitmap();
+        Bitmap newBM = mSketchView.getResultBitmap();
         try {
             File dir = new File(filePath);
             if (!dir.exists()) {
@@ -801,9 +800,15 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                 f.delete();
             }
             FileOutputStream out = new FileOutputStream(f);
-            newBM.compress(Bitmap.CompressFormat.PNG, 90, out);
+            if (compress >= 1 && compress <= 100)
+                newBM.compress(Bitmap.CompressFormat.PNG, compress, out);
+            else {
+                newBM.compress(Bitmap.CompressFormat.PNG, 80, out);
+            }
             out.close();
-            return f.getAbsolutePath().toString();
+            newBM.recycle();
+            newBM = null;
+            return f;
         } catch (Exception e) {
             return null;
         }
@@ -829,4 +834,20 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         btn_drag.setAlpha(BTN_ALPHA);
         iv.setAlpha(1f);
     }
+
+    class UpdateSketchGVTask extends AsyncTask<String, Void, Void> {
+
+        @Override
+        protected Void doInBackground(String... photoName) {
+            curSketchData.thumbnailFile = saveInOI(TEMP_FILE_PATH, photoName[0], 20);
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            sketchGVAdapter.notifyDataSetChanged();
+        }
+    }
+
 }

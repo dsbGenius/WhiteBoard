@@ -11,7 +11,6 @@ import android.widget.TextView;
 import com.squareup.picasso.Picasso;
 import com.yinghe.whiteboardlib.R;
 import com.yinghe.whiteboardlib.bean.SketchData;
-import com.yinghe.whiteboardlib.fragment.WhiteBoardFragment;
 
 import java.util.List;
 
@@ -44,7 +43,6 @@ public class SketchDataGridAdapter extends BaseAdapter {
 
     @Override
     public SketchData getItem(int position) {
-//        return WhiteBoardFragment.TEMP_FILE_PATH + WhiteBoardFragment.TEMP_FILE_NAME + position + ".png";
         return sketchDataList.get(position);
     }
 
@@ -78,13 +76,14 @@ public class SketchDataGridAdapter extends BaseAdapter {
 
     private void showData(ViewHolder holder, int position) {
         Picasso.with(mContext)
-                .load(getItem(position).filePath)
+                .load(getItem(position).thumbnailFile)
                 .placeholder(R.drawable.default_error)
+                .tag("aa")
 //                .resize(holder.sketchIV.getWidth(), holder.sketchIV.getHeight())
                 .resize(200, 200)
                 .centerCrop()
                 .into(holder.sketchIV);
-        holder.numberTV.setText(position + "");
+        holder.numberTV.setText(position + 1 + "");
     }
 
     private void bindView(View view, ViewHolder holder) {
@@ -92,7 +91,6 @@ public class SketchDataGridAdapter extends BaseAdapter {
         holder.deleteIV = (ImageView) view.findViewById(R.id.grid_delete);
         holder.numberTV = (TextView) view.findViewById(R.id.grid_number);
     }
-
 
     class ViewHolder {
         ImageView sketchIV;

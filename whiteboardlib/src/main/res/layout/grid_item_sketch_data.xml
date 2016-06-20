@@ -11,7 +11,7 @@
         tools:src="@android:color/holo_blue_light"
         android:layout_gravity="center_vertical"
         android:scaleType="centerInside"
-        android:layout_width="@dimen/grid_width"
+        android:layout_width="match_parent"
         android:layout_height="@dimen/grid_width" />
 
     <ImageView

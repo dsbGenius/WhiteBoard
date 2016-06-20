@@ -12,6 +12,7 @@ import android.widget.Toast;
 
 import com.yinghe.whiteboardlib.fragment.WhiteBoardFragment;
 
+import java.io.File;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
@@ -40,10 +41,10 @@ public class MainActivity extends AppCompatActivity {
         FragmentTransaction ts = getFragmentManager().beginTransaction();
         ts.add(R.id.fl_main, WhiteBoardFragment.newInstance(new WhiteBoardFragment.SendBtnCallback() {
             @Override
-            public void onSendBtnClick(String filePath) {
+            public void onSendBtnClick(File filePath) {
                 Log.e("11", "onSendBtnClick: " + filePath);
                 Looper.prepare();
-                Toast.makeText(MainActivity.this, filePath, Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, filePath.toString(), Toast.LENGTH_SHORT).show();
                 Looper.loop();
             }
         }), "wb").commit();
