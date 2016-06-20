@@ -568,7 +568,8 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         if (id == R.id.btn_add) {
             if (mSketchView.getVisibility() == View.VISIBLE) {
                 mSketchView.setVisibility(View.GONE);
-                curSketchData.thumbnailBM = mSketchView.getResultBitmap();
+//                curSketchData.thumbnailBM = mSketchView.getResultBitmap();
+                curSketchData.thumbnailBM = mSketchView.getThumbnailResultBitmap();
 //                new UpdateSketchGVTask().execute(photoName);
             } else {
                 mSketchView.setVisibility(View.VISIBLE);

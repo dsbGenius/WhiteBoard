@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.util.Log;
 import android.view.WindowManager;
 
@@ -46,6 +47,22 @@ public class BitmapUtils {
         Bitmap bm = BitmapFactory.decodeResource(context.getResources(), resId, options);
         Log.e("xxx", bm.getByteCount() + "");
         return bm;
+    }
+
+
+    public static Bitmap createBitmapThumbnail(Bitmap bitMap, boolean needRecycle, int newHeight, int newWidth) {
+        int width = bitMap.getWidth();
+        int height = bitMap.getHeight();
+        // 计算缩放比例
+        float scale = Math.min((float) newWidth / width, (float) (newHeight) / height);
+        // 取得想要缩放的matrix参数
+        Matrix matrix = new Matrix();
+        matrix.postScale(scale, scale);
+        // 得到新的图片
+        Bitmap newBitMap = Bitmap.createBitmap(bitMap, 0, 0, width, height, matrix, true);
+        if (needRecycle)
+            bitMap.recycle();
+        return newBitMap;
     }
 
     public static BitmapFactory.Options sampleBitmapOptions(

@@ -621,6 +621,11 @@ public class SketchView extends View implements OnTouchListener {
         canvas.restore();
         return newBM;
     }
+
+    @NonNull
+    public Bitmap getThumbnailResultBitmap() {
+        return BitmapUtils.createBitmapThumbnail(getResultBitmap(), true, 200, 200);
+    }
     /*
      * 删除一笔
      */
