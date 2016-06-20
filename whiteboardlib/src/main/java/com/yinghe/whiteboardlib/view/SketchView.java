@@ -50,7 +50,6 @@ import com.yinghe.whiteboardlib.bean.SketchData;
 import com.yinghe.whiteboardlib.bean.StrokeRecord;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 import static com.yinghe.whiteboardlib.bean.StrokeRecord.STROKE_TYPE_CIRCLE;
@@ -333,6 +332,7 @@ public class SketchView extends View implements OnTouchListener {
 
     }
 
+    //绘制图像边线（由于图形旋转或不一定是矩形，所以用Path绘制边线）
     private void drawBoard(Canvas canvas, float[] photoCorners) {
         Path photoBorderPath = new Path();
         photoBorderPath.moveTo(photoCorners[0], photoCorners[1]);
@@ -343,31 +343,28 @@ public class SketchView extends View implements OnTouchListener {
         canvas.drawPath(photoBorderPath, boardPaint);
     }
 
+    //绘制边角操作图标
     private void drawMarks(Canvas canvas, float[] photoCorners) {
         float x;
         float y;
         x = photoCorners[0] - markerCopyRect.width() / 2;
         y = photoCorners[1] - markerCopyRect.height() / 2;
         markerCopyRect.offsetTo(x, y);
-//        canvas.drawRect(markerCopyRect, p);
         canvas.drawBitmap(mirrorMarkBM, x, y, null);
 
         x = photoCorners[2] - markerDeleteRect.width() / 2;
         y = photoCorners[3] - markerDeleteRect.height() / 2;
         markerDeleteRect.offsetTo(x, y);
-//        canvas.drawRect(markerDeleteRect, p);
         canvas.drawBitmap(deleteMarkBM, x, y, null);
 
         x = photoCorners[4] - markerRotateRect.width() / 2;
         y = photoCorners[5] - markerRotateRect.height() / 2;
         markerRotateRect.offsetTo(x, y);
-//        canvas.drawRect(markerRotateRect, p);
         canvas.drawBitmap(rotateMarkBM, x, y, null);
 
         x = photoCorners[6] - markerResetRect.width() / 2;
         y = photoCorners[7] - markerResetRect.height() / 2;
         markerResetRect.offsetTo(x, y);
-//        canvas.drawRect(markerRotateRect, p);
         canvas.drawBitmap(resetMarkBM, x, y, null);
     }
 
@@ -549,27 +546,27 @@ public class SketchView extends View implements OnTouchListener {
     }
 
     private void onRotateAction(PhotoRecord record) {
-        float[] photoCorners = calculateCorners(record);
+        float[] 啥orners = calculateCorners(record);
         //放大
         //目前触摸点与图片显示中心距离
-        float a = (float) Math.sqrt(Math.pow(curX - photoCorners[8], 2) + Math.pow(curY - photoCorners[9], 2));
+        float a = (float) Math.sqrt(Math.pow(curX - 啥orners[8], 2) + Math.pow(curY - 啥orners[9], 2));
         //目前上次旋转图标与图片显示中心距离
-        float b = (float) Math.sqrt(Math.pow(photoCorners[4] - photoCorners[0], 2) + Math.pow(photoCorners[5] - photoCorners[1], 2)) / 2;
+        float b = (float) Math.sqrt(Math.pow(啥orners[4] - 啥orners[0], 2) + Math.pow(啥orners[5] - 啥orners[1], 2)) / 2;
 
         //设置Matrix缩放参数
         double photoLen = Math.sqrt(Math.pow(record.photoRectSrc.width(), 2) + Math.pow(record.photoRectSrc.height(), 2));
         if (a >= photoLen / 2 * SCALE_MIN && a >= SCALE_MIN_LEN && a <= photoLen / 2 * SCALE_MAX) {
             //这种计算方法可以保持旋转图标坐标与触摸点同步缩放
             float scale = a / b;
-            record.matrix.postScale(scale, scale, photoCorners[8], photoCorners[9]);
+            record.matrix.postScale(scale, scale, 啥orners[8], 啥orners[9]);
         }
 
         //旋转
         //根据移动坐标的变化构建两个向量，以便计算两个向量角度.
         PointF preVector = new PointF();
         PointF curVector = new PointF();
-        preVector.set(preX - photoCorners[8], preY - photoCorners[9]);//旋转后向量
-        curVector.set(curX - photoCorners[8], curY - photoCorners[9]);//旋转前向量
+        preVector.set(preX - 啥orners[8], preY - 啥orners[9]);//旋转后向量
+        curVector.set(curX - 啥orners[8], curY - 啥orners[9]);//旋转前向量
         //计算向量长度
         double preVectorLen = getVectorLength(preVector);
         double curVectorLen = getVectorLength(curVector);
@@ -599,7 +596,7 @@ public class SketchView extends View implements OnTouchListener {
         } else {
             dAngle = -dAngle;
         }
-        record.matrix.postRotate((float) dAngle, photoCorners[8], photoCorners[9]);
+        record.matrix.postRotate((float) dAngle, 啥orners[8], 啥orners[9]);
     }
 
     /**

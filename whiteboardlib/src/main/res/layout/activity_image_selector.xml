@@ -3,7 +3,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:background="#181819"
-    android:id="@+id/image_selector_layout"
     android:layout_marginBottom="@dimen/bottom_marin"
     android:layout_marginRight="@dimen/right_margin"
     android:layout_width="match_parent"
