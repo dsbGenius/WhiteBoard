@@ -788,7 +788,10 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         if (!imgName.contains(".png")) {
             imgName += ".png";
         }
+        Log.e(TAG, "saveInOI: " + System.currentTimeMillis());
         Bitmap newBM = mSketchView.getResultBitmap();
+        Log.e(TAG, "saveInOI: " + System.currentTimeMillis());
+
         try {
             File dir = new File(filePath);
             if (!dir.exists()) {
@@ -801,11 +804,15 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                 f.delete();
             }
             FileOutputStream out = new FileOutputStream(f);
+            Log.e(TAG, "saveInOI: " + System.currentTimeMillis());
+
             if (compress >= 1 && compress <= 100)
                 newBM.compress(Bitmap.CompressFormat.PNG, compress, out);
             else {
                 newBM.compress(Bitmap.CompressFormat.PNG, 80, out);
             }
+            Log.e(TAG, "saveInOI: " + System.currentTimeMillis());
+
             out.close();
             newBM.recycle();
             newBM = null;

@@ -156,37 +156,40 @@ public class SketchView extends View implements OnTouchListener {
         curPhotoRecord = null;
     }
 
+
     public SketchView(Context context, AttributeSet attr) {
         super(context, attr);
         this.mContext = context;
         setSketchData(new SketchData());
-        this.setOnTouchListener(this);
-        mScaleGestureDetector = new ScaleGestureDetector(context, new ScaleGestureDetector.OnScaleGestureListener() {
-            @Override
-            public boolean onScale(ScaleGestureDetector detector) {
-                onScaleAction(detector);
-                return true;
-            }
-
-
-            @Override
-            public boolean onScaleBegin(ScaleGestureDetector detector) {
-                return true;
-            }
-
-            @Override
-            public void onScaleEnd(ScaleGestureDetector detector) {
-
-            }
-        });
         initParams(context);
+        if (isFocusable()) {
+            this.setOnTouchListener(this);
+            mScaleGestureDetector = new ScaleGestureDetector(context, new ScaleGestureDetector.OnScaleGestureListener() {
+                @Override
+                public boolean onScale(ScaleGestureDetector detector) {
+                    onScaleAction(detector);
+                    return true;
+                }
+
+
+                @Override
+                public boolean onScaleBegin(ScaleGestureDetector detector) {
+                    return true;
+                }
+
+                @Override
+                public void onScaleEnd(ScaleGestureDetector detector) {
+
+                }
+            });
+        }
         invalidate();
     }
 
     private void initParams(Context context) {
 
-        setFocusable(true);
-        setFocusableInTouchMode(true);
+//        setFocusable(true);
+//        setFocusableInTouchMode(true);
         setBackgroundColor(Color.WHITE);
 
         strokePaint = new Paint();
@@ -225,18 +228,6 @@ public class SketchView extends View implements OnTouchListener {
         strokeRealColor = Color.argb(strokeAlpha, Color.red(strokeColor), Color.green(strokeColor), Color.blue(strokeColor));
     }
 
-
-//    private Bitmap getScaledBitmap(Activity mActivity, Bitmap bitmap) {
-//        DisplayMetrics display = new DisplayMetrics();
-//        mActivity.getWindowManager().getDefaultDisplay().getMetrics(display);
-//        int screenWidth = display.widthPixels;
-//        int screenHeight = display.heightPixels;
-//        float scale = bitmap.getWidth() / screenWidth > bitmap.getHeight() / screenHeight ? bitmap.getWidth() /
-//                screenWidth : bitmap.getHeight() / screenHeight;
-//        int scaledWidth = (int) (bitmap.getWidth() / scale);
-//        int scaledHeight = (int) (bitmap.getHeight() / scale);
-//        return Bitmap.createScaledBitmap(bitmap, scaledWidth, scaledHeight, true);
-//    }
 
 
     @Override
