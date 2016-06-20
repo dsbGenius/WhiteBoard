@@ -8,4 +8,5 @@
     <dimen name="control_btn_padding">1.5dp</dimen>
     <dimen name="control_draw_padding">3dp</dimen>
     <dimen name="control_layout_padding">15dp</dimen>
+    <dimen name="sketch_gv_padding">10dp</dimen>
 </resources>

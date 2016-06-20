@@ -4,12 +4,14 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 import com.yinghe.whiteboardlib.R;
+import com.yinghe.whiteboardlib.Utils.ScreenUtils;
 import com.yinghe.whiteboardlib.bean.SketchData;
 
 import java.util.List;
@@ -23,6 +25,9 @@ public class SketchDataGridAdapter extends BaseAdapter {
         void onDeleteCallback(int position);
     }
 
+    int itemHeight;
+
+
     List<SketchData> sketchDataList;
 
     private Context mContext;
@@ -31,6 +36,7 @@ public class SketchDataGridAdapter extends BaseAdapter {
 
     public SketchDataGridAdapter(Context context, List<SketchData> sketchDataList, OnDeleteCallback onDeleteCallback) {
         this.mContext = context;
+        itemHeight = ScreenUtils.getScreenSize(context).y / 4;
         mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         this.onDeleteCallback = onDeleteCallback;
         this.sketchDataList = sketchDataList;
@@ -87,7 +93,9 @@ public class SketchDataGridAdapter extends BaseAdapter {
     }
 
     private void bindView(View view, ViewHolder holder) {
+
         holder.sketchIV = (ImageView) view.findViewById(R.id.grid_sketch);
+        holder.sketchIV.setMinimumHeight(itemHeight);
         holder.deleteIV = (ImageView) view.findViewById(R.id.grid_delete);
         holder.numberTV = (TextView) view.findViewById(R.id.grid_number);
     }

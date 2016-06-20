@@ -35,6 +35,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.squareup.picasso.Picasso;
 import com.yinghe.whiteboardlib.MultiImageSelector;
 import com.yinghe.whiteboardlib.R;
 import com.yinghe.whiteboardlib.Utils.BitmapUtils;
@@ -568,7 +569,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
             if (mSketchView.getVisibility() == View.VISIBLE) {
                 mSketchView.setVisibility(View.GONE);
                 curSketchData.thumbnailFile = null;//重置缩略图
-                String photoName = TEMP_FILE_NAME + dataPosition + ".png";
+                String photoName = TEMP_FILE_NAME + TimeUtils.getNowTimeString() + ".png";
                 new UpdateSketchGVTask().execute(photoName);
             } else {
                 mSketchView.setVisibility(View.VISIBLE);
@@ -626,7 +627,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        String photoName = TEMP_FILE_NAME + dataPosition + ".png";
+                        String photoName = TEMP_FILE_NAME + TimeUtils.getNowTimeString() + ".png";
                         sendBtnCallback.onSendBtnClick(saveInOI(TEMP_FILE_PATH, photoName, 50));
                     }
                 }).start();
