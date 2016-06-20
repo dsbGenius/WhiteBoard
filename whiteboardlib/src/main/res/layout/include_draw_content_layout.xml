@@ -6,9 +6,9 @@
 
         <GridView
             android:id="@+id/sketch_data_gv"
-            android:visibility="visible"
+            android:visibility="gone"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:padding="@dimen/sketch_gv_padding"
             android:horizontalSpacing="@dimen/sketch_gv_padding"
             android:verticalSpacing="@dimen/sketch_gv_padding"

@@ -35,7 +35,6 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.squareup.picasso.Picasso;
 import com.yinghe.whiteboardlib.MultiImageSelector;
 import com.yinghe.whiteboardlib.R;
 import com.yinghe.whiteboardlib.Utils.BitmapUtils;
@@ -568,11 +567,11 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         if (id == R.id.btn_add) {
             if (mSketchView.getVisibility() == View.VISIBLE) {
                 mSketchView.setVisibility(View.GONE);
-//                curSketchData.thumbnailBM = mSketchView.getResultBitmap();
+                sketchGV.setVisibility(View.VISIBLE);
                 curSketchData.thumbnailBM = mSketchView.getThumbnailResultBitmap();
-//                new UpdateSketchGVTask().execute(photoName);
             } else {
                 mSketchView.setVisibility(View.VISIBLE);
+                sketchGV.setVisibility(View.GONE);
             }
             updateGV();
         } else if (id == R.id.btn_stroke) {

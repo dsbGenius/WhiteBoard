@@ -624,7 +624,7 @@ public class SketchView extends View implements OnTouchListener {
 
     @NonNull
     public Bitmap getThumbnailResultBitmap() {
-        return BitmapUtils.createBitmapThumbnail(getResultBitmap(), true, 200, 200);
+        return BitmapUtils.createBitmapThumbnail(getResultBitmap(), true, ScreenUtils.dip2px(mContext, 200), ScreenUtils.dip2px(mContext, 200));
     }
     /*
      * 删除一笔

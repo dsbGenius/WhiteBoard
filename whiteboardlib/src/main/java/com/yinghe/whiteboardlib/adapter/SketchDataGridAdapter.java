@@ -8,8 +8,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.BaseAdapter;
-import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -65,7 +65,14 @@ public class SketchDataGridAdapter extends BaseAdapter {
     public View getView(final int position, View convertView, ViewGroup parent) {
         ViewHolder holder = null;
         if (convertView == null) {
-            View view = mInflater.inflate(R.layout.grid_item_sketch_data, null);
+            final View view = mInflater.inflate(R.layout.grid_item_sketch_data, null);
+//            view.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+//                @Override
+//                public void onGlobalLayout() {
+//                    int height = (int) (view.getWidth() * ratio);
+//                    view.setBottom(view.getTop() + height);
+//                }
+//            });
             holder = new ViewHolder();
             bindView(view, holder);
             holder.deleteIV.setOnClickListener(new View.OnClickListener() {
@@ -79,8 +86,6 @@ public class SketchDataGridAdapter extends BaseAdapter {
             convertView = view;
         } else {
             holder = (ViewHolder) convertView.getTag();
-            ViewGroup.LayoutParams layoutParams = convertView.getLayoutParams();
-            layoutParams.height = (int) (layoutParams.width * ratio);
         }
         showData(holder, position);
         return convertView;
@@ -96,8 +101,17 @@ public class SketchDataGridAdapter extends BaseAdapter {
         holder.numberTV.setText(position + 1 + "");
     }
 
-    private void bindView(View view, ViewHolder holder) {
+    private void bindView(View view, final ViewHolder holder) {
         holder.sketchIV = (ImageView) view.findViewById(R.id.grid_sketch);
+        holder.sketchIV.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                //确保图像比例
+                ViewGroup.LayoutParams lp = holder.sketchIV.getLayoutParams();
+                lp.height = (int) (holder.sketchIV.getWidth() / ratio);
+            }
+        });
+
         holder.deleteIV = (ImageView) view.findViewById(R.id.grid_delete);
         holder.numberTV = (TextView) view.findViewById(R.id.grid_number);
     }
