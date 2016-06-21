@@ -144,19 +144,19 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     public static int decorWidth;
 
     /**
+     * show 默认新建一个学生端功能
      * @author TangentLu
      * create at 16/6/17 上午9:59
-     * @summary 默认新建一个学生端功能
      */
     public static WhiteBoardFragment newInstance() {
         return new WhiteBoardFragment();
     }
 
     /**
+     * show 新建一个教师端的画板碎片，有推送按钮
      * @param callback 推送按钮监听器，接受返回的图片文件路径可用于显示文件
      * @author TangentLu
      * create at 16/6/17 上午9:57
-     * @summary 新建一个教师端的画板碎片，有推送按钮
      */
     public static WhiteBoardFragment newInstance(SendBtnCallback callback) {
         WhiteBoardFragment fragment = new WhiteBoardFragment();
@@ -169,7 +169,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
      * @param imgPath 添加的背景图片文件路径
      * @author TangentLu
      * create at 16/6/21 下午3:39
-     * @summary 设置当前白板的背景图片
+     * show 设置当前白板的背景图片
      */
     public void setCurBackgroundByPath(String imgPath) {
         showSketchView(true);
@@ -177,10 +177,10 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     }
 
     /**
+     * show  新增白板并设置白板的背景图片
      * @param imgPath 添加的背景图片文件路径
      * @author TangentLu
      * create at 16/6/21 下午3:39
-     * @summary 新增白板并设置白板的背景图片
      */
     public void setNewBackgroundByPath(String imgPath) {
         showSketchView(true);
@@ -192,10 +192,10 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     }
 
     /**
+     * show 新增图片到当前白板
      * @param imgPath 新增的图片路径
      * @author TangentLu
      * create at 16/6/21 下午3:42
-     * @summary 新增图片到当前白板
      */
     public void addPhotoByPath(String imgPath) {
         showSketchView(true);
@@ -205,14 +205,26 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
 
 
     /**
+     * show 获取当前白板的BitMap
      * @author TangentLu
      * create at 16/6/21 下午3:44
-     * @summary 获取当前白板的BitMap
      */
     public Bitmap getResultBitmap() {
         return mSketchView.getResultBitmap();
     }
 
+    /**
+     * show 手动保存当前画板到文件，耗时操作
+     *
+     * @param filePath 保存的文件路径
+     * @param imgName  保存的文件名
+     * @return 返回保存后的文件路径
+     * @author TangentLu
+     * create at 16/6/21 下午3:46
+     */
+    public File saveInOI(String filePath, String imgName) {
+        return saveInOI(filePath, imgName, 80);
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -729,17 +741,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
 
 
 
-    /**
-     * @param filePath 保存的文件路径
-     * @param imgName  保存的文件名
-     * @return 返回保存后的文件路径
-     * @author TangentLu
-     * create at 16/6/21 下午3:46
-     * @summary 手动保存当前画板到文件，耗时操作
-     */
-    public File saveInOI(String filePath, String imgName) {
-        return saveInOI(filePath, imgName, 80);
-    }
+
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -815,13 +817,13 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     }
 
     /**
+     * show 保存图片到本地文件，耗时操作
      * @param filePath 文件保存路径
      * @param imgName  文件名
      * @param compress 压缩百分比1-100
      * @return 返回保存的图片文件
      * @author TangentLu
      * create at 16/6/17 上午11:18
-     * @summary 保存图片到本地文件，耗时操作
      */
     public File saveInOI(String filePath, String imgName, int compress) {
         if (!imgName.contains(".png")) {
