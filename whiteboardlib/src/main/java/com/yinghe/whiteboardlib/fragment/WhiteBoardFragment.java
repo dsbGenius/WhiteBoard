@@ -209,14 +209,25 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     }
 
     private void initSketchGV() {
-        sketchGVAdapter = new SketchDataGridAdapter(activity, sketchDataList, new SketchDataGridAdapter.OnDeleteCallback() {
+        sketchGVAdapter = new SketchDataGridAdapter(activity, sketchDataList, new SketchDataGridAdapter.OnActionCallback() {
             @Override
             public void onDeleteCallback(int position) {
                 sketchDataList.remove(position);
                 sketchGVAdapter.notifyDataSetChanged();
             }
+
+            @Override
+            public void onADDCallback() {
+                sketchDataList.add(new SketchData());
+                showSketchView(true);
+            }
         });
         sketchGV.setAdapter(sketchGVAdapter);
+    }
+
+    private void showSketchView(boolean b) {
+        mSketchView.setVisibility(b ? View.VISIBLE : View.GONE);
+        sketchGV.setVisibility(!b ? View.VISIBLE : View.GONE);
     }
 
     private void initSaveDialog() {
@@ -566,12 +577,10 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         int id = v.getId();
         if (id == R.id.btn_add) {
             if (mSketchView.getVisibility() == View.VISIBLE) {
-                mSketchView.setVisibility(View.GONE);
-                sketchGV.setVisibility(View.VISIBLE);
                 curSketchData.thumbnailBM = mSketchView.getThumbnailResultBitmap();
+                showSketchView(false);
             } else {
-                mSketchView.setVisibility(View.VISIBLE);
-                sketchGV.setVisibility(View.GONE);
+                showSketchView(true);
             }
             updateGV();
         } else if (id == R.id.btn_stroke) {

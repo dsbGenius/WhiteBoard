@@ -24,7 +24,7 @@
                 <ImageView
                     android:id="@+id/btn_add"
                     style="@style/control_btn"
-                    android:src="@drawable/ic_add" />
+                    android:src="@drawable/ic_add_small" />
 
                 <ImageView style="@style/control_btn.space" />
 

@@ -1,40 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:background="@android:color/white"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@drawable/sketch_gv_item_bg"
+    android:padding="1dp">
 
-    <ImageView
-        android:layout_centerVertical="true"
-        android:id="@+id/grid_sketch"
+    <RelativeLayout
+        android:id="@+id/grid_sketch_lay"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent">
+
+        <ImageView
+            android:id="@+id/grid_sketch"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_centerVertical="true"
+            android:scaleType="fitXY" />
+
+        <ImageView
+            android:id="@+id/grid_number_bg"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_alignBottom="@id/grid_sketch"
+            android:layout_alignRight="@id/grid_sketch"
+            android:src="@drawable/grid_corner" />
+
+        <ImageView
+            android:id="@+id/grid_delete"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_alignRight="@id/grid_sketch"
+            android:layout_alignTop="@id/grid_sketch"
+            android:padding="2dp"
+            android:src="@drawable/grid_delete" />
+
+        <TextView
+            android:id="@+id/grid_number"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:layout_alignBottom="@id/grid_sketch"
+            android:layout_alignRight="@id/grid_sketch"
+            android:gravity="center"
+            android:textColor="@android:color/white"
+            tools:text="3" />
+    </RelativeLayout>
 
     <ImageView
-        android:layout_alignRight="@id/grid_sketch"
-        android:layout_alignBottom="@id/grid_sketch"
-        android:src="@drawable/grid_corner"
-        android:layout_width="30dp"
-        android:layout_height="30dp" />
-
-    <ImageView
-        android:id="@+id/grid_delete"
-        android:layout_alignRight="@id/grid_sketch"
-        android:layout_alignTop="@id/grid_sketch"
-        android:src="@drawable/grid_delete"
-        android:padding="2dp"
-        android:layout_width="20dp"
-        android:layout_height="20dp" />
-
-    <TextView
-        android:id="@+id/grid_number"
-        android:layout_alignRight="@id/grid_sketch"
-        android:layout_alignBottom="@id/grid_sketch"
-        tools:text="3"
-        android:gravity="center"
-        android:textColor="@android:color/white"
-        android:layout_width="18dp"
-        android:layout_height="18dp" />
-
+        android:id="@+id/grid_add"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerVertical="true"
+        android:scaleType="center"
+        android:src="@drawable/ic_add_big" />
 </RelativeLayout>

@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,8 +24,10 @@ import java.util.List;
 public class SketchDataGridAdapter extends BaseAdapter {
 
 
-    public interface OnDeleteCallback {
+    public interface OnActionCallback {
         void onDeleteCallback(int position);
+
+        void onADDCallback();
     }
 
     float ratio;
@@ -36,19 +37,19 @@ public class SketchDataGridAdapter extends BaseAdapter {
 
     private Context mContext;
     private LayoutInflater mInflater;
-    private OnDeleteCallback onDeleteCallback;
+    private OnActionCallback onActionCallback;
 
-    public SketchDataGridAdapter(Context context, List<SketchData> sketchDataList, OnDeleteCallback onDeleteCallback) {
+    public SketchDataGridAdapter(Context context, List<SketchData> sketchDataList, OnActionCallback onActionCallback) {
         this.mContext = context;
         ratio = (float) ScreenUtils.getScreenSize(context).x / ScreenUtils.getScreenSize(context).y;
         mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        this.onDeleteCallback = onDeleteCallback;
+        this.onActionCallback = onActionCallback;
         this.sketchDataList = sketchDataList;
     }
 
     @Override
     public int getCount() {
-        return sketchDataList.size();
+        return sketchDataList.size() + 1;
     }
 
     @Override
@@ -66,22 +67,8 @@ public class SketchDataGridAdapter extends BaseAdapter {
         ViewHolder holder = null;
         if (convertView == null) {
             final View view = mInflater.inflate(R.layout.grid_item_sketch_data, null);
-//            view.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-//                @Override
-//                public void onGlobalLayout() {
-//                    int height = (int) (view.getWidth() * ratio);
-//                    view.setBottom(view.getTop() + height);
-//                }
-//            });
             holder = new ViewHolder();
-            bindView(view, holder);
-            holder.deleteIV.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (onDeleteCallback != null)
-                        onDeleteCallback.onDeleteCallback(position);
-                }
-            });
+            bindView(view, holder, position);
             view.setTag(holder);
             convertView = view;
         } else {
@@ -92,33 +79,65 @@ public class SketchDataGridAdapter extends BaseAdapter {
     }
 
     private void showData(ViewHolder holder, int position) {
-        if (getItem(position) != null) {
-            Drawable drawable = new BitmapDrawable(mContext.getResources(), getItem(position));
-            holder.sketchIV.setImageDrawable(drawable);
+        if (getCount() > 1 && position == getCount() - 1) {
+            showAdd(holder, true);
+        } else {
+            showAdd(holder, false);
+            if (getCount() > 2) {
+                holder.deleteIV.setVisibility(View.VISIBLE);
+            } else {
+                holder.deleteIV.setVisibility(View.GONE);
+            }
+            if (getItem(position) != null) {
+                Drawable drawable = new BitmapDrawable(mContext.getResources(), getItem(position));
+                holder.sketchIV.setImageDrawable(drawable);
+            }
+            holder.numberTV.setText(position + 1 + "");
         }
-        Log.d("", "getView: w=" + holder.sketchIV.getWidth() + "h=" + holder.sketchIV.getHeight());
-
-        holder.numberTV.setText(position + 1 + "");
     }
 
-    private void bindView(View view, final ViewHolder holder) {
+    private void bindView(View view, final ViewHolder holder, final int position) {
+        holder.sketchLay = view.findViewById(R.id.grid_sketch_lay);
         holder.sketchIV = (ImageView) view.findViewById(R.id.grid_sketch);
         holder.sketchIV.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
+                holder.sketchIV.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                 //确保图像比例
                 ViewGroup.LayoutParams lp = holder.sketchIV.getLayoutParams();
                 lp.height = (int) (holder.sketchIV.getWidth() / ratio);
+//                Log.d("tangentLu", "getView: w=" + holder.sketchIV.getWidth() + "ratio=" + ratio + "h=" + holder.sketchIV.getHeight());
             }
         });
-
         holder.deleteIV = (ImageView) view.findViewById(R.id.grid_delete);
+        holder.deleteIV.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (getCount() > 1 && onActionCallback != null)
+                    onActionCallback.onDeleteCallback(position);
+            }
+        });
         holder.numberTV = (TextView) view.findViewById(R.id.grid_number);
+        holder.addIV = (ImageView) view.findViewById(R.id.grid_add);
+        holder.addIV.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (onActionCallback != null)
+                    onActionCallback.onADDCallback();
+            }
+        });
     }
 
     class ViewHolder {
+        View sketchLay;
         ImageView sketchIV;
         ImageView deleteIV;
         TextView numberTV;
+        ImageView addIV;
+    }
+
+    void showAdd(ViewHolder holder, boolean b) {
+        holder.sketchLay.setVisibility(!b ? View.VISIBLE : View.INVISIBLE);
+        holder.addIV.setVisibility(b ? View.VISIBLE : View.GONE);
     }
 }
