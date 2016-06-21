@@ -165,6 +165,55 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         return fragment;
     }
 
+    /**
+     * @param imgPath 添加的背景图片文件路径
+     * @author TangentLu
+     * create at 16/6/21 下午3:39
+     * @summary 设置当前白板的背景图片
+     */
+    public void setCurBackgroundByPath(String imgPath) {
+        showSketchView(true);
+        mSketchView.setBackgroundByPath(imgPath);
+    }
+
+    /**
+     * @param imgPath 添加的背景图片文件路径
+     * @author TangentLu
+     * create at 16/6/21 下午3:39
+     * @summary 新增白板并设置白板的背景图片
+     */
+    public void setNewBackgroundByPath(String imgPath) {
+        showSketchView(true);
+        SketchData newSketchData = new SketchData();
+        sketchDataList.add(newSketchData);
+        mSketchView.updateSketchData(newSketchData);
+        setCurBackgroundByPath(imgPath);
+        mSketchView.setEditMode(SketchView.EDIT_STROKE);
+    }
+
+    /**
+     * @param imgPath 新增的图片路径
+     * @author TangentLu
+     * create at 16/6/21 下午3:42
+     * @summary 新增图片到当前白板
+     */
+    public void addPhotoByPath(String imgPath) {
+        showSketchView(true);
+        mSketchView.addPhotoByPath(imgPath);
+        mSketchView.setEditMode(SketchView.EDIT_PHOTO);//切换图片编辑模式
+    }
+
+
+    /**
+     * @author TangentLu
+     * create at 16/6/21 下午3:44
+     * @summary 获取当前白板的BitMap
+     */
+    public Bitmap getResultBitmap() {
+        return mSketchView.getResultBitmap();
+    }
+
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -677,53 +726,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         ScreenUtils.showInput(mSketchView);
     }
 
-    /**
-     * @param imgPath 添加的背景图片文件路径
-     * @author TangentLu
-     * create at 16/6/21 下午3:39
-     * @summary 设置当前白板的背景图片
-     */
-    public void setCurBackgroundByPath(String imgPath) {
-        showSketchView(true);
-        mSketchView.setBackgroundByPath(imgPath);
-    }
 
-    /**
-     * @param imgPath 添加的背景图片文件路径
-     * @author TangentLu
-     * create at 16/6/21 下午3:39
-     * @summary 新增白板并设置白板的背景图片
-     */
-    public void setNewBackgroundByPath(String imgPath) {
-        showSketchView(true);
-        SketchData newSketchData = new SketchData();
-        sketchDataList.add(newSketchData);
-        mSketchView.updateSketchData(newSketchData);
-        setCurBackgroundByPath(imgPath);
-        mSketchView.setEditMode(SketchView.EDIT_STROKE);
-    }
-
-    /**
-     * @param imgPath 新增的图片路径
-     * @author TangentLu
-     * create at 16/6/21 下午3:42
-     * @summary 新增图片到当前白板
-     */
-    public void addPhotoByPath(String imgPath) {
-        showSketchView(true);
-        mSketchView.addPhotoByPath(imgPath);
-        mSketchView.setEditMode(SketchView.EDIT_PHOTO);//切换图片编辑模式
-    }
-
-
-    /**
-     * @author TangentLu
-     * create at 16/6/21 下午3:44
-     * @summary 获取当前白板的图片结果
-     */
-    public Bitmap getResultBitmap() {
-        return mSketchView.getResultBitmap();
-    }
 
 
     /**
