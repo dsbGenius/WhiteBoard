@@ -217,8 +217,10 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
             }
 
             @Override
-            public void onADDCallback() {
-                sketchDataList.add(new SketchData());
+            public void onAddCallback() {
+                SketchData newSketchData = new SketchData();
+                sketchDataList.add(newSketchData);
+                mSketchView.setSketchData(newSketchData);
                 showSketchView(true);
             }
         });

@@ -7,51 +7,58 @@
     android:padding="1dp">
 
     <RelativeLayout
-        android:id="@+id/grid_sketch_lay"
+        android:id="@+id/grid_sketch_root_view"
+
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <RelativeLayout
+            android:id="@+id/grid_sketch_lay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:id="@+id/grid_sketch"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_centerVertical="true"
+                android:scaleType="fitXY" />
+
+            <ImageView
+                android:id="@+id/grid_number_bg"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_alignBottom="@id/grid_sketch"
+                android:layout_alignRight="@id/grid_sketch"
+                android:src="@drawable/grid_corner" />
+
+            <ImageView
+                android:id="@+id/grid_delete"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_alignRight="@id/grid_sketch"
+                android:layout_alignTop="@id/grid_sketch"
+                android:padding="2dp"
+                android:src="@drawable/grid_delete" />
+
+            <TextView
+                android:id="@+id/grid_number"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:layout_alignBottom="@id/grid_sketch"
+                android:layout_alignRight="@id/grid_sketch"
+                android:gravity="center"
+                android:textColor="@android:color/white"
+                tools:text="3" />
+        </RelativeLayout>
+
         <ImageView
-            android:id="@+id/grid_sketch"
+            android:id="@+id/grid_add"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_centerVertical="true"
-            android:scaleType="fitXY" />
-
-        <ImageView
-            android:id="@+id/grid_number_bg"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_alignBottom="@id/grid_sketch"
-            android:layout_alignRight="@id/grid_sketch"
-            android:src="@drawable/grid_corner" />
-
-        <ImageView
-            android:id="@+id/grid_delete"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:layout_alignRight="@id/grid_sketch"
-            android:layout_alignTop="@id/grid_sketch"
-            android:padding="2dp"
-            android:src="@drawable/grid_delete" />
-
-        <TextView
-            android:id="@+id/grid_number"
-            android:layout_width="18dp"
-            android:layout_height="18dp"
-            android:layout_alignBottom="@id/grid_sketch"
-            android:layout_alignRight="@id/grid_sketch"
-            android:gravity="center"
-            android:textColor="@android:color/white"
-            tools:text="3" />
+            android:scaleType="center"
+            android:src="@drawable/ic_add_big"
+            android:visibility="gone" />
     </RelativeLayout>
-
-    <ImageView
-        android:id="@+id/grid_add"
-        android:visibility="gone"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_centerVertical="true"
-        android:scaleType="center"
-        android:src="@drawable/ic_add_big" />
 </RelativeLayout>

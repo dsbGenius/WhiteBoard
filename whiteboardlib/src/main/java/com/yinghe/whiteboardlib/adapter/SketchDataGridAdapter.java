@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,10 +25,11 @@ import java.util.List;
 public class SketchDataGridAdapter extends BaseAdapter {
 
 
+    String TAG = "tangentLu";
     public interface OnActionCallback {
         void onDeleteCallback(int position);
 
-        void onADDCallback();
+        void onAddCallback();
     }
 
     float ratio;
@@ -78,7 +80,7 @@ public class SketchDataGridAdapter extends BaseAdapter {
         return convertView;
     }
 
-    private void showData(ViewHolder holder, int position) {
+    private void showData(final ViewHolder holder, int position) {
         if (getCount() > 1 && position == getCount() - 1) {
             showAdd(holder, true);
         } else {
@@ -94,21 +96,17 @@ public class SketchDataGridAdapter extends BaseAdapter {
             }
             holder.numberTV.setText(position + 1 + "");
         }
+        ViewGroup.LayoutParams lp = holder.rootView.getLayoutParams();
+        Log.d(TAG, "showData: lpW=" + lp.width + ",lpH=" + lp.height + ",vW=" + holder.rootView.getWidth());
+        lp.height = (int) (holder.rootView.getMeasuredWidth() / ratio);
+//        lp.height = 300;
     }
 
     private void bindView(View view, final ViewHolder holder, final int position) {
+        holder.rootView = view.findViewById(R.id.grid_sketch_root_view);
         holder.sketchLay = view.findViewById(R.id.grid_sketch_lay);
         holder.sketchIV = (ImageView) view.findViewById(R.id.grid_sketch);
-        holder.sketchIV.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                holder.sketchIV.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                //确保图像比例
-                ViewGroup.LayoutParams lp = holder.sketchIV.getLayoutParams();
-                lp.height = (int) (holder.sketchIV.getWidth() / ratio);
-//                Log.d("tangentLu", "getView: w=" + holder.sketchIV.getWidth() + "ratio=" + ratio + "h=" + holder.sketchIV.getHeight());
-            }
-        });
+
         holder.deleteIV = (ImageView) view.findViewById(R.id.grid_delete);
         holder.deleteIV.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -123,13 +121,14 @@ public class SketchDataGridAdapter extends BaseAdapter {
             @Override
             public void onClick(View v) {
                 if (onActionCallback != null)
-                    onActionCallback.onADDCallback();
+                    onActionCallback.onAddCallback();
             }
         });
     }
 
     class ViewHolder {
         View sketchLay;
+        View rootView;
         ImageView sketchIV;
         ImageView deleteIV;
         TextView numberTV;
@@ -137,7 +136,7 @@ public class SketchDataGridAdapter extends BaseAdapter {
     }
 
     void showAdd(ViewHolder holder, boolean b) {
-        holder.sketchLay.setVisibility(!b ? View.VISIBLE : View.INVISIBLE);
+        holder.sketchLay.setVisibility(!b ? View.VISIBLE : View.GONE);
         holder.addIV.setVisibility(b ? View.VISIBLE : View.GONE);
     }
 }
