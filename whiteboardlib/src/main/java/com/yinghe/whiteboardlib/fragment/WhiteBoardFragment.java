@@ -59,19 +59,19 @@ import static com.yinghe.whiteboardlib.bean.StrokeRecord.STROKE_TYPE_TEXT;
 
 public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawChangedListener, View.OnClickListener {
 
-    public final String TAG = getClass().getSimpleName();
+    final String TAG = getClass().getSimpleName();
 
     public interface SendBtnCallback {
         void onSendBtnClick(File filePath);
     }
 
-    public static final int COLOR_BLACK = Color.parseColor("#ff000000");
-    public static final int COLOR_RED = Color.parseColor("#ffff4444");
-    public static final int COLOR_GREEN = Color.parseColor("#ff99cc00");
-    public static final int COLOR_ORANGE = Color.parseColor("#ffffbb33");
-    public static final int COLOR_BLUE = Color.parseColor("#ff33b5e5");
-    public static final int REQUEST_IMAGE = 2;
-    public static final int REQUEST_BACKGROUND = 3;
+    static final int COLOR_BLACK = Color.parseColor("#ff000000");
+    static final int COLOR_RED = Color.parseColor("#ffff4444");
+    static final int COLOR_GREEN = Color.parseColor("#ff99cc00");
+    static final int COLOR_ORANGE = Color.parseColor("#ffffbb33");
+    static final int COLOR_BLUE = Color.parseColor("#ff33b5e5");
+    static final int REQUEST_IMAGE = 2;
+    static final int REQUEST_BACKGROUND = 3;
 
     private static final float BTN_ALPHA = 0.4f;
 
@@ -253,7 +253,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                     ScreenUtils.hideInput(saveDialog.getCurrentFocus());
                     saveDialog.dismiss();
                     String input = saveET.getText().toString();
-                    saveInUI(input + ".png", true);
+                    saveInUI(input + ".png");
                 }
                 return true;
             }
@@ -267,7 +267,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                     public void onClick(DialogInterface dialog, int which) {
                         ScreenUtils.hideInput(saveDialog.getCurrentFocus());
                         String input = saveET.getText().toString();
-                        saveInUI(input + ".png", true);
+                        saveInUI(input + ".png");
                     }
                 }).setNegativeButton("取消", new DialogInterface.OnClickListener() {
                     @Override
@@ -580,6 +580,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     private void updateGV() {
         sketchGVAdapter.notifyDataSetChanged();
     }
+
     @Override
     public void onClick(View v) {
         int id = v.getId();
@@ -643,7 +644,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        String photoName = TEMP_FILE_NAME + TimeUtils.getNowTimeString() + ".png";
+                        String photoName = TEMP_FILE_NAME + TimeUtils.getNowTimeString();
                         sendBtnCallback.onSendBtnClick(saveInOI(TEMP_FILE_PATH, photoName, 50));
                     }
                 }).start();
@@ -676,16 +677,60 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         ScreenUtils.showInput(mSketchView);
     }
 
-    public void setBackgroundByPath(String path) {
-        mSketchView.setBackgroundByPath(path);
+    /**
+     * @param imgPath 添加的背景图片文件路径
+     * @author TangentLu
+     * create at 16/6/21 下午3:39
+     * @summary 设置当前白板的背景图片
+     */
+    public void setCurBackgroundByPath(String imgPath) {
+        mSketchView.setBackgroundByPath(imgPath);
     }
 
-    public void addPhotoByPath(String path) {
-        mSketchView.addPhotoByPath(path);
+    /**
+     * @param imgPath 添加的背景图片文件路径
+     * @author TangentLu
+     * create at 16/6/21 下午3:39
+     * @summary 新增白板并设置白板的背景图片
+     */
+    public void setNewBackgroundByPath(String imgPath) {
+        SketchData newSketchData = new SketchData();
+        sketchDataList.add(newSketchData);
+        mSketchView.setSketchData(newSketchData);
+        setCurBackgroundByPath(imgPath);
     }
 
+    /**
+     * @param imgPath 新增的图片路径
+     * @author TangentLu
+     * create at 16/6/21 下午3:42
+     * @summary 新增图片到当前白板
+     */
+    public void addPhotoByPath(String imgPath) {
+        mSketchView.addPhotoByPath(imgPath);
+    }
+
+
+    /**
+     * @author TangentLu
+     * create at 16/6/21 下午3:44
+     * @summary 获取当前白板的图片结果
+     */
     public Bitmap getResultBitmap() {
         return mSketchView.getResultBitmap();
+    }
+
+
+    /**
+     * @param filePath 保存的文件路径
+     * @param imgName  保存的文件名
+     * @return 返回保存后的文件路径
+     * @author TangentLu
+     * create at 16/6/21 下午3:46
+     * @summary 手动保存当前画板到文件，耗时操作
+     */
+    public File saveInOI(String filePath, String imgName) {
+        return saveInOI(filePath, imgName, 80);
     }
 
     @Override
@@ -757,44 +802,14 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     }
 
 
-    private void saveInUI(final String imgName, final boolean isToast) {
-        new AsyncTask() {
-
-            @Override
-            protected void onPreExecute() {
-                super.onPreExecute();
-                dialog = new AlertDialog.Builder(activity)
-                        .setTitle("保存画板")
-                        .setMessage("保存中...")
-                        .show();
-            }
-
-            @Override
-            protected Object doInBackground(Object[] params) {
-                return saveInOI(FILE_PATH, imgName);
-            }
-
-            @Override
-            protected void onPostExecute(Object o) {
-                super.onPostExecute(o);
-                if (isToast) {
-                    if (o != null)
-                        Toast.makeText(getActivity(), (String) o, Toast.LENGTH_SHORT).show();
-                    else
-                        Toast.makeText(getActivity(), "保存失败！", Toast.LENGTH_SHORT).show();
-                }
-                dialog.dismiss();
-            }
-        }.execute("");
+    private void saveInUI(final String imgName) {
+        new saveToFileTask().execute(imgName);
     }
 
-    public File saveInOI(String filePath, String imgName) {
-        return saveInOI(filePath, imgName, 90);
-    }
     /**
      * @param filePath 文件保存路径
      * @param imgName  文件名
-     * @param compress  压缩百分比1-100
+     * @param compress 压缩百分比1-100
      * @return 返回保存的图片文件
      * @author TangentLu
      * create at 16/6/17 上午11:18
@@ -859,18 +874,29 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         iv.setAlpha(1f);
     }
 
-    class UpdateSketchGVTask extends AsyncTask<String, Void, Void> {
-
+    class saveToFileTask extends AsyncTask<String, Void, File> {
         @Override
-        protected Void doInBackground(String... photoName) {
-//            curSketchData.thumbnailBM = mSketchView.getResultBitmap();
-            return null;
+        protected void onPreExecute() {
+            super.onPreExecute();
+            dialog = new AlertDialog.Builder(activity)
+                    .setTitle("保存画板")
+                    .setMessage("保存中...")
+                    .show();
         }
 
         @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            sketchGVAdapter.notifyDataSetChanged();
+        protected File doInBackground(String... photoName) {
+            return saveInOI(FILE_PATH, photoName[0]);
+        }
+
+        @Override
+        protected void onPostExecute(File file) {
+            super.onPostExecute(file);
+            if (file.exists())
+                Toast.makeText(getActivity(), file.getAbsolutePath(), Toast.LENGTH_SHORT).show();
+            else
+                Toast.makeText(getActivity(), "保存失败！", Toast.LENGTH_SHORT).show();
+            dialog.dismiss();
         }
     }
 

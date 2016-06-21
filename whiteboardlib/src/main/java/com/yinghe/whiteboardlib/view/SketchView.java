@@ -723,6 +723,8 @@ public class SketchView extends View implements OnTouchListener {
         if (sampleBM != null) {
             PhotoRecord newRecord = initPhotoRecord(sampleBM);
             setCurPhotoRecord(newRecord);
+        } else {
+            Toast.makeText(mContext, "图片文件路径有误！", Toast.LENGTH_SHORT).show();
         }
     }
 
