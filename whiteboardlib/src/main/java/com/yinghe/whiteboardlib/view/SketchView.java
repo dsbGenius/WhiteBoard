@@ -50,7 +50,6 @@ import com.yinghe.whiteboardlib.bean.SketchData;
 import com.yinghe.whiteboardlib.bean.StrokeRecord;
 
 import java.io.File;
-import java.util.List;
 
 import static com.yinghe.whiteboardlib.bean.StrokeRecord.STROKE_TYPE_CIRCLE;
 import static com.yinghe.whiteboardlib.bean.StrokeRecord.STROKE_TYPE_DRAW;
@@ -112,12 +111,12 @@ public class SketchView extends View implements OnTouchListener {
     private int mWidth, mHeight;
 
     SketchData curSketchData;
-    private List<PhotoRecord> curPhotoRecordList;
-    private List<StrokeRecord> curStrokeRecordList;
-    private List<StrokeRecord> curStrokeRedoList;
+    //    private List<PhotoRecord> curSketchData.photoRecordList;
+//    private List<StrokeRecord> curSketchData.strokeRecordList;
+//    private List<StrokeRecord> curSketchData.strokeRedoList;
     private Context mContext;
 
-    private Bitmap curBackgroundBM;
+    //    private Bitmap curSketchData.backgroundBM;
     Rect backgroundSrcRect = new Rect();
     Rect backgroundDstRect = new Rect();
     StrokeRecord curStrokeRecord;
@@ -149,18 +148,21 @@ public class SketchView extends View implements OnTouchListener {
 
     public void setSketchData(SketchData sketchData) {
         this.curSketchData = sketchData;
-        curPhotoRecordList = sketchData.photoRecordList;
-        curStrokeRecordList = sketchData.strokeRecordList;
-        curStrokeRedoList = sketchData.strokeRedoList;
-        curBackgroundBM = sketchData.backgroundBM;
         curPhotoRecord = null;
     }
+
+    public void updateSketchData(SketchData sketchData) {
+        if (curSketchData != null)
+            curSketchData.thumbnailBM = getThumbnailResultBitmap();//更新数据前先保存上一份数据的缩略图
+        setSketchData(sketchData);
+    }
+
 
 
     public SketchView(Context context, AttributeSet attr) {
         super(context, attr);
         this.mContext = context;
-        setSketchData(new SketchData());
+//        setSketchData(new SketchData());
         initParams(context);
         if (isFocusable()) {
             this.setOnTouchListener(this);
@@ -281,8 +283,8 @@ public class SketchView extends View implements OnTouchListener {
     }
 
     private void drawBackground(Canvas canvas) {
-        if (curBackgroundBM != null) {
-            canvas.drawBitmap(curBackgroundBM, backgroundSrcRect, backgroundDstRect, null);
+        if (curSketchData.backgroundBM != null) {
+            canvas.drawBitmap(curSketchData.backgroundBM, backgroundSrcRect, backgroundDstRect, null);
         } else {
             canvas.drawColor(Color.WHITE);
         }
@@ -294,7 +296,7 @@ public class SketchView extends View implements OnTouchListener {
 
     private void drawRecord(Canvas canvas, boolean isDrawBoard) {
         if (curSketchData != null) {
-            for (PhotoRecord record : curPhotoRecordList) {
+            for (PhotoRecord record : curSketchData.photoRecordList) {
                 if (record != null)
                     canvas.drawBitmap(record.bitmap, record.matrix, null);
             }
@@ -304,7 +306,7 @@ public class SketchView extends View implements OnTouchListener {
                 drawBoard(canvas, photoCorners);//绘制图形边线
                 drawMarks(canvas, photoCorners);//绘制边角图片
             }
-            for (StrokeRecord record : curStrokeRecordList) {
+            for (StrokeRecord record : curSketchData.strokeRecordList) {
                 int type = record.type;
                 if (type == StrokeRecord.STROKE_TYPE_ERASER || type == StrokeRecord.STROKE_TYPE_DRAW || type == StrokeRecord.STROKE_TYPE_LINE) {
                     canvas.drawPath(record.path, record.paint);
@@ -385,7 +387,7 @@ public class SketchView extends View implements OnTouchListener {
     }
 
     public void addStrokeRecord(StrokeRecord record) {
-        curStrokeRecordList.add(record);
+        curSketchData.strokeRecordList.add(record);
         invalidate();
     }
 
@@ -393,7 +395,7 @@ public class SketchView extends View implements OnTouchListener {
         downX = event.getX();
         downY = event.getY();
         if (editMode == EDIT_STROKE) {
-            curStrokeRedoList.clear();
+            curSketchData.strokeRedoList.clear();
             curStrokeRecord = new StrokeRecord(strokeType);
             if (strokeType == STROKE_TYPE_ERASER) {
                 strokePath = new Path();
@@ -424,7 +426,7 @@ public class SketchView extends View implements OnTouchListener {
                 textWindowCallback.onText(this, curStrokeRecord);
                 return;
             }
-            curStrokeRecordList.add(curStrokeRecord);
+            curSketchData.strokeRecordList.add(curStrokeRecord);
         } else if (editMode == EDIT_PHOTO) {
             float[] downPoint = new float[]{downX, downY};
             if (isInMarkRect(downPoint)) {// 先判操作标记区域
@@ -441,8 +443,8 @@ public class SketchView extends View implements OnTouchListener {
     //judge click which photo，then can edit the photo
     private void selectPhoto(float[] downPoint) {
         PhotoRecord clickRecord = null;
-        for (int i = curPhotoRecordList.size() - 1; i >= 0; i--) {
-            PhotoRecord record = curPhotoRecordList.get(i);
+        for (int i = curSketchData.photoRecordList.size() - 1; i >= 0; i--) {
+            PhotoRecord record = curSketchData.photoRecordList.get(i);
             if (isInPhotoRect(record, downPoint)) {
                 clickRecord = record;
                 break;
@@ -462,7 +464,7 @@ public class SketchView extends View implements OnTouchListener {
             return true;
         }
         if (markerDeleteRect.contains(downPoint[0], (int) downPoint[1])) {//判断是否在区域内
-            curPhotoRecordList.remove(curPhotoRecord);
+            curSketchData.photoRecordList.remove(curPhotoRecord);
             setCurPhotoRecord(null);
             actionMode = ACTION_NONE;
             return true;
@@ -635,9 +637,9 @@ public class SketchView extends View implements OnTouchListener {
      * 删除一笔
      */
     public void undo() {
-        if (curStrokeRecordList.size() > 0) {
-            curStrokeRedoList.add(curStrokeRecordList.get(curStrokeRecordList.size() - 1));
-            curStrokeRecordList.remove(curStrokeRecordList.size() - 1);
+        if (curSketchData.strokeRecordList.size() > 0) {
+            curSketchData.strokeRedoList.add(curSketchData.strokeRecordList.get(curSketchData.strokeRecordList.size() - 1));
+            curSketchData.strokeRecordList.remove(curSketchData.strokeRecordList.size() - 1);
             invalidate();
         }
     }
@@ -647,25 +649,25 @@ public class SketchView extends View implements OnTouchListener {
      * 撤销
      */
     public void redo() {
-        if (curStrokeRedoList.size() > 0) {
-            curStrokeRecordList.add(curStrokeRedoList.get(curStrokeRedoList.size() - 1));
-            curStrokeRedoList.remove(curStrokeRedoList.size() - 1);
+        if (curSketchData.strokeRedoList.size() > 0) {
+            curSketchData.strokeRecordList.add(curSketchData.strokeRedoList.get(curSketchData.strokeRedoList.size() - 1));
+            curSketchData.strokeRedoList.remove(curSketchData.strokeRedoList.size() - 1);
         }
         invalidate();
     }
 
 
     public int getRedoCount() {
-        return curStrokeRedoList != null ? curStrokeRedoList.size() : 0;
+        return curSketchData.strokeRedoList != null ? curSketchData.strokeRedoList.size() : 0;
     }
 
 
     public int getRecordCount() {
-        return (curStrokeRecordList != null && curPhotoRecordList != null) ? curStrokeRecordList.size() + curPhotoRecordList.size() : 0;
+        return (curSketchData.strokeRecordList != null && curSketchData.photoRecordList != null) ? curSketchData.strokeRecordList.size() + curSketchData.photoRecordList.size() : 0;
     }
 
     public int getStrokeRecordCount() {
-        return curStrokeRecordList != null ? curStrokeRecordList.size() : 0;
+        return curSketchData.strokeRecordList != null ? curSketchData.strokeRecordList.size() : 0;
     }
 
 
@@ -689,20 +691,20 @@ public class SketchView extends View implements OnTouchListener {
 
     public void erase() {
         // 先判断是否已经回收
-        for (PhotoRecord record : curPhotoRecordList) {
+        for (PhotoRecord record : curSketchData.photoRecordList) {
             if (record.bitmap != null && !record.bitmap.isRecycled()) {
                 record.bitmap.recycle();
                 record.bitmap = null;
             }
         }
-        if (curBackgroundBM != null && !curBackgroundBM.isRecycled()) {
+        if (curSketchData.backgroundBM != null && !curSketchData.backgroundBM.isRecycled()) {
             // 回收并且置为null
-            curBackgroundBM.recycle();
-            curBackgroundBM = null;
+            curSketchData.backgroundBM.recycle();
+            curSketchData.backgroundBM = null;
         }
-        curStrokeRecordList.clear();
-        curPhotoRecordList.clear();
-        curStrokeRedoList.clear();
+        curSketchData.strokeRecordList.clear();
+        curSketchData.photoRecordList.clear();
+        curSketchData.strokeRedoList.clear();
         curPhotoRecord = null;
         System.gc();
         invalidate();
@@ -731,8 +733,8 @@ public class SketchView extends View implements OnTouchListener {
     public void setBackgroundByPath(String path) {
         Bitmap sampleBM = getSampleBitMap(path);
         if (sampleBM != null) {
-            curBackgroundBM = sampleBM;
-            backgroundSrcRect = new Rect(0, 0, curBackgroundBM.getWidth(), curBackgroundBM.getHeight());
+            curSketchData.backgroundBM = sampleBM;
+            backgroundSrcRect = new Rect(0, 0, curSketchData.backgroundBM.getWidth(), curSketchData.backgroundBM.getHeight());
             backgroundDstRect = new Rect(0, 0, mWidth, mHeight);
             invalidate();
         } else {
@@ -762,8 +764,8 @@ public class SketchView extends View implements OnTouchListener {
     }
 
     private void setCurPhotoRecord(PhotoRecord record) {
-        curPhotoRecordList.remove(record);
-        curPhotoRecordList.add(record);
+        curSketchData.photoRecordList.remove(record);
+        curSketchData.photoRecordList.add(record);
         curPhotoRecord = record;
         invalidate();
     }

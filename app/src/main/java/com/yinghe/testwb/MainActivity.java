@@ -25,21 +25,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-//        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-//        setSupportActionBar(toolbar);
-
-//        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-//        fab.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
-//            }
-//        });
 
 
         FragmentTransaction ts = getFragmentManager().beginTransaction();
-        ts.add(R.id.fl_main, WhiteBoardFragment.newInstance(new WhiteBoardFragment.SendBtnCallback() {
+        whiteBoardFragment = WhiteBoardFragment.newInstance(new WhiteBoardFragment.SendBtnCallback() {
             @Override
             public void onSendBtnClick(File filePath) {
                 Log.e("11", "onSendBtnClick: " + filePath);
@@ -47,7 +36,8 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this, filePath.toString(), Toast.LENGTH_SHORT).show();
                 Looper.loop();
             }
-        }), "wb").commit();
+        });
+        ts.add(R.id.fl_main, whiteBoardFragment, "wb").commit();
     }
 
     @Override
@@ -74,9 +64,12 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        Intent intent = new Intent(Intent.ACTION_MAIN);
-        intent.addCategory(Intent.CATEGORY_HOME);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
+//        whiteBoardFragment.setCurBackgroundByPath("/storage/emulated/0/YingHe/sketchPhoto/2016-06-21_035725.png");
+//        whiteBoardFragment.setNewBackgroundByPath("/storage/emulated/0/YingHe/sketchPhoto/2016-06-21_035725.png");
+        whiteBoardFragment.setNewBackgroundByPath("/storage/emulated/0/YingHe/sketchPhoto/2016-06-21_041513.png");
+//        Intent intent = new Intent(Intent.ACTION_MAIN);
+//        intent.addCategory(Intent.CATEGORY_HOME);
+//        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//        startActivity(intent);
     }
 }

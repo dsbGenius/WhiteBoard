@@ -70,8 +70,8 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     static final int COLOR_GREEN = Color.parseColor("#ff99cc00");
     static final int COLOR_ORANGE = Color.parseColor("#ffffbb33");
     static final int COLOR_BLUE = Color.parseColor("#ff33b5e5");
-    static final int REQUEST_IMAGE = 2;
-    static final int REQUEST_BACKGROUND = 3;
+    public static final int REQUEST_IMAGE = 2;
+    public static final int REQUEST_BACKGROUND = 3;
 
     private static final float BTN_ALPHA = 0.4f;
 
@@ -220,13 +220,13 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
             public void onAddCallback() {
                 SketchData newSketchData = new SketchData();
                 sketchDataList.add(newSketchData);
-                mSketchView.setSketchData(newSketchData);
+                mSketchView.updateSketchData(newSketchData);
                 showSketchView(true);
             }
 
             @Override
             public void onSelectCallback(SketchData sketchData) {
-                mSketchView.setSketchData(sketchData);
+                mSketchView.updateSketchData(sketchData);
                 showSketchView(true);
             }
         });
@@ -684,6 +684,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
      * @summary 设置当前白板的背景图片
      */
     public void setCurBackgroundByPath(String imgPath) {
+        showSketchView(true);
         mSketchView.setBackgroundByPath(imgPath);
     }
 
@@ -694,9 +695,10 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
      * @summary 新增白板并设置白板的背景图片
      */
     public void setNewBackgroundByPath(String imgPath) {
+        showSketchView(true);
         SketchData newSketchData = new SketchData();
         sketchDataList.add(newSketchData);
-        mSketchView.setSketchData(newSketchData);
+        mSketchView.updateSketchData(newSketchData);
         setCurBackgroundByPath(imgPath);
     }
 
@@ -707,6 +709,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
      * @summary 新增图片到当前白板
      */
     public void addPhotoByPath(String imgPath) {
+        showSketchView(true);
         mSketchView.addPhotoByPath(imgPath);
     }
 
