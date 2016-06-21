@@ -66,10 +66,14 @@ public class MainActivity extends AppCompatActivity {
     public void onBackPressed() {
 //        whiteBoardFragment.setCurBackgroundByPath("/storage/emulated/0/YingHe/sketchPhoto/2016-06-21_035725.png");
 //        whiteBoardFragment.setNewBackgroundByPath("/storage/emulated/0/YingHe/sketchPhoto/2016-06-21_035725.png");
-        whiteBoardFragment.setNewBackgroundByPath("/storage/emulated/0/YingHe/sketchPhoto/2016-06-21_041513.png");
-//        Intent intent = new Intent(Intent.ACTION_MAIN);
-//        intent.addCategory(Intent.CATEGORY_HOME);
-//        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//        startActivity(intent);
+//        whiteBoardFragment.setNewBackgroundByPath("/storage/emulated/0/YingHe/sketchPhoto/2016-06-21_041513.png");
+//         File f= whiteBoardFragment.saveInOI(WhiteBoardFragment.FILE_PATH, "ss");
+//
+//        whiteBoardFragment.addPhotoByPath(f.toString());
+//        whiteBoardFragment.setCurBackgroundByPath("/storage/emulated/0/YingHe/sketchPhoto/2016-06-21_04151  3.png");
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_HOME);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
     }
 }

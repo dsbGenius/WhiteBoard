@@ -131,9 +131,9 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     private ArrayList<String> mSelectPath;
 
     private List<SketchData> sketchDataList = new ArrayList<>();
-    //    private SketchData curSketchData;
-    private List<String> sketchPathList = new ArrayList<>();
-    private int dataPosition;
+//    //    private SketchData curSketchData;
+//    private List<String> sketchPathList = new ArrayList<>();
+//    private int dataPosition;
 
 
     public static int sketchViewHeight;
@@ -700,6 +700,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         sketchDataList.add(newSketchData);
         mSketchView.updateSketchData(newSketchData);
         setCurBackgroundByPath(imgPath);
+        mSketchView.setEditMode(SketchView.EDIT_STROKE);
     }
 
     /**
@@ -711,6 +712,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     public void addPhotoByPath(String imgPath) {
         showSketchView(true);
         mSketchView.addPhotoByPath(imgPath);
+        mSketchView.setEditMode(SketchView.EDIT_PHOTO);//切换图片编辑模式
     }
 
 

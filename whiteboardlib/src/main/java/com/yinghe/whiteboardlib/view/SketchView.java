@@ -61,6 +61,8 @@ import static com.yinghe.whiteboardlib.bean.StrokeRecord.STROKE_TYPE_TEXT;
 
 public class SketchView extends View implements OnTouchListener {
 
+    final String TAG = getClass().getSimpleName();
+
     public interface TextWindowCallback {
         void onText(View view, StrokeRecord record);
     }
@@ -284,7 +286,15 @@ public class SketchView extends View implements OnTouchListener {
 
     private void drawBackground(Canvas canvas) {
         if (curSketchData.backgroundBM != null) {
-            canvas.drawBitmap(curSketchData.backgroundBM, backgroundSrcRect, backgroundDstRect, null);
+//            Rect dstRect = new Rect(0, 0, canvas.getWidth(), canvas.getHeight());
+//            canvas.drawBitmap(curSketchData.backgroundBM, backgroundSrcRect, backgroundDstRect, null);
+            Matrix matrix = new Matrix();
+            float wScale = (float) canvas.getWidth() / curSketchData.backgroundBM.getWidth();
+            float hScale = (float) canvas.getHeight() / curSketchData.backgroundBM.getHeight();
+            matrix.postScale(wScale, hScale);
+            canvas.drawBitmap(curSketchData.backgroundBM, matrix, null);
+//            canvas.drawBitmap(curSketchData.backgroundBM, backgroundSrcRect, dstRect, null);
+            Log.d(TAG, "drawBackground:src= " + backgroundSrcRect.toString() + ";dst=" + backgroundDstRect.toString());
         } else {
             canvas.drawColor(Color.WHITE);
         }
