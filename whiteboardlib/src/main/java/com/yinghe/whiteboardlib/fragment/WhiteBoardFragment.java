@@ -131,7 +131,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     private ArrayList<String> mSelectPath;
 
     private List<SketchData> sketchDataList = new ArrayList<>();
-    private SketchData curSketchData;
+    //    private SketchData curSketchData;
     private List<String> sketchPathList = new ArrayList<>();
     private int dataPosition;
 
@@ -203,9 +203,9 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
     }
 
     private void initData() {
-        curSketchData = new SketchData();
-        sketchDataList.add(curSketchData);
-        mSketchView.setSketchData(curSketchData);
+        SketchData newSketchData = new SketchData();
+        sketchDataList.add(newSketchData);
+        mSketchView.setSketchData(newSketchData);
     }
 
     private void initSketchGV() {
@@ -221,6 +221,12 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                 SketchData newSketchData = new SketchData();
                 sketchDataList.add(newSketchData);
                 mSketchView.setSketchData(newSketchData);
+                showSketchView(true);
+            }
+
+            @Override
+            public void onSelectCallback(SketchData sketchData) {
+                mSketchView.setSketchData(sketchData);
                 showSketchView(true);
             }
         });
@@ -579,7 +585,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
         int id = v.getId();
         if (id == R.id.btn_add) {
             if (mSketchView.getVisibility() == View.VISIBLE) {
-                curSketchData.thumbnailBM = mSketchView.getThumbnailResultBitmap();
+                mSketchView.createCurThumbnailBM();
                 showSketchView(false);
             } else {
                 showSketchView(true);

@@ -4,6 +4,7 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="folder_all">所有图片</string>
     <string name="folder_first">背景素材</string>
+    <string name="sketch_count_alert">画板已达最大数量</string>
 
     <string name="msg_no_camera">No system camera found</string>
     <string name="msg_amount_limit">Select images amount is limit</string>

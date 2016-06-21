@@ -623,6 +623,11 @@ public class SketchView extends View implements OnTouchListener {
     }
 
     @NonNull
+    public void createCurThumbnailBM() {
+        curSketchData.thumbnailBM = getThumbnailResultBitmap();
+    }
+
+    @NonNull
     public Bitmap getThumbnailResultBitmap() {
         return BitmapUtils.createBitmapThumbnail(getResultBitmap(), true, ScreenUtils.dip2px(mContext, 200), ScreenUtils.dip2px(mContext, 200));
     }

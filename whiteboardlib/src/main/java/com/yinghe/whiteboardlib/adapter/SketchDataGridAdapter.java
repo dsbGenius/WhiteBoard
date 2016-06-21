@@ -1,17 +1,15 @@
 package com.yinghe.whiteboardlib.adapter;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.yinghe.whiteboardlib.R;
 import com.yinghe.whiteboardlib.Utils.ScreenUtils;
@@ -26,13 +24,17 @@ public class SketchDataGridAdapter extends BaseAdapter {
 
 
     String TAG = "tangentLu";
+
     public interface OnActionCallback {
         void onDeleteCallback(int position);
 
         void onAddCallback();
+
+        void onSelectCallback(SketchData sketchData);
     }
 
     float ratio;
+    int itemHeight;
 
 
     List<SketchData> sketchDataList;
@@ -55,8 +57,8 @@ public class SketchDataGridAdapter extends BaseAdapter {
     }
 
     @Override
-    public Bitmap getItem(int position) {
-        return sketchDataList.get(position).thumbnailBM;
+    public SketchData getItem(int position) {
+        return sketchDataList.get(position);
     }
 
     @Override
@@ -66,18 +68,17 @@ public class SketchDataGridAdapter extends BaseAdapter {
 
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
-        ViewHolder holder = null;
+        final ViewHolder holder;
+        final View view;
         if (convertView == null) {
-            final View view = mInflater.inflate(R.layout.grid_item_sketch_data, null);
-            holder = new ViewHolder();
-            bindView(view, holder, position);
-            view.setTag(holder);
-            convertView = view;
+            view = mInflater.inflate(R.layout.grid_item_sketch_data, null);
         } else {
-            holder = (ViewHolder) convertView.getTag();
+            view = convertView;
         }
+        holder = new ViewHolder();
+        bindView(view, holder, position);
         showData(holder, position);
-        return convertView;
+        return view;
     }
 
     private void showData(final ViewHolder holder, int position) {
@@ -91,22 +92,30 @@ public class SketchDataGridAdapter extends BaseAdapter {
                 holder.deleteIV.setVisibility(View.GONE);
             }
             if (getItem(position) != null) {
-                Drawable drawable = new BitmapDrawable(mContext.getResources(), getItem(position));
+                Drawable drawable = new BitmapDrawable(mContext.getResources(), getItem(position).thumbnailBM);
                 holder.sketchIV.setImageDrawable(drawable);
             }
             holder.numberTV.setText(position + 1 + "");
         }
         ViewGroup.LayoutParams lp = holder.rootView.getLayoutParams();
-        Log.d(TAG, "showData: lpW=" + lp.width + ",lpH=" + lp.height + ",vW=" + holder.rootView.getWidth());
-        lp.height = (int) (holder.rootView.getMeasuredWidth() / ratio);
-//        lp.height = 300;
+        //为保持白板缩略图高宽比例，快被GridView玩死了。。。
+        if (holder.rootView.getMeasuredWidth() == 0) {
+            lp.height = itemHeight;
+        } else {
+            itemHeight = lp.height = (int) (holder.rootView.getMeasuredWidth() / ratio);
+        }
     }
 
     private void bindView(View view, final ViewHolder holder, final int position) {
         holder.rootView = view.findViewById(R.id.grid_sketch_root_view);
         holder.sketchLay = view.findViewById(R.id.grid_sketch_lay);
+        holder.sketchLay.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onActionCallback.onSelectCallback(getItem(position));
+            }
+        });
         holder.sketchIV = (ImageView) view.findViewById(R.id.grid_sketch);
-
         holder.deleteIV = (ImageView) view.findViewById(R.id.grid_delete);
         holder.deleteIV.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -120,8 +129,10 @@ public class SketchDataGridAdapter extends BaseAdapter {
         holder.addIV.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (onActionCallback != null)
+                if (onActionCallback != null && getCount() < 11)
                     onActionCallback.onAddCallback();
+                else
+                    Toast.makeText(mContext, R.string.sketch_count_alert, Toast.LENGTH_SHORT).show();
             }
         });
     }
