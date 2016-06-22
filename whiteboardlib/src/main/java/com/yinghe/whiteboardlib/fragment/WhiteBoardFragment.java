@@ -282,12 +282,14 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                 SketchData newSketchData = new SketchData();
                 sketchDataList.add(newSketchData);
                 mSketchView.updateSketchData(newSketchData);
+                mSketchView.setEditMode(SketchView.EDIT_STROKE);//切换笔画编辑模式
                 showSketchView(true);
             }
 
             @Override
             public void onSelectCallback(SketchData sketchData) {
                 mSketchView.updateSketchData(sketchData);
+                mSketchView.setEditMode(SketchView.EDIT_PHOTO);//切换图片编辑模式
                 showSketchView(true);
             }
         });
