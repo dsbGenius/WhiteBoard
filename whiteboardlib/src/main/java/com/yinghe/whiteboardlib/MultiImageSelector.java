@@ -78,6 +78,15 @@ public class MultiImageSelector {
         }
     }
 
+    public void start(android.support.v4.app.Fragment fragment, int[] boundsInts, int requestCode) {
+        if (hasPermission()) {
+            mRequstType = requestCode;
+            fragment.startActivityForResult(createIntent(boundsInts), requestCode);
+        } else {
+            Toast.makeText(mContext, R.string.error_no_permission, Toast.LENGTH_SHORT).show();
+        }
+    }
+
     private boolean hasPermission(){
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN){
             // Permission was added in API Level 16
