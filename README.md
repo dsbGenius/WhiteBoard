@@ -2,6 +2,7 @@
 > ##SketchBoard是一个可涂鸦、绘图、添加文字、图像（可旋转缩放）、背景的Fragment，其中主要由SketchView利用matrix完成所有图形绘制操作。
 
 tips：图像旋转缩放高仿美图APP的操作方式
+
 tips: 感谢🙏绮怀先生对图片选取功能的代码贡献
 
 
