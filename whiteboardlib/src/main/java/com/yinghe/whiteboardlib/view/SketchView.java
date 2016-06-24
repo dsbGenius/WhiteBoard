@@ -702,7 +702,7 @@ public class SketchView extends View implements OnTouchListener {
     public void erase() {
         // 先判断是否已经回收
         for (PhotoRecord record : curSketchData.photoRecordList) {
-            if (record.bitmap != null && !record.bitmap.isRecycled()) {
+            if (record != null && record.bitmap != null && !record.bitmap.isRecycled()) {
                 record.bitmap.recycle();
                 record.bitmap = null;
             }

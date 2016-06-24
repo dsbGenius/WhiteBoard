@@ -28,15 +28,7 @@ public class MainActivity extends AppCompatActivity {
 
 
         FragmentTransaction ts = getSupportFragmentManager().beginTransaction();
-        whiteBoardFragment = WhiteBoardFragment.newInstance(new WhiteBoardFragment.SendBtnCallback() {
-            @Override
-            public void onSendBtnClick(File filePath) {
-                Log.e("11", "onSendBtnClick: " + filePath);
-                Looper.prepare();
-                Toast.makeText(MainActivity.this, filePath.toString(), Toast.LENGTH_SHORT).show();
-                Looper.loop();
-            }
-        });
+        whiteBoardFragment = WhiteBoardFragment.newInstance();
         ts.add(R.id.fl_main, whiteBoardFragment, "wb").commit();
     }
 
