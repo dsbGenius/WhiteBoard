@@ -135,7 +135,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
 //    private List<String> sketchPathList = new ArrayList<>();
 //    private int dataPosition;
 
-
+    //
     public static int sketchViewHeight;
     public static int sketchViewWidth;
     public static int sketchViewRight;
@@ -440,6 +440,7 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
                 }
                 btn_stroke.setImageResource(resId);
                 mSketchView.setStrokeType(strokeType);
+                strokePopupWindow.dismiss();//切换画笔后隐藏
             }
         });
         strokeColorRG.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
@@ -786,9 +787,11 @@ public class WhiteBoardFragment extends Fragment implements SketchView.OnDrawCha
             }
         } else {
             if (drawMode == STROKE_TYPE_DRAW) {
-                strokePopupWindow.showAsDropDown(anchor, 0, ScreenUtils.dip2px(activity, -strokePupWindowsDPHeight) - anchor.getHeight());
+//                strokePopupWindow.showAsDropDown(anchor, 0, ScreenUtils.dip2px(activity, -strokePupWindowsDPHeight) - anchor.getHeight());
+                strokePopupWindow.showAsDropDown(anchor, 0, 0);
             } else {
-                eraserPopupWindow.showAsDropDown(anchor, 0, ScreenUtils.dip2px(activity, -eraserPupWindowsDPHeight) - anchor.getHeight());
+//                eraserPopupWindow.showAsDropDown(anchor, 0, ScreenUtils.dip2px(activity, -eraserPupWindowsDPHeight) - anchor.getHeight());
+                eraserPopupWindow.showAsDropDown(anchor, 0, 0);
             }
         }
     }
