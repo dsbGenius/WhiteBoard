@@ -27,6 +27,8 @@ import android.graphics.Paint;
 import android.graphics.PaintFlagsDrawFilter;
 import android.graphics.Path;
 import android.graphics.PointF;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.os.Environment;
@@ -304,6 +306,7 @@ public class SketchView extends View implements OnTouchListener {
         drawRecord(canvas, true);
     }
 
+    Bitmap tempBitmap;
     private void drawRecord(Canvas canvas, boolean isDrawBoard) {
         if (curSketchData != null) {
             for (PhotoRecord record : curSketchData.photoRecordList) {
@@ -316,27 +319,47 @@ public class SketchView extends View implements OnTouchListener {
                 drawBoard(canvas, photoCorners);//绘制图形边线
                 drawMarks(canvas, photoCorners);//绘制边角图片
             }
+
+            //新建一个临时画布，以便橡皮擦生效
+            if (tempBitmap == null) {
+                tempBitmap = Bitmap.createBitmap(getWidth(), getHeight() , Bitmap.Config.ARGB_4444);
+            }
+            Canvas tempCanvas = new Canvas(tempBitmap);
+            clearCanvas(tempCanvas);//清空画布
+            tempCanvas.drawColor(Color.TRANSPARENT);
             for (StrokeRecord record : curSketchData.strokeRecordList) {
                 int type = record.type;
                 if (type == StrokeRecord.STROKE_TYPE_ERASER || type == StrokeRecord.STROKE_TYPE_DRAW || type == StrokeRecord.STROKE_TYPE_LINE) {
-                    canvas.drawPath(record.path, record.paint);
+                    tempCanvas.drawPath(record.path, record.paint);
                 } else if (type == STROKE_TYPE_CIRCLE) {
-                    canvas.drawOval(record.rect, record.paint);
+                    tempCanvas.drawOval(record.rect, record.paint);
                 } else if (type == STROKE_TYPE_RECTANGLE) {
-                    canvas.drawRect(record.rect, record.paint);
+                    tempCanvas.drawRect(record.rect, record.paint);
                 } else if (type == STROKE_TYPE_TEXT) {
                     if (record.text != null) {
                         StaticLayout layout = new StaticLayout(record.text, record.textPaint, record.textWidth, Layout.Alignment.ALIGN_NORMAL, 1.0F, 0.0F, true);
-                        canvas.translate(record.textOffX, record.textOffY);
-                        layout.draw(canvas);
-                        canvas.translate(-record.textOffX, -record.textOffY);
+                        tempCanvas.translate(record.textOffX, record.textOffY);
+                        layout.draw(tempCanvas);
+                        tempCanvas.translate(-record.textOffX, -record.textOffY);
                     }
                 }
             }
+            canvas.drawBitmap(tempBitmap, new Rect(0, 0, tempCanvas.getWidth(), tempCanvas.getHeight()), new Rect(0, 0, canvas.getWidth(), canvas.getHeight()), null);
+
         }
 
     }
-
+    /**
+     * 清理画布canvas
+     *
+     * @param temptCanvas
+     */
+    private void clearCanvas(Canvas temptCanvas) {
+        Paint p = new Paint();
+        p.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
+        temptCanvas.drawPaint(p);
+        p.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC));
+    }
     //绘制图像边线（由于图形旋转或不一定是矩形，所以用Path绘制边线）
     private void drawBoard(Canvas canvas, float[] photoCorners) {
         Path photoBorderPath = new Path();
@@ -407,6 +430,12 @@ public class SketchView extends View implements OnTouchListener {
         if (editMode == EDIT_STROKE) {
             curSketchData.strokeRedoList.clear();
             curStrokeRecord = new StrokeRecord(strokeType);
+            //实现橡皮擦关键代码，把橡皮擦的绘制模式改变，并且在onDraw里加一层
+            if (strokeType == StrokeRecord.STROKE_TYPE_ERASER) {
+                strokePaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));//关键代码
+            } else {
+                strokePaint.setXfermode(null);//关键代码
+            }
             if (strokeType == STROKE_TYPE_ERASER) {
                 strokePath = new Path();
                 strokePath.moveTo(downX, downY);
