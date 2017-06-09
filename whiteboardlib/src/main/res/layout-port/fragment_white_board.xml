@@ -34,6 +34,7 @@
             android:paddingTop="@dimen/control_btn_padding">
 
             <ImageView
+                android:id="@+id/btn_add"
                 style="@style/control_btn"
                 android:src="@drawable/ic_add_small" />
 
@@ -84,6 +85,7 @@
             <ImageView style="@style/control_btn.space" />
 
             <ImageView
+                android:id="@+id/btn_save"
                 style="@style/control_btn"
                 android:src="@drawable/ic_file" />
 
@@ -93,11 +95,13 @@
                 android:src="@drawable/ic_empty" />
 
             <ImageView
+                android:id="@+id/btn_send_space"
                 style="@style/control_btn.space"
                 android:visibility="gone"
                 tools:visibility="visible" />
 
             <ImageView
+                android:id="@+id/btn_send"
                 style="@style/control_btn"
                 android:layout_weight="1"
                 android:src="@drawable/ic_teacher"

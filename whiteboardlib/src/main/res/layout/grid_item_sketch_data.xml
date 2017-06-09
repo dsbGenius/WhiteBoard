@@ -25,6 +25,7 @@
                 android:scaleType="fitXY" />
 
             <ImageView
+                android:id="@+id/grid_number_bg"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
                 android:layout_alignBottom="@id/grid_sketch"

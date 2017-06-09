@@ -1,9 +1,7 @@
 package com.yinghe.whiteboardlib.Utils;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.os.Environment;
 import android.text.TextUtils;
 
@@ -21,20 +19,9 @@ public class FileUtils {
     private static final String JPEG_FILE_PREFIX = "IMG_";
     private static final String JPEG_FILE_SUFFIX = ".jpg";
 
-    /**
-     * 通知媒体库更新文件
-     *
-     * @param context
-     * @param filePath 文件全路径
-     */
-    public static void scanFile(Context context, String filePath) {
-        Intent scanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-        scanIntent.setData(Uri.fromFile(new File(filePath)));
-        context.sendBroadcast(scanIntent);
-    }
-    public static File createTmpFile(Context context) throws IOException {
+    public static File createTmpFile(Context context) throws IOException{
         File dir = null;
-        if (TextUtils.equals(Environment.getExternalStorageState(), Environment.MEDIA_MOUNTED)) {
+        if(TextUtils.equals(Environment.getExternalStorageState(), Environment.MEDIA_MOUNTED)) {
             dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
             if (!dir.exists()) {
                 dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM + "/Camera");
@@ -42,7 +29,7 @@ public class FileUtils {
                     dir = getCacheDirectory(context, true);
                 }
             }
-        } else {
+        }else{
             dir = getCacheDirectory(context, true);
         }
         return File.createTempFile(JPEG_FILE_PREFIX, JPEG_FILE_SUFFIX, dir);
@@ -104,7 +91,7 @@ public class FileUtils {
      * created on SD card <i>("/Android/data/[app_package_name]/cache/uil-images")</i> if card is mounted and app has
      * appropriate permission. Else - Android defines cache directory on device's file system.
      *
-     * @param context  Application context
+     * @param context Application context
      * @param cacheDir Cache directory path (e.g.: "AppCacheDir", "AppDir/cache/images")
      * @return Cache {@link File directory}
      */
@@ -139,23 +126,4 @@ public class FileUtils {
         return perm == PackageManager.PERMISSION_GRANTED;
     }
 
-    public static boolean deleteFoder(File file) {
-        if (file.exists()) { // 判断文件是否存在
-            if (file.isFile()) { // 判断是否是文件
-                file.delete(); // delete()方法 你应该知道 是删除的意思;
-            } else if (file.isDirectory()) { // 否则如果它是一个目录
-                File files[] = file.listFiles(); // 声明目录下所有的文件 files[];
-                if (files != null) {
-                    for (int i = 0; i < files.length; i++) { // 遍历目录下所有的文件
-                        deleteFoder(files[i]); // 把每个文件 用这个方法进行迭代
-                    }
-                }
-            }
-            boolean isSuccess = file.delete();
-            if (!isSuccess) {
-                return false;
-            }
-        }
-        return true;
-    }
 }

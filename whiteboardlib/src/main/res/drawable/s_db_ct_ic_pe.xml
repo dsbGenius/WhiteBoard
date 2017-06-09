@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:drawable="@drawable/s_db_ct_ic_pe_che" android:state_checked="true" android:state_enabled="true" android:state_pressed="false" />
-    <item android:drawable="@drawable/s_db_ct_ic_pe_dis" android:state_checked="false" android:state_enabled="false" android:state_pressed="false" />
-    <item android:drawable="@drawable/s_db_ct_ic_pe_nor" android:state_checked="false" android:state_enabled="true" android:state_pressed="false" />
-    <item android:drawable="@drawable/s_db_ct_ic_pe_pre" android:state_checked="false" android:state_enabled="true" android:state_pressed="true" />
-</selector>

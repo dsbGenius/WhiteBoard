@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="gray">#D7D7D7</color>
+    <color name="gray">#eeeeee</color>
     <color name="com_bg_gray">#aaaaaaaa</color>
-    <color name="azure">#44cdfc</color>
-    <color name="white">#ffffff</color>
-    <color name="tran">#00ffffff</color>
-    <color name="blue_pressed">#36a4ca</color>
+
 </resources>
