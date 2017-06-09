@@ -2,7 +2,6 @@
 <resources>
     <dimen name="space_size">2dp</dimen>
     <dimen name="folder_cover_size">72dp</dimen>
-    <dimen name="grid_width">100dp</dimen>
     <dimen name="bottom_marin">0dp</dimen>
     <dimen name="right_margin">0dp</dimen>
     <dimen name="control_btn_padding">2dp</dimen>
