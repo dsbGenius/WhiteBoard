@@ -24,7 +24,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.PaintFlagsDrawFilter;
 import android.graphics.Path;
 import android.graphics.PointF;
 import android.graphics.PorterDuff;
@@ -52,7 +51,9 @@ import com.yinghe.whiteboardlib.bean.SketchData;
 import com.yinghe.whiteboardlib.bean.StrokeRecord;
 
 import java.io.File;
+import java.util.logging.Logger;
 
+import static com.yinghe.whiteboardlib.Utils.BitmapUtils.createBitmapThumbnail;
 import static com.yinghe.whiteboardlib.bean.StrokeRecord.STROKE_TYPE_CIRCLE;
 import static com.yinghe.whiteboardlib.bean.StrokeRecord.STROKE_TYPE_DRAW;
 import static com.yinghe.whiteboardlib.bean.StrokeRecord.STROKE_TYPE_ERASER;
@@ -63,40 +64,21 @@ import static com.yinghe.whiteboardlib.bean.StrokeRecord.STROKE_TYPE_TEXT;
 
 public class SketchView extends View implements OnTouchListener {
 
-    final String TAG = getClass().getSimpleName();
-
-    public interface TextWindowCallback {
-        void onText(View view, StrokeRecord record);
-    }
-
-
-    public void setTextWindowCallback(TextWindowCallback textWindowCallback) {
-        this.textWindowCallback = textWindowCallback;
-    }
-
-    private TextWindowCallback textWindowCallback;
-    private static final float TOUCH_TOLERANCE = 4;
-
     public static final int EDIT_STROKE = 1;
     public static final int EDIT_PHOTO = 2;
-
+    public static final int DEFAULT_STROKE_SIZE = 3;
+    public static final int DEFAULT_STROKE_ALPHA = 100;
+    public static final int DEFAULT_ERASER_SIZE = 50;
+    private static final float TOUCH_TOLERANCE = 4;
     private static final int ACTION_NONE = 0;
     private static final int ACTION_DRAG = 1;
     private static final int ACTION_SCALE = 2;
     private static final int ACTION_ROTATE = 3;
-
-    public static final int DEFAULT_STROKE_SIZE = 7;
-    public static final int DEFAULT_STROKE_ALPHA = 100;
-    public static final int DEFAULT_ERASER_SIZE = 50;
-
-
-    private float strokeSize = DEFAULT_STROKE_SIZE;
-    private int strokeRealColor = Color.BLACK;//画笔实际颜色
-    private int strokeColor = Color.BLACK;//画笔颜色
-    private int strokeAlpha = 255;//画笔透明度
-    private float eraserSize = DEFAULT_ERASER_SIZE;
-//    private int background = Color.WHITE;
-
+    //    private int curSketchData.editMode = EDIT_STROKE;
+    private static float SCALE_MAX = 4.0f;
+    private static float SCALE_MIN = 0.2f;
+    private static float SCALE_MIN_LEN;
+    final String TAG = getClass().getSimpleName();
     Paint boardPaint;
 
     Bitmap mirrorMarkBM = BitmapFactory.decodeResource(getResources(), R.drawable.mark_copy);
@@ -108,61 +90,43 @@ public class SketchView extends View implements OnTouchListener {
     RectF markerDeleteRect = new RectF(0, 0, deleteMarkBM.getWidth(), deleteMarkBM.getHeight());//删除标记边界
     RectF markerRotateRect = new RectF(0, 0, rotateMarkBM.getWidth(), rotateMarkBM.getHeight());//旋转标记边界
     RectF markerResetRect = new RectF(0, 0, resetMarkBM.getWidth(), resetMarkBM.getHeight());//旋转标记边界
-
-    private Path strokePath;
-    private Paint strokePaint;
-    private float downX, downY, preX, preY, curX, curY;
-    private int mWidth, mHeight;
-
     SketchData curSketchData;
-    //    private List<PhotoRecord> curSketchData.photoRecordList;
-//    private List<StrokeRecord> curSketchData.strokeRecordList;
-//    private List<StrokeRecord> curSketchData.strokeRedoList;
-    private Context mContext;
-
     //    private Bitmap curSketchData.backgroundBM;
     Rect backgroundSrcRect = new Rect();
     Rect backgroundDstRect = new Rect();
     StrokeRecord curStrokeRecord;
     PhotoRecord curPhotoRecord;
-
     int actionMode;
-
-    private int editMode = EDIT_STROKE;
-    private static float SCALE_MAX = 4.0f;
-    private static float SCALE_MIN = 0.2f;
-    private static float SCALE_MIN_LEN;
-
     float simpleScale = 0.5f;//图片载入的缩放倍数
+    private TextWindowCallback textWindowCallback;
+    private float strokeSize = DEFAULT_STROKE_SIZE;
+    private int strokeRealColor = Color.BLACK;//画笔实际颜色
+    private int strokeColor = Color.BLACK;//画笔颜色
+    private int strokeAlpha = 255;//画笔透明度
+    private float eraserSize = DEFAULT_ERASER_SIZE;
+    private Path strokePath;
+    private Paint strokePaint;
+    private float downX, downY, preX, preY, curX, curY;
+    private int mWidth, mHeight;
+    //    private List<PhotoRecord> curSketchData.photoRecordList;
+//    private List<StrokeRecord> curSketchData.strokeRecordList;
+//    private List<StrokeRecord> curSketchData.strokeRedoList;
+    private Context mContext;
+    private int drawDensity = 2;//绘制密度,数值越高图像质量越低、性能越好
     /**
      * 缩放手势
      */
     private ScaleGestureDetector mScaleGestureDetector = null;
-    public void setStrokeType(int strokeType) {
-        this.strokeType = strokeType;
-    }
-
-    public int getStrokeType() {
-        return strokeType;
-    }
-
-    private int strokeType = StrokeRecord.STROKE_TYPE_DRAW;
-
     private OnDrawChangedListener onDrawChangedListener;
+    View friendView;
 
-    public void setSketchData(SketchData sketchData) {
-        this.curSketchData = sketchData;
-        curPhotoRecord = null;
+    public View getFriendView() {
+        return friendView;
     }
 
-    public void updateSketchData(SketchData sketchData) {
-        if (curSketchData != null)
-            curSketchData.thumbnailBM = getThumbnailResultBitmap();//更新数据前先保存上一份数据的缩略图
-        setSketchData(sketchData);
+    public void setFriendView(View friendView) {
+        this.friendView = friendView;
     }
-
-
-
     public SketchView(Context context, AttributeSet attr) {
         super(context, attr);
         this.mContext = context;
@@ -192,6 +156,31 @@ public class SketchView extends View implements OnTouchListener {
         invalidate();
     }
 
+    public void setTextWindowCallback(TextWindowCallback textWindowCallback) {
+        this.textWindowCallback = textWindowCallback;
+    }
+
+    public int getStrokeType() {
+        return curSketchData.strokeType;
+    }
+
+//    private int curSketchData.strokeType = StrokeRecord.STROKE_TYPE_DRAW;
+
+    public void setStrokeType(int strokeType) {
+        this.curSketchData.strokeType = strokeType;
+    }
+
+    public void setSketchData(SketchData sketchData) {
+        this.curSketchData = sketchData;
+        curPhotoRecord = null;
+    }
+
+    public void updateSketchData(SketchData sketchData) {
+        if (curSketchData != null)
+            curSketchData.thumbnailBM = getThumbnailResultBitmap();//更新数据前先保存上一份数据的缩略图
+        setSketchData(sketchData);
+    }
+
     private void initParams(Context context) {
 
 //        setFocusable(true);
@@ -215,13 +204,11 @@ public class SketchView extends View implements OnTouchListener {
         SCALE_MIN_LEN = ScreenUtils.dip2px(context, 20);
     }
 
-
     public void setStrokeAlpha(int mAlpha) {
         this.strokeAlpha = mAlpha;
         calculColor();
         strokePaint.setStrokeWidth(strokeSize);
     }
-
 
     public void setStrokeColor(int color) {
         strokeColor = color;
@@ -229,12 +216,9 @@ public class SketchView extends View implements OnTouchListener {
         strokePaint.setColor(strokeRealColor);
     }
 
-
     private void calculColor() {
         strokeRealColor = Color.argb(strokeAlpha, Color.red(strokeColor), Color.green(strokeColor), Color.blue(strokeColor));
     }
-
-
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
@@ -243,11 +227,21 @@ public class SketchView extends View implements OnTouchListener {
         setMeasuredDimension(mWidth, mHeight);
     }
 
+    int[] location = new int[2];
 
     @Override
     public boolean onTouch(View arg0, MotionEvent event) {
-        curX = event.getX();
-        curY = event.getY();
+        getLocationInWindow(location); //获取在当前窗口内的绝对坐标
+        curX = (event.getRawX() - location[0]) / drawDensity;
+        curY = (event.getRawY() - location[1]) / drawDensity;
+        int toolType = event.getToolType(0);
+//        //检测到手指点击自动进入拖动图片模式
+//        if (toolType == MotionEvent.TOOL_TYPE_FINGER&&curSketchData.editMode == EDIT_STROKE) {
+//            curSketchData.editMode = EDIT_PHOTO;
+//        } else if (toolType == MotionEvent.TOOL_TYPE_STYLUS){//检测到手写板开始绘画则自动进入绘画模式
+//            curSketchData.editMode = EDIT_STROKE;
+//        }
+//        Log.d(getClass().getSimpleName(), "onTouch======" + toolType);
         switch (event.getAction() & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_POINTER_DOWN:
                 float downDistance = spacing(event);
@@ -255,7 +249,7 @@ public class SketchView extends View implements OnTouchListener {
                     actionMode = ACTION_SCALE;
                 break;
             case MotionEvent.ACTION_DOWN:
-                touch_down(event);
+                touch_down();
                 invalidate();
                 break;
             case MotionEvent.ACTION_MOVE:
@@ -298,7 +292,14 @@ public class SketchView extends View implements OnTouchListener {
 //            canvas.drawBitmap(curSketchData.backgroundBM, backgroundSrcRect, dstRect, null);
             Log.d(TAG, "drawBackground:src= " + backgroundSrcRect.toString() + ";dst=" + backgroundDstRect.toString());
         } else {
-            canvas.drawColor(Color.WHITE);
+//            try {
+//                setBackgroundByPath("background/bg_yellow_board.png");
+//            canvas.drawColor(Color.rgb(246, 246, 246));
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            canvas.drawColor(Color.rgb(246, 246, 246));
+            canvas.drawColor(Color.rgb(239, 234, 224));
+//            }
         }
     }
 
@@ -306,30 +307,66 @@ public class SketchView extends View implements OnTouchListener {
         drawRecord(canvas, true);
     }
 
-    Bitmap tempBitmap;
+    Bitmap tempBitmap;//临时绘制的bitmap
+    Canvas tempCanvas;
+    Bitmap tempHoldBitmap;//保存已固化的笔画bitmap
+    Canvas tempHoldCanvas;
     private void drawRecord(Canvas canvas, boolean isDrawBoard) {
         if (curSketchData != null) {
             for (PhotoRecord record : curSketchData.photoRecordList) {
-                if (record != null)
+                if (record != null) {
+                    Log.d(getClass().getSimpleName(), "drawRecord" + record.bitmap.toString());
                     canvas.drawBitmap(record.bitmap, record.matrix, null);
+                }
             }
-            if (isDrawBoard && editMode == EDIT_PHOTO && curPhotoRecord != null) {
+            if (isDrawBoard && curSketchData.editMode == EDIT_PHOTO && curPhotoRecord != null) {
                 SCALE_MAX = curPhotoRecord.scaleMax;
                 float[] photoCorners = calculateCorners(curPhotoRecord);//计算图片四个角点和中心点
                 drawBoard(canvas, photoCorners);//绘制图形边线
                 drawMarks(canvas, photoCorners);//绘制边角图片
             }
-
             //新建一个临时画布，以便橡皮擦生效
             if (tempBitmap == null) {
-                tempBitmap = Bitmap.createBitmap(getWidth(), getHeight() , Bitmap.Config.ARGB_4444);
+                tempBitmap = Bitmap.createBitmap(getWidth() / drawDensity, getHeight() / drawDensity, Bitmap.Config.ARGB_4444);
+                tempCanvas = new Canvas(tempBitmap);
             }
-            Canvas tempCanvas = new Canvas(tempBitmap);
+            //新建一个临时画布，以便保存过多的画笔
+            if (tempHoldBitmap == null) {
+                tempHoldBitmap = Bitmap.createBitmap(getWidth() / drawDensity, getHeight() / drawDensity, Bitmap.Config.ARGB_4444);
+                tempHoldCanvas = new Canvas(tempHoldBitmap);
+            }
+//            Canvas tempCanvas = new Canvas(tempBitmap);
+            //把十个操作以前的笔画全都画进固化层
+            while (curSketchData.strokeRecordList.size() > 10) {
+                StrokeRecord record = curSketchData.strokeRecordList.get(0);
+                int type = record.type;
+                if (type == StrokeRecord.STROKE_TYPE_ERASER) {//橡皮擦需要在固化层也绘制
+                    tempHoldCanvas.drawPath(record.path, record.paint);
+                } else if (type == StrokeRecord.STROKE_TYPE_DRAW || type == StrokeRecord.STROKE_TYPE_LINE) {
+                    tempHoldCanvas.drawPath(record.path, record.paint);
+                } else if (type == STROKE_TYPE_CIRCLE) {
+                    tempHoldCanvas.drawOval(record.rect, record.paint);
+                } else if (type == STROKE_TYPE_RECTANGLE) {
+                    tempHoldCanvas.drawRect(record.rect, record.paint);
+                } else if (type == STROKE_TYPE_TEXT) {
+                    if (record.text != null) {
+                        StaticLayout layout = new StaticLayout(record.text, record.textPaint, record.textWidth, Layout.Alignment.ALIGN_NORMAL, 1.0F, 0.0F, true);
+                        tempHoldCanvas.translate(record.textOffX, record.textOffY);
+                        layout.draw(tempHoldCanvas);
+                        tempHoldCanvas.translate(-record.textOffX, -record.textOffY);
+                    }
+                }
+                curSketchData.strokeRecordList.remove(0);
+            }
             clearCanvas(tempCanvas);//清空画布
             tempCanvas.drawColor(Color.TRANSPARENT);
+            tempCanvas.drawBitmap(tempHoldBitmap, new Rect(0, 0, tempHoldBitmap.getWidth(), tempHoldBitmap.getHeight()), new Rect(0, 0, tempCanvas.getWidth(), tempCanvas.getHeight()), null);
             for (StrokeRecord record : curSketchData.strokeRecordList) {
                 int type = record.type;
-                if (type == StrokeRecord.STROKE_TYPE_ERASER || type == StrokeRecord.STROKE_TYPE_DRAW || type == StrokeRecord.STROKE_TYPE_LINE) {
+                if (type == StrokeRecord.STROKE_TYPE_ERASER) {//橡皮擦需要在固化层也绘制
+                    tempCanvas.drawPath(record.path, record.paint);
+                    tempHoldCanvas.drawPath(record.path, record.paint);
+                } else if (type == StrokeRecord.STROKE_TYPE_DRAW || type == StrokeRecord.STROKE_TYPE_LINE) {
                     tempCanvas.drawPath(record.path, record.paint);
                 } else if (type == STROKE_TYPE_CIRCLE) {
                     tempCanvas.drawOval(record.rect, record.paint);
@@ -345,10 +382,10 @@ public class SketchView extends View implements OnTouchListener {
                 }
             }
             canvas.drawBitmap(tempBitmap, new Rect(0, 0, tempCanvas.getWidth(), tempCanvas.getHeight()), new Rect(0, 0, canvas.getWidth(), canvas.getHeight()), null);
-
         }
 
     }
+
     /**
      * 清理画布canvas
      *
@@ -360,6 +397,7 @@ public class SketchView extends View implements OnTouchListener {
         temptCanvas.drawPaint(p);
         p.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC));
     }
+
     //绘制图像边线（由于图形旋转或不一定是矩形，所以用Path绘制边线）
     private void drawBoard(Canvas canvas, float[] photoCorners) {
         Path photoBorderPath = new Path();
@@ -424,39 +462,39 @@ public class SketchView extends View implements OnTouchListener {
         invalidate();
     }
 
-    private void touch_down(MotionEvent event) {
-        downX = event.getX();
-        downY = event.getY();
-        if (editMode == EDIT_STROKE) {
+    private void touch_down() {
+        downX = curX;
+        downY = curY;
+        if (curSketchData.editMode == EDIT_STROKE) {
             curSketchData.strokeRedoList.clear();
-            curStrokeRecord = new StrokeRecord(strokeType);
-            //实现橡皮擦关键代码，把橡皮擦的绘制模式改变，并且在onDraw里加一层
-            if (strokeType == StrokeRecord.STROKE_TYPE_ERASER) {
+            curStrokeRecord = new StrokeRecord(curSketchData.strokeType);
+            strokePaint.setAntiAlias(true);//由于降低密度绘制，所以需要抗锯齿
+            if (curSketchData.strokeType == StrokeRecord.STROKE_TYPE_ERASER) {
                 strokePaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));//关键代码
             } else {
                 strokePaint.setXfermode(null);//关键代码
             }
-            if (strokeType == STROKE_TYPE_ERASER) {
+            if (curSketchData.strokeType == STROKE_TYPE_ERASER) {
                 strokePath = new Path();
                 strokePath.moveTo(downX, downY);
                 strokePaint.setColor(Color.WHITE);
                 strokePaint.setStrokeWidth(eraserSize);
                 curStrokeRecord.paint = new Paint(strokePaint); // Clones the mPaint object
                 curStrokeRecord.path = strokePath;
-            } else if (strokeType == STROKE_TYPE_DRAW || strokeType == STROKE_TYPE_LINE) {
+            } else if (curSketchData.strokeType == STROKE_TYPE_DRAW || curSketchData.strokeType == STROKE_TYPE_LINE) {
                 strokePath = new Path();
                 strokePath.moveTo(downX, downY);
                 curStrokeRecord.path = strokePath;
                 strokePaint.setColor(strokeRealColor);
                 strokePaint.setStrokeWidth(strokeSize);
                 curStrokeRecord.paint = new Paint(strokePaint); // Clones the mPaint object
-            } else if (strokeType == STROKE_TYPE_CIRCLE || strokeType == STROKE_TYPE_RECTANGLE) {
+            } else if (curSketchData.strokeType == STROKE_TYPE_CIRCLE || curSketchData.strokeType == STROKE_TYPE_RECTANGLE) {
                 RectF rect = new RectF(downX, downY, downX, downY);
                 curStrokeRecord.rect = rect;
                 strokePaint.setColor(strokeRealColor);
                 strokePaint.setStrokeWidth(strokeSize);
                 curStrokeRecord.paint = new Paint(strokePaint); // Clones the mPaint object
-            } else if (strokeType == STROKE_TYPE_TEXT) {
+            } else if (curSketchData.strokeType == STROKE_TYPE_TEXT) {
                 curStrokeRecord.textOffX = (int) downX;
                 curStrokeRecord.textOffY = (int) downY;
                 TextPaint tp = new TextPaint();
@@ -466,8 +504,8 @@ public class SketchView extends View implements OnTouchListener {
                 return;
             }
             curSketchData.strokeRecordList.add(curStrokeRecord);
-        } else if (editMode == EDIT_PHOTO) {
-            float[] downPoint = new float[]{downX, downY};
+        } else if (curSketchData.editMode == EDIT_PHOTO) {
+            float[] downPoint = new float[]{downX * drawDensity, downY * drawDensity};//还原点倍数
             if (isInMarkRect(downPoint)) {// 先判操作标记区域
                 return;
             }
@@ -537,25 +575,24 @@ public class SketchView extends View implements OnTouchListener {
         return false;
     }
 
-
     private void touch_move(MotionEvent event) {
-        if (editMode == EDIT_STROKE) {
-            if (strokeType == STROKE_TYPE_ERASER) {
+        if (curSketchData.editMode == EDIT_STROKE) {
+            if (curSketchData.strokeType == STROKE_TYPE_ERASER) {
                 strokePath.quadTo(preX, preY, (curX + preX) / 2, (curY + preY) / 2);
-            } else if (strokeType == STROKE_TYPE_DRAW) {
+            } else if (curSketchData.strokeType == STROKE_TYPE_DRAW) {
                 strokePath.quadTo(preX, preY, (curX + preX) / 2, (curY + preY) / 2);
-            } else if (strokeType == STROKE_TYPE_LINE) {
+            } else if (curSketchData.strokeType == STROKE_TYPE_LINE) {
                 strokePath.reset();
                 strokePath.moveTo(downX, downY);
                 strokePath.lineTo(curX, curY);
-            } else if (strokeType == STROKE_TYPE_CIRCLE || strokeType == STROKE_TYPE_RECTANGLE) {
+            } else if (curSketchData.strokeType == STROKE_TYPE_CIRCLE || curSketchData.strokeType == STROKE_TYPE_RECTANGLE) {
                 curStrokeRecord.rect.set(downX < curX ? downX : curX, downY < curY ? downY : curY, downX > curX ? downX : curX, downY > curY ? downY : curY);
-            } else if (strokeType == STROKE_TYPE_TEXT) {
+            } else if (curSketchData.strokeType == STROKE_TYPE_TEXT) {
 
             }
-        } else if (editMode == EDIT_PHOTO && curPhotoRecord != null) {
+        } else if (curSketchData.editMode == EDIT_PHOTO && curPhotoRecord != null) {
             if (actionMode == ACTION_DRAG) {
-                onDragAction(curX - preX, curY - preY);
+                onDragAction((curX - preX) * drawDensity, (curY - preY) * drawDensity);
             } else if (actionMode == ACTION_ROTATE) {
                 onRotateAction(curPhotoRecord);
             } else if (actionMode == ACTION_SCALE) {
@@ -580,27 +617,27 @@ public class SketchView extends View implements OnTouchListener {
     }
 
     private void onRotateAction(PhotoRecord record) {
-        float[] 啥orners = calculateCorners(record);
+        float[] corners = calculateCorners(record);
         //放大
-        //目前触摸点与图片显示中心距离
-        float a = (float) Math.sqrt(Math.pow(curX - 啥orners[8], 2) + Math.pow(curY - 啥orners[9], 2));
+        //目前触摸点与图片显示中心距离,curX*drawDensity为还原缩小密度点数值
+        float a = (float) Math.sqrt(Math.pow(curX * drawDensity - corners[8], 2) + Math.pow(curY * drawDensity - corners[9], 2));
         //目前上次旋转图标与图片显示中心距离
-        float b = (float) Math.sqrt(Math.pow(啥orners[4] - 啥orners[0], 2) + Math.pow(啥orners[5] - 啥orners[1], 2)) / 2;
-
+        float b = (float) Math.sqrt(Math.pow(corners[4] - corners[0], 2) + Math.pow(corners[5] - corners[1], 2)) / 2;
+//        Log.e(TAG, "onRotateAction: a=" + a + ";b=" + b);
         //设置Matrix缩放参数
         double photoLen = Math.sqrt(Math.pow(record.photoRectSrc.width(), 2) + Math.pow(record.photoRectSrc.height(), 2));
         if (a >= photoLen / 2 * SCALE_MIN && a >= SCALE_MIN_LEN && a <= photoLen / 2 * SCALE_MAX) {
             //这种计算方法可以保持旋转图标坐标与触摸点同步缩放
             float scale = a / b;
-            record.matrix.postScale(scale, scale, 啥orners[8], 啥orners[9]);
+            record.matrix.postScale(scale, scale, corners[8], corners[9]);
         }
 
         //旋转
         //根据移动坐标的变化构建两个向量，以便计算两个向量角度.
         PointF preVector = new PointF();
         PointF curVector = new PointF();
-        preVector.set(preX - 啥orners[8], preY - 啥orners[9]);//旋转后向量
-        curVector.set(curX - 啥orners[8], curY - 啥orners[9]);//旋转前向量
+        preVector.set((preX * drawDensity - corners[8]), preY * drawDensity - corners[9]);//旋转后向量
+        curVector.set(curX * drawDensity - corners[8], curY * drawDensity - corners[9]);//旋转前向量
         //计算向量长度
         double preVectorLen = getVectorLength(preVector);
         double curVectorLen = getVectorLength(curVector);
@@ -630,7 +667,7 @@ public class SketchView extends View implements OnTouchListener {
         } else {
             dAngle = -dAngle;
         }
-        record.matrix.postRotate((float) dAngle, 啥orners[8], 啥orners[9]);
+        record.matrix.postRotate((float) dAngle, corners[8], corners[9]);
     }
 
     /**
@@ -641,26 +678,38 @@ public class SketchView extends View implements OnTouchListener {
     double getVectorLength(PointF vector) {
         return Math.sqrt(vector.x * vector.x + vector.y * vector.y);
     }
-    private void onDragAction(float distanceX, float distanceY) {
-            curPhotoRecord.matrix.postTranslate((int) distanceX, (int) distanceY);
-    }
 
+    private void onDragAction(float distanceX, float distanceY) {
+        curPhotoRecord.matrix.postTranslate((int) distanceX, (int) distanceY);
+    }
 
     private void touch_up() {
     }
 
-
     @NonNull
     public Bitmap getResultBitmap() {
+        return getResultBitmap(null);
+    }
+
+    @NonNull
+    public Bitmap getResultBitmap(Bitmap addBitmap) {
         Bitmap newBM = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.RGB_565);
+//        Bitmap newBM = Bitmap.createBitmap(1280, 800, Bitmap.Config.RGB_565);
+
         Canvas canvas = new Canvas(newBM);
-        canvas.setDrawFilter(new PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG));//抗锯齿
+//        canvas.setDrawFilter(new PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG));//抗锯齿
         //绘制背景
         drawBackground(canvas);
         drawRecord(canvas, false);
+
+        if (addBitmap != null) {
+            canvas.drawBitmap(addBitmap, 0, 0, null);
+        }
         canvas.save(Canvas.ALL_SAVE_FLAG);
         canvas.restore();
-        return newBM;
+//        return newBM;
+        Bitmap bitmap = BitmapUtils.createBitmapThumbnail(newBM, true, 800, 1280);
+        return bitmap;
     }
 
     @NonNull
@@ -670,8 +719,9 @@ public class SketchView extends View implements OnTouchListener {
 
     @NonNull
     public Bitmap getThumbnailResultBitmap() {
-        return BitmapUtils.createBitmapThumbnail(getResultBitmap(), true, ScreenUtils.dip2px(mContext, 200), ScreenUtils.dip2px(mContext, 200));
+        return createBitmapThumbnail(getResultBitmap(), true, ScreenUtils.dip2px(mContext, 200), ScreenUtils.dip2px(mContext, 200));
     }
+
     /*
      * 删除一笔
      */
@@ -682,7 +732,6 @@ public class SketchView extends View implements OnTouchListener {
             invalidate();
         }
     }
-
 
     /*
      * 撤销
@@ -695,11 +744,9 @@ public class SketchView extends View implements OnTouchListener {
         invalidate();
     }
 
-
     public int getRedoCount() {
         return curSketchData.strokeRedoList != null ? curSketchData.strokeRedoList.size() : 0;
     }
-
 
     public int getRecordCount() {
         return (curSketchData.strokeRecordList != null && curSketchData.photoRecordList != null) ? curSketchData.strokeRecordList.size() + curSketchData.photoRecordList.size() : 0;
@@ -709,11 +756,9 @@ public class SketchView extends View implements OnTouchListener {
         return curSketchData.strokeRecordList != null ? curSketchData.strokeRecordList.size() : 0;
     }
 
-
     public int getStrokeSize() {
         return Math.round(this.strokeSize);
     }
-
 
     public void setSize(int size, int eraserOrStroke) {
         switch (eraserOrStroke) {
@@ -726,7 +771,6 @@ public class SketchView extends View implements OnTouchListener {
         }
 
     }
-
 
     public void erase() {
         // 先判断是否已经回收
@@ -745,22 +789,26 @@ public class SketchView extends View implements OnTouchListener {
         curSketchData.photoRecordList.clear();
         curSketchData.strokeRedoList.clear();
         curPhotoRecord = null;
+
+        tempCanvas = null;
+        tempBitmap.recycle();
+        tempBitmap = null;
+        tempHoldCanvas = null;
+        tempHoldBitmap.recycle();
+        tempHoldBitmap = null;
         System.gc();
         invalidate();
     }
-
-
     public void setOnDrawChangedListener(OnDrawChangedListener listener) {
         this.onDrawChangedListener = listener;
     }
 
-    public interface OnDrawChangedListener {
-
-        public void onDrawChanged();
-    }
-
     public void addPhotoByPath(String path) {
         Bitmap sampleBM = getSampleBitMap(path);
+        addPhotoByBitmap(sampleBM);
+    }
+
+    public void addPhotoByBitmap(Bitmap sampleBM) {
         if (sampleBM != null) {
             PhotoRecord newRecord = initPhotoRecord(sampleBM);
             setCurPhotoRecord(newRecord);
@@ -769,16 +817,39 @@ public class SketchView extends View implements OnTouchListener {
         }
     }
 
-    public void setBackgroundByPath(String path) {
-        Bitmap sampleBM = getSampleBitMap(path);
+    public void addPhotoByBitmap(Bitmap sampleBM, int[] position) {
         if (sampleBM != null) {
-            curSketchData.backgroundBM = sampleBM;
-            backgroundSrcRect = new Rect(0, 0, curSketchData.backgroundBM.getWidth(), curSketchData.backgroundBM.getHeight());
-            backgroundDstRect = new Rect(0, 0, mWidth, mHeight);
-            invalidate();
+            PhotoRecord newRecord = initPhotoRecord(sampleBM, position);
+            setCurPhotoRecord(newRecord);
         } else {
             Toast.makeText(mContext, "图片文件路径有误！", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    public void removeCurrentPhotoRecord() {
+        curSketchData.photoRecordList.remove(curPhotoRecord);
+        setCurPhotoRecord(null);
+        actionMode = ACTION_NONE;
+    }
+
+    public void setBackgroundByPath(Bitmap bm) {
+        setBackgroundByBitmap(bm);
+    }
+
+    public void setBackgroundByPath(String path) {
+        Bitmap sampleBM = getSampleBitMap(path);
+        if (sampleBM != null) {
+            setBackgroundByBitmap(sampleBM);
+        } else {
+            Toast.makeText(mContext, "图片文件路径有误！", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public void setBackgroundByBitmap(Bitmap sampleBM) {
+        curSketchData.backgroundBM = sampleBM;
+        backgroundSrcRect = new Rect(0, 0, curSketchData.backgroundBM.getWidth(), curSketchData.backgroundBM.getHeight());
+        backgroundDstRect = new Rect(0, 0, mWidth, mHeight);
+        invalidate();
     }
 
     public Bitmap getSampleBitMap(String path) {
@@ -802,6 +873,17 @@ public class SketchView extends View implements OnTouchListener {
         return newRecord;
     }
 
+    @NonNull
+    private PhotoRecord initPhotoRecord(Bitmap bitmap, int[] position) {
+        PhotoRecord newRecord = new PhotoRecord();
+        newRecord.bitmap = bitmap;
+        newRecord.photoRectSrc = new RectF(0, 0, newRecord.bitmap.getWidth(), newRecord.bitmap.getHeight());
+        newRecord.scaleMax = getMaxScale(newRecord.photoRectSrc);//放大倍数
+        newRecord.matrix = new Matrix();
+        newRecord.matrix.postTranslate(position[0], position[1]);
+        return newRecord;
+    }
+
     private void setCurPhotoRecord(PhotoRecord record) {
         curSketchData.photoRecordList.remove(record);
         curSketchData.photoRecordList.add(record);
@@ -822,12 +904,21 @@ public class SketchView extends View implements OnTouchListener {
         return BitmapUtils.getBitmapFromAssets(mContext, path);
     }
 
+    public int getEditMode() {
+        return curSketchData.editMode;
+    }
+
     public void setEditMode(int editMode) {
-        this.editMode = editMode;
+        this.curSketchData.editMode = editMode;
         invalidate();
     }
 
-    public int getEditMode() {
-        return editMode;
+    public interface TextWindowCallback {
+        void onText(View view, StrokeRecord record);
+    }
+
+    public interface OnDrawChangedListener {
+
+        public void onDrawChanged();
     }
 }

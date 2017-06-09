@@ -1,24 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#efeded">
+
+    <GridView
+        android:id="@+id/sketch_data_gv"
+        android:visibility="gone"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#efeded">
+        android:padding="@dimen/sketch_gv_padding"
+        android:horizontalSpacing="@dimen/sketch_gv_padding"
+        android:verticalSpacing="@dimen/sketch_gv_padding"
+        android:numColumns="4" />
 
-        <GridView
-            android:id="@+id/sketch_data_gv"
-            android:visibility="gone"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:padding="@dimen/sketch_gv_padding"
-            android:horizontalSpacing="@dimen/sketch_gv_padding"
-            android:verticalSpacing="@dimen/sketch_gv_padding"
-            android:numColumns="4" />
+    <com.yinghe.whiteboardlib.view.SketchView
+        android:id="@+id/sketch_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:layout_gravity="center" />
 
-        <com.yinghe.whiteboardlib.view.SketchView
-            android:id="@+id/sketch_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:focusable="true"
-            android:focusableInTouchMode="true"
-            android:layout_gravity="center" />
+    <ImageView
+        android:id="@+id/iv_see_question"
+        android:layout_width="50dp"
+        android:src="@drawable/s_ct_bt_dt"
+        android:visibility="gone"
+        android:elevation="10dp"
+        android:background="@color/tran"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:clickable="true"
+        android:padding="0dp"
+        android:layout_height="100dp"
+        android:layout_gravity="left|center_vertical"
+        />
+
+    <TextView
+        android:id="@+id/tv_save"
+        android:textSize="18sp"
+        android:visibility="gone"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:text="完成"
+        android:textColor="@color/white"
+        android:layout_gravity="bottom|end"
+        android:gravity="center"
+        android:clickable="true"
+        android:layout_marginBottom="30dp"
+        android:layout_marginRight="30dp"
+        android:elevation="20dp"
+        android:background="@drawable/shape_answer"
+        />
 </FrameLayout>
